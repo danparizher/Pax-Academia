@@ -5,9 +5,9 @@ class QuillBot:
     def __init__(self, page) -> None:
         self.page = page
 
-    def type_text(self) -> None:
+    def type_text(self, text: str) -> None:
         self.page.click("div[data-gramm_editor='false']")
-        self.page.keyboard.type(input("Enter text: "))
+        self.page.keyboard.type(text)
 
     def fix_all_errors(self) -> None:
         try:
@@ -34,7 +34,11 @@ def main() -> None:
 
             quillbot = QuillBot(page)
 
-            quillbot.type_text()
+            quillbot.type_text("I am a bot")
             quillbot.fix_all_errors()
 
             print("\nCorrected text:", quillbot.get_text())
+
+
+if __name__ == "__main__":
+    main()

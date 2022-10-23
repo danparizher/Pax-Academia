@@ -8,21 +8,17 @@ from webcache import main
 load_dotenv()
 TOKEN: str | None = os.getenv("DISCORD_TOKEN")
 
-client = discord.Client()
+bot = discord.Bot()
 
 
-@client.event
-async def on_ready() -> None:
-    print(f"{client.user} has connected to Discord!")
+@bot.event
+async def on_ready():
+    print(f"We have logged in as {bot.user}")
 
 
-@client.event
-async def on_message(message) -> None:
-    if message.author == client.user:
-        return
-
-    if message.content.startswith("/fixgrammar"):
-        await message.channel.send(main())
+@bot.slash_command(guild_ids=[883845473893482517])
+async def hello(ctx):
+    await ctx.respond("Hello!")
 
 
-client.run(TOKEN)
+bot.run(TOKEN)
