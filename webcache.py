@@ -21,19 +21,20 @@ class QuillBot:
         return self.page.inner_text("div[data-gramm_editor='false']")
 
 
-with sync_playwright() as p:
-    with p.firefox.launch(headless=True, timeout=0) as browser:
-        context = browser.new_context()
-        page = context.new_page()
+def main() -> None:
+    with sync_playwright() as p:
+        with p.firefox.launch(headless=True, timeout=0) as browser:
+            context = browser.new_context()
+            page = context.new_page()
 
-        try:
-            page.goto("https://quillbot.com/grammar-check", timeout=5000)
-        except Exception:
-            page.reload()
+            try:
+                page.goto("https://quillbot.com/grammar-check", timeout=5000)
+            except Exception:
+                page.reload()
 
-        quillbot = QuillBot(page)
+            quillbot = QuillBot(page)
 
-        quillbot.type_text()
-        quillbot.fix_all_errors()
+            quillbot.type_text()
+            quillbot.fix_all_errors()
 
-        print("\nCorrected text:", quillbot.get_text())
+            print("\nCorrected text:", quillbot.get_text())
