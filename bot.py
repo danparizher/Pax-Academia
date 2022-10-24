@@ -18,11 +18,12 @@ async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
 
 
-@bot.bridge_command()
+@bot.bridge_command(description="Corrects grammar in a given text.")
 async def correct(ctx, text: str) -> None:
     await ctx.respond("Correcting grammar...")
+    original_text: str = text
     corrected_text: str = await quilling(text)
-    await ctx.respond(corrected_text)
+    await ctx.respond(f"Original text: {original_text}\nCorrected text: {corrected_text}")
     log(f"Corrected grammar for {ctx.author} in {ctx.guild}.")
 
 
