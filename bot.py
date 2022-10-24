@@ -20,12 +20,12 @@ async def on_ready() -> None:
 
 @bot.bridge_command(description="Corrects the grammar in a given text.")
 async def correct(ctx, *, text: str) -> None:
-    await ctx.respond("Correcting grammar...")
+    message: discord.message = await ctx.respond("Correcting grammar...")
 
     original_text: str = text
     corrected_text: str = await quilling(text)
 
-    await ctx.respond(
+    await message.edit_original_response(
         content=f"**__Original Text:__** {original_text}\n\n**__Corrected Text:__** {corrected_text}"
     )
 
