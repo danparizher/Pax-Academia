@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from webcache import QuillBot, quilling
 
 load_dotenv()
-TOKEN: str | None = os.getenv("DISCORD_TOKEN")
+TOKEN: str = os.getenv("DISCORD_TOKEN")
 
 bot = discord.Bot()
 
