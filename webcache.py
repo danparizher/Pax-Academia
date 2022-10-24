@@ -15,13 +15,11 @@ class QuillBot:
             await self.page.wait_for_selector("text=Fixed all grammar errors.")
         except Exception:
             print("No errors found")
-            exit()
 
     async def get_text(self) -> str:
         return await self.page.inner_text("div[data-gramm_editor='false']")
 
 
-# TODO: Input should be coming from user, not hardcoded (logic in bot.py)
 async def quilling(text: str) -> str:
     async with async_playwright() as p:
         browser = await p.firefox.launch(headless=True, timeout=0)

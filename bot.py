@@ -16,7 +16,6 @@ async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
 
 
-# TODO: Add a command to check grammar
 @bot.slash_command(guild_ids=[883845473893482517])
 async def correct_grammar(ctx, text: str) -> None:
     await ctx.respond("Correcting grammar...")
