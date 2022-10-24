@@ -16,7 +16,7 @@ async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
 
 
-@bot.slash_command(guild_ids=[883845473893482517])
+@bot.slash_command(guild_ids=[883845473893482517, 238956364729155585])
 async def correct_grammar(ctx, text: str) -> None:
     await ctx.respond("Correcting grammar...")
     corrected_text: str = await quilling(text)
