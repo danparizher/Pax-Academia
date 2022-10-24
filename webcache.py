@@ -1,44 +1,40 @@
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 
 
 class QuillBot:
     def __init__(self, page) -> None:
         self.page = page
 
-    def type_text(self, text: str) -> None:
-        self.page.click("div[data-gramm_editor='false']")
-        self.page.keyboard.type(text)
+    async def type_text(self, text: str) -> None:
+        await self.page.click("div[data-gramm_editor='false']")
+        await self.page.keyboard.type(text)
 
-    def fix_all_errors(self) -> None:
+    async def fix_all_errors(self) -> None:
         try:
-            self.page.click("text=Fix All Errors", timeout=5000)
-            self.page.wait_for_selector("text=Fixed all grammar errors.")
+            await self.page.click("text=Fix All Errors", timeout=5000)
+            await self.page.wait_for_selector("text=Fixed all grammar errors.")
         except Exception:
             print("No errors found")
             exit()
 
-    def get_text(self) -> str:
-        return self.page.inner_text("div[data-gramm_editor='false']")
+    async def get_text(self) -> str:
+        return await self.page.inner_text("div[data-gramm_editor='false']")
 
 
-def main() -> None:
-    with sync_playwright() as p:
-        with p.firefox.launch(headless=True, timeout=0) as browser:
-            context = browser.new_context()
-            page = context.new_page()
+# TODO: Input should be coming from user, not hardcoded (logic in bot.py)
+async def quilling(text: str) -> str:
+    async with async_playwright() as p:
+        browser = await p.firefox.launch(headless=True, timeout=0)
+        context = await browser.new_context()
+        page = await context.new_page()
 
-            try:
-                page.goto("https://quillbot.com/grammar-check", timeout=5000)
-            except Exception:
-                page.reload()
+        try:
+            await page.goto("https://quillbot.com/grammar-check", timeout=5000)
+        except Exception:
+            await page.reload()
 
-            quillbot = QuillBot(page)
+        quillbot = QuillBot(page)
 
-            quillbot.type_text("I am a bot")
-            quillbot.fix_all_errors()
-
-            print("\nCorrected text:", quillbot.get_text())
-
-
-if __name__ == "__main__":
-    main()
+        await quillbot.type_text(text)
+        await quillbot.fix_all_errors()
+        return await quillbot.get_text()
