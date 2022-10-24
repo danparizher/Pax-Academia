@@ -3,7 +3,7 @@ import os
 import discord
 from dotenv import load_dotenv
 
-from webcache import QuillBot, quilling
+from webcache import quilling
 
 load_dotenv()
 TOKEN: str = os.getenv("DISCORD_TOKEN")
