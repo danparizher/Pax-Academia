@@ -5,7 +5,7 @@ from discord.ext import bridge
 from dotenv import load_dotenv
 
 from webcache import quilling
-from logging import log
+from logging_file import log
 
 load_dotenv()
 TOKEN: str = os.getenv("DISCORD_TOKEN")
