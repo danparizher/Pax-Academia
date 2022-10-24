@@ -14,7 +14,7 @@ class QuillBot:
             await self.page.click("text=Fix All Errors", timeout=5000)
             await self.page.wait_for_selector("text=Fixed all grammar errors.")
         except Exception:
-            print("No errors found")
+            pass
 
     async def get_text(self) -> str:
         return await self.page.inner_text("div[data-gramm_editor='false']")
