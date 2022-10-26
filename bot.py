@@ -5,7 +5,7 @@ from discord import option
 from discord.ext import bridge
 from dotenv import load_dotenv
 
-from DeepL import translation, get_language_list
+from DeepL import get_language_list, translation
 from logging_file import log
 from QuillBot import quilling
 

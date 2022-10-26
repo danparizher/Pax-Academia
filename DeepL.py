@@ -31,14 +31,13 @@ def get_language_list() -> list[str]:
     return languages
 
 
-formality = ["formal", "informal"]
-
-
 async def translation(
     text, source_language, target_language, formality_tone=None
 ) -> str:
 
+    formality = ["formal", "informal"]
     languages = get_language_list()
+
     if source_language not in languages or target_language not in languages:
         return "Invalid Language"
 
