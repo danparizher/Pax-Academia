@@ -1,4 +1,5 @@
 import os
+import re
 
 import discord
 from discord import option
@@ -19,6 +20,25 @@ bot = bridge.Bot(command_prefix="g.", intents=discord.Intents.all())
 @bot.event
 async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
+
+
+####################################################################################################################
+
+
+@bot.event
+async def on_message(message: discord.Message) -> None:
+    if re.search(r"https?://", message.content):
+        if re.search(r"form|qualtric|survey", message.content):
+            if message.channel.name != "surveys":
+                embed = EmbedBuilder(
+                    title="Survey Link Detected",
+                    description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. Please post survey links in the #surveys channel! Thanks.",
+                ).build()
+                await message.channel.send(embed=embed)
+    await bot.process_commands(message)
+
+
+####################################################################################################################
 
 
 @bot.bridge_command(name="correct", description="Corrects the grammar in a given text.")
