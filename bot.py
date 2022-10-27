@@ -6,6 +6,7 @@ from discord.ext import bridge
 from dotenv import load_dotenv
 
 from DeepL import get_language_list, translation
+from EmbedBuilder import EmbedBuilder
 from logging_file import log
 from QuillBot import quilling
 
@@ -20,21 +21,25 @@ async def on_ready() -> None:
     print(f"We have logged in as {bot.user}")
 
 
-@bot.bridge_command(description="Corrects the grammar in a given text.")
+@bot.bridge_command(name="correct", description="Corrects the grammar in a given text.")
 @option(
     name="text",
     description="The text to be corrected.",
     required=True,
 )
 async def correct(ctx, *, text: str) -> None:
+
     message = await ctx.respond("Correcting grammar...")
 
     original_text = text
     corrected_text = await quilling(text)
 
-    await message.edit_original_response(
-        content=f"**__Original Text:__** {original_text}\n\n**__Corrected Text:__** {corrected_text}"
-    )
+    embed = EmbedBuilder(
+        title="Grammar Correction",
+        description=f"**__Original Text:__** {original_text}\n\n**__Corrected Text:__** {corrected_text}",
+    ).build()
+
+    await message.edit_original_response(embed=embed)
 
     log(f"Corrected grammar for {ctx.author} in {ctx.guild}.")
 
@@ -42,7 +47,7 @@ async def correct(ctx, *, text: str) -> None:
 ####################################################################################################################
 
 
-@bot.slash_command(description="Translates a given text.")
+@bot.slash_command(name="translate", description="Translates a given text.")
 @option(
     "text",
     str,
@@ -68,7 +73,7 @@ async def correct(ctx, *, text: str) -> None:
     str,
     description="The formality of the translation.",
     required=False,
-    choices=["formal", "informal"],
+    choices=["Formal", "Informal"],
 )
 async def translate(
     ctx,
@@ -82,9 +87,12 @@ async def translate(
         text, source_language, target_language, formality_tone
     )
 
-    await ctx.respond(
-        f"**__Original Text:__** {text}\n\n**__Translated Text:__** {translated_text}"
-    )
+    embed = EmbedBuilder(
+        title="Translation",
+        description=f"**__Original Text:__** {text}\n\n**__Translated Text:__** {translated_text}",
+    ).build()
+
+    await ctx.respond(embed=embed)
 
     log(f"Translated text for {ctx.author} in {ctx.guild}.")
 
