@@ -1,7 +1,5 @@
 import discord
 
-# TODO: Incorporate HWH logo into embeds.
-
 
 class EmbedBuilder:
     def __init__(
@@ -10,7 +8,7 @@ class EmbedBuilder:
         description,
         color=0xFF7900,
         image=None,
-        thumbnail="https://media-exp1.licdn.com/dms/image/C560BAQF9f_j13_jk9g/company-logo_200_200/0/1619494448942?e=1675296000&v=beta&t=LYn4OQyBazxw113Bna4GyHsL8QXyltt0uCQ5rE0IdGM",
+        thumbnail="https://pbs.twimg.com/profile_images/988662835180797952/9fWyq5hr_400x400.jpg",
     ) -> None:
         self.title: str | None = title
         self.description: str | None = description
