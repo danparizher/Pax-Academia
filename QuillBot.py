@@ -35,9 +35,9 @@ class QuillBot:
     # //*[@id="close"]
 
     async def close_signin(self) -> None:
-        # Click the close button based on the above XPATH
+        # Click the close button based on the above HTML
         try:
-            await self.page.click("xpath=//*[@id='close']", timeout=100)
+            await self.page.click("div#close")
         except Exception:
             return None
 
@@ -49,7 +49,7 @@ async def recursive_quilling(
     text = await quillbot.get_text()
     if text == initial_text:
         return text
-    await quillbot.page.wait_for_timeout(250)
+    await quillbot.page.wait_for_timeout(50)
     await quillbot.cut_paste()
     return await recursive_quilling(text, quillbot, iteration_count)
 

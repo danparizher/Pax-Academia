@@ -53,14 +53,28 @@ async def correct(ctx, *, text: str) -> None:
     message = await ctx.respond("Correcting grammar...")
 
     original_text = text
-    corrected_text = await quilling(text)
+    try:
+        corrected_text = await quilling(text)
+    except Exception as e:
+        embed = EmbedBuilder(
+            title="Error",
+            description=f"An error occurred while correcting the grammar:\n\n{e}",
+        ).build()
+        await message.edit_original_response(embed=embed)
+        return
 
     embed = EmbedBuilder(
-        title="Grammar Correction",
-        description=f"**__Original Text:__**\n{original_text}\n\n**__Corrected Text:__**\n{corrected_text}",
+        title="Original Text",
+        description=original_text,
     ).build()
 
     await message.edit_original_response(embed=embed)
+
+    embed = EmbedBuilder(
+        title="Corrected Text",
+        description=corrected_text,
+    ).build()
+    await ctx.send(embed=embed)
 
     log(f"Corrected grammar for {ctx.author} in {ctx.guild}.")
 
@@ -104,16 +118,32 @@ async def translate(
     formality_tone: str = None,
 ) -> None:
 
-    translated_text = await translation(
-        text, source_language, target_language, formality_tone
-    )
+    try:
+        translated_text = await translation(
+            text, source_language, target_language, formality_tone
+        )
+    except Exception as e:
+        embed = EmbedBuilder(
+            title="Error",
+            description=f"An error occurred while translating the text:\n\n{e}",
+        ).build()
+
+        await ctx.send(embed=embed)
+        return
 
     embed = EmbedBuilder(
-        title="Translation",
-        description=f"**__Original Text ({source_language}):__**\n{text}\n\n**__Translated Text ({target_language}):__**\n{translated_text}",
+        title=f"Original Text ({source_language})",
+        description=f"{text}",
     ).build()
 
     await ctx.respond(embed=embed)
+
+    embed = EmbedBuilder(
+        title=f"Translated Text ({target_language})",
+        description=f"{translated_text}",
+    ).build()
+
+    await ctx.send(embed=embed)
 
     log(f"Translated text for {ctx.author} in {ctx.guild}.")
 
