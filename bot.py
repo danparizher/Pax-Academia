@@ -19,7 +19,8 @@ bot = bridge.Bot(command_prefix="g.", intents=discord.Intents.all())
 
 @bot.event
 async def on_ready() -> None:
-    print(f"We have logged in as {bot.user}")
+    print(f"{bot.user.name} has connected to Discord!")
+    await bot.change_presence(activity=discord.Game(name="Academic Peace..."))
 
 
 ####################################################################################################################
@@ -56,7 +57,7 @@ async def correct(ctx, *, text: str) -> None:
 
     embed = EmbedBuilder(
         title="Grammar Correction",
-        description=f"**__Original Text:__** {original_text}\n\n**__Corrected Text:__** {corrected_text}",
+        description=f"**__Original Text:__**\n{original_text}\n\n**__Corrected Text:__**\n{corrected_text}",
     ).build()
 
     await message.edit_original_response(embed=embed)
@@ -109,7 +110,7 @@ async def translate(
 
     embed = EmbedBuilder(
         title="Translation",
-        description=f"**__Original Text:__** {text}\n\n**__Translated Text:__** {translated_text}",
+        description=f"**__Original Text ({source_language}):__**\n{text}\n\n**__Translated Text ({target_language}):__**\n{translated_text}",
     ).build()
 
     await ctx.respond(embed=embed)
