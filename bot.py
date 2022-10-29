@@ -28,14 +28,13 @@ async def on_ready() -> None:
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if re.search(r"https?://", message.content):
-        if re.search(r"form|qualtric|survey", message.content):
-            if message.channel.name != "surveys":
-                embed = EmbedBuilder(
-                    title="Survey Link Detected",
-                    description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel! Thanks.",
-                ).build()
-                await message.channel.send(embed=embed)
+    if re.search(r"https?://(.*)(forms?|qualtrics|survey)(.*)", message.content):
+        if message.channel.name != "surveys":
+            embed = EmbedBuilder(
+                title="Survey Link Detected",
+                description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel! Thanks.",
+            ).build()
+            await message.channel.send(embed=embed)
     await bot.process_commands(message)
 
 
