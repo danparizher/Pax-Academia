@@ -32,7 +32,7 @@ async def on_message(message: discord.Message) -> None:
         if message.channel.name != "surveys":
             embed = EmbedBuilder(
                 title="Survey Link Detected",
-                description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel! Thanks.",
+                description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
             ).build()
             await message.channel.send(embed=embed)
     await bot.process_commands(message)
