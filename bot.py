@@ -1,5 +1,6 @@
 import os
 import re
+from asyncio import Queue
 
 import discord
 from discord import option
@@ -49,7 +50,15 @@ async def on_message(message: discord.Message) -> None:
 )
 async def correct(ctx, *, text: str) -> None:
 
-    message = await ctx.respond("Correcting grammar...")
+    process_queue = Queue()
+
+    await process_queue.put(ctx.author)
+
+    embed = EmbedBuilder(
+        title="Correcting Grammar",
+        description=f"You are number {process_queue.qsize()} in the queue.",
+    ).build()
+    message = await ctx.respond(embed=embed)
 
     original_text = text
     try:
@@ -59,6 +68,7 @@ async def correct(ctx, *, text: str) -> None:
             title="Error",
             description=f"An error occurred while correcting the grammar:\n\n{e}",
         ).build()
+        await process_queue.get()
         await message.edit_original_response(embed=embed)
         return
 
@@ -73,6 +83,7 @@ async def correct(ctx, *, text: str) -> None:
         title="Corrected Text",
         description=corrected_text,
     ).build()
+    await process_queue.get()
     await ctx.send(embed=embed)
 
     log(f"Corrected grammar for {ctx.author} in {ctx.guild}.")
