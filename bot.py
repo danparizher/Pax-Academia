@@ -56,7 +56,7 @@ async def correct(ctx, *, text: str) -> None:
 
     embed = EmbedBuilder(
         title="Correcting Grammar",
-        description=f"You are number {process_queue.qsize()} in the queue.",
+        description=f"You are number **{process_queue.qsize()}** in the queue.",
     ).build()
     message = await ctx.respond(embed=embed)
 
