@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from DeepL import get_language_list, translation
 from EmbedBuilder import EmbedBuilder
 from logging_file import log
-from QuillBot import quilling
+from QuillBot import correcting
 
 load_dotenv()
 TOKEN: str = os.getenv("DISCORD_TOKEN")
@@ -29,7 +29,7 @@ async def on_ready() -> None:
 
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if re.search(r"https?://(.*)(forms?|qualtrics|survey)(.*)", message.content):
+    if re.search(r"(https?://)?(www\.)?(.*)(forms?|qualtrics|survey)(.*)(\.com|\.net|\.org|\.edu)?", message.content):
         if message.channel.name != "surveys":
             embed = EmbedBuilder(
                 title="Survey Link Detected",
@@ -62,7 +62,7 @@ async def correct(ctx, *, text: str) -> None:
 
     original_text = text
     try:
-        corrected_text = await quilling(text)
+        corrected_text = await correcting(text)
     except Exception as e:
         embed = EmbedBuilder(
             title="Error",
