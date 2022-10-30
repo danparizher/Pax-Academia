@@ -11,7 +11,7 @@ class QuillBot:
 
     async def fix_all_errors(self) -> None:
         try:
-            await self.page.click("text=Fix All Errors", timeout=1500)
+            await self.page.click("text=Fix All Errors", timeout=3000)
             await self.page.wait_for_selector("text=Fixed all grammar errors.")
         except Exception:
             return None
