@@ -1,5 +1,4 @@
 import os
-import re
 from asyncio import Queue
 
 import discord
@@ -27,15 +26,25 @@ async def on_ready() -> None:
 ####################################################################################################################
 
 
+def surveys() -> list[str]:
+    surveys = [
+        "https://forms.gle/",
+        "https://docs.google.com/forms/",
+        "https://www.surveymonkey.com/",
+        "https://www.qualtrics.com/",
+    ]
+    return surveys
+
 @bot.event
 async def on_message(message: discord.Message) -> None:
-    if re.search(r"(https?://)?(www\.)?(.*)(forms?|qualtrics|survey)(.*)(\.com|\.net|\.org|\.edu)?", message.content):
-        if message.channel.name != "surveys":
-            embed = EmbedBuilder(
-                title="Survey Link Detected",
-                description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
-            ).build()
-            await message.channel.send(embed=embed)
+    if message.channel.name != "surveys":
+        for survey in surveys():
+            if survey in message.content:
+                embed = EmbedBuilder(
+                    title="Survey Link Detected",
+                    description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
+                ).build()
+                await message.channel.send(embed=embed)
     await bot.process_commands(message)
 
 
