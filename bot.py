@@ -91,7 +91,7 @@ async def define_command(ctx: bridge.context, word: str) -> None:
     except Exception as e:
         embed = EmbedBuilder(
             title=f"Definition of __{word.capitalize()}__",
-            description=f"Something went wrong: {e}",
+            description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
         ).build()
         await message.edit_original_response(embed=embed)
 
