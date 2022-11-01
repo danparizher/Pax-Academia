@@ -10,7 +10,7 @@ idna==3.4
 multidict==6.0.2
 playwright==1.27.1
 py-cord==2.2.2
-pyee==8.1.0
+pyee==9.0.4
 yarl==1.8.1
 python-dotenv==0.21.0
 beautifulsoup4==4.11.1
