@@ -70,6 +70,8 @@ async def define_command(ctx: bridge.context, word: str) -> None:
     ).build()
     await ctx.respond(embed=embed)
 
+    log(f"Define command used by {ctx.author} in {ctx.guild}.")
+
 
 ####################################################################################################################
 
@@ -118,7 +120,7 @@ async def correct(ctx, *, text: str) -> None:
     await process_queue.get()
     await ctx.send(embed=embed)
 
-    log(f"Corrected grammar for {ctx.author} in {ctx.guild}.")
+    log(f"Correct command used by {ctx.author} in {ctx.guild}.")
 
 
 ####################################################################################################################
@@ -187,7 +189,7 @@ async def translate(
 
     await ctx.send(embed=embed)
 
-    log(f"Translated text for {ctx.author} in {ctx.guild}.")
+    log(f"Translate command used by {ctx.author} in {ctx.guild}.")
 
 
 bot.run(TOKEN)
