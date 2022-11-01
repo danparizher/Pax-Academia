@@ -7,6 +7,7 @@ from discord.ext import bridge
 from dotenv import load_dotenv
 
 from DeepL import get_language_list, translation
+from Dictionary import audiate, define, part_of_speech, phonetisize
 from EmbedBuilder import EmbedBuilder
 from logging_file import log
 from QuillBot import correcting
@@ -35,6 +36,7 @@ def surveys() -> list[str]:
     ]
     return surveys
 
+
 @bot.event
 async def on_message(message: discord.Message) -> None:
     if message.channel.name != "surveys":
@@ -46,6 +48,27 @@ async def on_message(message: discord.Message) -> None:
                 ).build()
                 await message.channel.send(embed=embed)
     await bot.process_commands(message)
+
+
+####################################################################################################################
+
+
+@bot.bridge_command(name="define", description="Defines a word.")
+async def define_command(ctx: bridge.context, word: str) -> None:
+    definition = define(word)
+    phonetic = phonetisize(word) or "No phonetic found"
+    pos = part_of_speech(word) or "No part of speech found"
+    audio = audiate(word) or "No audio found"
+    embed = EmbedBuilder(
+        title=f"Definition of {word}",
+        description=definition,
+        fields=[
+            ("Phonetic", phonetic, False),
+            ("Part of Speech", pos, False),
+            ("Audio", audio, False),
+        ],
+    ).build()
+    await ctx.respond(embed=embed)
 
 
 ####################################################################################################################
