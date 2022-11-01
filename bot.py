@@ -7,7 +7,14 @@ from discord.ext import bridge
 from dotenv import load_dotenv
 
 from DeepL import get_language_list, translation
-from Dictionary import audiate, define, part_of_speech, phonetisize
+from Dictionary import (
+    antonymize,
+    define,
+    history_and_etymology,
+    phonetisize,
+    synonymize,
+    usage,
+)
 from EmbedBuilder import EmbedBuilder
 from logging_file import log
 from QuillBot import correcting
@@ -53,24 +60,40 @@ async def on_message(message: discord.Message) -> None:
 ####################################################################################################################
 
 
-@bot.bridge_command(name="define", description="Defines a word.")
+@bot.slash_command(name="define", description="Defines a word.")
 async def define_command(ctx: bridge.context, word: str) -> None:
-    definition = define(word)
-    phonetic = phonetisize(word) or "No phonetic found"
-    pos = part_of_speech(word) or "No part of speech found"
-    audio = audiate(word) or "No audio found"
-    embed = EmbedBuilder(
-        title=f"Definition of {word}",
-        description=definition,
-        fields=[
-            ("Phonetic", phonetic, False),
-            ("Part of Speech", pos, False),
-            ("Audio", audio, False),
-        ],
-    ).build()
-    await ctx.respond(embed=embed)
 
-    log(f"Define command used by {ctx.author} in {ctx.guild}.")
+    embed = EmbedBuilder(
+        title=f"Definition of __{word.capitalize()}__",
+        description=f"Finding definition for {word.capitalize()}...",
+    ).build()
+    message = await ctx.respond(embed=embed)
+
+    try:
+        definition = define(word)
+        phonetic = phonetisize(word)
+        synonyms = synonymize(word)
+        antonyms = antonymize(word)
+        use = usage(word)
+        etymology = history_and_etymology(word)
+        embed = EmbedBuilder(
+            title=f"Definition of __{word.capitalize()}__",
+            description=definition,
+            fields=[
+                ("Phonetic", phonetic, False),
+                ("Synonyms", synonyms, True),
+                ("Antonyms", antonyms, True),
+                ("First Known Use", use, False),
+                ("Etymology", etymology, False),
+            ],
+        ).build()
+        await message.edit_original_response(embed=embed)
+    except Exception as e:
+        embed = EmbedBuilder(
+            title=f"Definition of __{word.capitalize()}__",
+            description=f"Something went wrong: {e}",
+        ).build()
+        await message.edit_original_response(embed=embed)
 
 
 ####################################################################################################################

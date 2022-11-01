@@ -1,49 +1,78 @@
-import json
-
+import bs4
 import requests
 
-# API: https://api.dictionaryapi.dev/api/
-# API Documentation: https://dictionaryapi.dev/
 
-
-def request(word) -> str:
-    url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+def request(word: str) -> bs4.BeautifulSoup:
+    url = f"https://www.merriam-webster.com/dictionary/{word}"
     response = requests.get(url)
-    data = json.loads(response.text)
-    return data
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+    return soup
 
 
-def define(word) -> str:
-    data = request(word)
+def define(word: str) -> str:
+    soup = request(word.lower())
     try:
-        definition = data[0]["meanings"][0]["definitions"][0]["definition"]
-    except (KeyError, IndexError):
+        definition = soup.find("span", {"class": "dtText"}).text.split(":")[1]
+    except (AttributeError, IndexError):
         definition = "No definition found"
-    return definition
+    return definition.strip().capitalize()
 
 
-def phonetisize(word) -> str:
-    data = request(word)
+def phonetisize(word: str) -> str:
+    soup = request(word.lower())
     try:
-        phonetic = data[0]["phonetics"][0]["text"]
-    except (KeyError, IndexError):
-        phonetic = ""
-    return phonetic
+        phonetic = f"\\{soup.find('span', {'class': 'pr'}).text}\\".replace(" ", "")
+    except (AttributeError, IndexError):
+        phonetic = "No phonetic found"
+    return phonetic.strip()
 
 
-def part_of_speech(word) -> str:
-    data = request(word)
+def synonymize(word: str) -> str:
+    soup = request(word.lower())
     try:
-        part_of_speech = data[0]["meanings"][0]["partOfSpeech"]
-    except (KeyError, IndexError):
-        part_of_speech = ""
-    return part_of_speech
+        synonyms = soup.find("ul", {"class": "mw-list"}).find_all("li")
+        synonyms = ", ".join(
+            [
+                synonym.text.replace(", ", "").capitalize()
+                for synonym in synonyms
+                if "(" not in synonym.text
+            ]
+        )
+    except (AttributeError, IndexError):
+        synonyms = "No synonyms found"
+    return synonyms
 
 
-def audiate(word) -> str:
-    data = request(word)
+def antonymize(word: str) -> str:
+    soup = request(word.lower())
     try:
-        audio = data[0]["phonetics"][0]["audio"]
-    except (KeyError, IndexError):
-        audio = ""
-    return audio
+        antonyms = soup.find_all("ul", {"class": "mw-list"})[1].find_all("li")
+        antonyms = ", ".join(
+            [
+                antonym.text.replace(", ", "").capitalize()
+                for antonym in antonyms
+                if "(" not in antonym.text
+            ]
+        )
+    except (AttributeError, IndexError):
+        antonyms = "No antonyms found"
+    return antonyms
+
+
+def usage(word: str) -> str:
+    soup = request(word.lower())
+    try:
+        use = soup.find("p", {"class": "ety-sl"}).text
+        use = use.split(",")[0]
+    except (AttributeError, IndexError):
+        use = "No use found"
+    return use.capitalize()
+
+
+def history_and_etymology(word: str) -> str:
+    soup = request(word.lower())
+    try:
+        history = soup.find_all("p", {"class": "et"})[0].text
+    except (AttributeError, IndexError):
+        history = "No history found"
+    return history.strip().capitalize()
