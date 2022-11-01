@@ -9,8 +9,7 @@ def request(word: str) -> bs4.BeautifulSoup:
     return soup
 
 
-def define(word: str) -> str:
-    soup = request(word.lower())
+def define(soup) -> str:
     try:
         definition = soup.find("span", {"class": "dtText"}).text.split(":")[1]
     except (AttributeError, IndexError):
@@ -18,8 +17,7 @@ def define(word: str) -> str:
     return definition.strip().capitalize()
 
 
-def phonetisize(word: str) -> str:
-    soup = request(word.lower())
+def phonetisize(soup) -> str:
     try:
         phonetic = soup.find("span", {"class": "pr"}).text.replace(" ", "")
     except (AttributeError, IndexError):
@@ -27,8 +25,7 @@ def phonetisize(word: str) -> str:
     return phonetic.strip()
 
 
-def synonymize(word: str) -> str:
-    soup = request(word.lower())
+def synonymize(soup) -> str:
     try:
         synonyms = soup.find("ul", {"class": "mw-list"}).find_all("li")
         synonyms = ", ".join(
@@ -43,8 +40,7 @@ def synonymize(word: str) -> str:
     return synonyms
 
 
-def antonymize(word: str) -> str:
-    soup = request(word.lower())
+def antonymize(soup) -> str:
     try:
         antonyms = soup.find_all("ul", {"class": "mw-list"})[1].find_all("li")
         antonyms = ", ".join(
@@ -59,8 +55,7 @@ def antonymize(word: str) -> str:
     return antonyms
 
 
-def usage(word: str) -> str:
-    soup = request(word.lower())
+def usage(soup) -> str:
     try:
         use = soup.find("p", {"class": "ety-sl"}).text
         use = use.split(",")[0]
@@ -69,8 +64,7 @@ def usage(word: str) -> str:
     return use.capitalize()
 
 
-def history_and_etymology(word: str) -> str:
-    soup = request(word.lower())
+def history_and_etymology(soup) -> str:
     try:
         history = soup.find_all("p", {"class": "et"})[0].text.split("—")[0]
     except (AttributeError, IndexError):

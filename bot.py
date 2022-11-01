@@ -1,5 +1,6 @@
 import os
 from asyncio import Queue
+import re
 
 import discord
 from discord import option
@@ -15,6 +16,7 @@ from Dictionary import (
     spellcheck,
     synonymize,
     usage,
+    request,
 )
 from EmbedBuilder import EmbedBuilder
 from logging_file import log
@@ -69,14 +71,14 @@ async def define_command(ctx: bridge.context, word: str) -> None:
         description=f"Finding definition for {word.capitalize()}...",
     ).build()
     message = await ctx.respond(embed=embed)
-
+    req = request(word.lower())
     try:
-        definition = define(word)
-        phonetic = phonetisize(word)
-        synonyms = synonymize(word)
-        antonyms = antonymize(word)
-        use = usage(word)
-        etymology = history_and_etymology(word)
+        definition = define(word, req)
+        phonetic = phonetisize(word, req)
+        synonyms = synonymize(word, req)
+        antonyms = antonymize(word, req)
+        use = usage(word, req)
+        etymology = history_and_etymology(word, req)
         embed = EmbedBuilder(
             title=f"Definition of __{word.capitalize()}__",
             description=definition,
@@ -98,12 +100,12 @@ async def define_command(ctx: bridge.context, word: str) -> None:
 
             spelling = spellcheck(word)
 
-            definition = define(spelling)
-            phonetic = phonetisize(spelling)
-            synonyms = synonymize(spelling)
-            antonyms = antonymize(spelling)
-            use = usage(spelling)
-            etymology = history_and_etymology(spelling)
+            definition = define(spelling, req)
+            phonetic = phonetisize(spelling, req)
+            synonyms = synonymize(spelling, req)
+            antonyms = antonymize(spelling, req)
+            use = usage(spelling, req)
+            etymology = history_and_etymology(spelling, req)
             embed = EmbedBuilder(
                 title=f"Definition of __{spelling.capitalize()}__",
                 description=definition,
