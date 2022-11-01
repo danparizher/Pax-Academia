@@ -1,4 +1,4 @@
-import deepl
+from deepl import translate
 
 
 def get_language_list() -> list[str]:
@@ -47,7 +47,7 @@ async def translation(
     if formality_tone is not None and formality_tone not in formality:
         return "Invalid Formality"
 
-    return deepl.translate(
+    return translate(
         text=text,
         source_language=source_language,
         target_language=target_language,

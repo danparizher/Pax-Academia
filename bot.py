@@ -80,7 +80,7 @@ async def define_command(ctx: bridge.context, word: str) -> None:
             title=f"Definition of __{word.capitalize()}__",
             description=definition,
             fields=[
-                ("Phonetic", phonetic, False),
+                ("Phonetic Pronunciation", phonetic, False),
                 ("Synonyms", synonyms, True),
                 ("Antonyms", antonyms, True),
                 ("First Known Use", use, False),
