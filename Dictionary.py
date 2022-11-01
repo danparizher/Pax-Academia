@@ -21,7 +21,7 @@ def define(word: str) -> str:
 def phonetisize(word: str) -> str:
     soup = request(word.lower())
     try:
-        phonetic = f"\\{soup.find('span', {'class': 'pr'}).text}\\".replace(" ", "")
+        phonetic = soup.find('span', {'class': 'pr'}).text.replace(" ", "")
     except (AttributeError, IndexError):
         phonetic = "No phonetic found"
     return phonetic.strip()
