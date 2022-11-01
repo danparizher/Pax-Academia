@@ -7,15 +7,7 @@ from discord.ext import bridge
 from dotenv import load_dotenv
 
 from DeepL import get_language_list, translation
-from Dictionary import (
-    antonymize,
-    define,
-    history_and_etymology,
-    phonetisize,
-    spellcheck,
-    synonymize,
-    usage,
-)
+from Dictionary import get_word_info, spellcheck
 from EmbedBuilder import EmbedBuilder
 from logging_file import log
 from QuillBot import correcting
@@ -63,68 +55,36 @@ async def on_message(message: discord.Message) -> None:
 
 @bot.slash_command(name="define", description="Defines a word.")
 async def define_command(ctx: bridge.context, word: str) -> None:
-
-    embed = EmbedBuilder(
-        title=f"Definition of __{word.capitalize()}__",
-        description=f"Finding definition for {word.capitalize()}...",
-    ).build()
-    message = await ctx.respond(embed=embed)
+    await ctx.defer()
 
     try:
-        definition = define(word)
-        phonetic = phonetisize(word)
-        synonyms = synonymize(word)
-        antonyms = antonymize(word)
-        use = usage(word)
-        etymology = history_and_etymology(word)
+        word_data = get_word_info(word)
+        old_word = ''
+        if word_data['definition'] == 'No definition found':
+            old_word = word
+            word_data = get_word_info(spellcheck(word))
+
         embed = EmbedBuilder(
-            title=f"Definition of __{word.capitalize()}__",
-            description=definition,
+            title=f"Definition of __{word_data['word'].capitalize()}__",
+            description=word_data['definition'],
             fields=[
-                ("Phonetic Pronunciation", phonetic, False),
-                ("Synonyms", synonyms, True),
-                ("Antonyms", antonyms, True),
-                ("First Known Use", use, False),
-                ("Etymology", etymology, False),
-            ],
+                ("Phonetic Pronunciation", word_data['phonetic'], False),
+                ("Synonyms", word_data['synonyms'], True),
+                ("Antonmyms", word_data['antonyms'], True),
+                ("First Known Use", word_data['usage'], False),
+                ("Etymology", word_data['etymology'], False)
+            ]
         ).build()
 
-        if definition == "No definition found":
-            embed = EmbedBuilder(
-                title=f"Definition of __{word.capitalize()}__",
-                description=f'No data found for "{word.capitalize()}". Did you mean "{spellcheck(word)}"?',
-            ).build()
-            await message.edit_original_response(embed=embed)
-
-            spelling = spellcheck(word)
-
-            definition = define(spelling)
-            phonetic = phonetisize(spelling)
-            synonyms = synonymize(spelling)
-            antonyms = antonymize(spelling)
-            use = usage(spelling)
-            etymology = history_and_etymology(spelling)
-            embed = EmbedBuilder(
-                title=f"Definition of __{spelling.capitalize()}__",
-                description=definition,
-                fields=[
-                    ("Phonetic Pronunciation", phonetic, False),
-                    ("Synonyms", synonyms, True),
-                    ("Antonyms", antonyms, True),
-                    ("First Known Use", use, False),
-                    ("Etymology", etymology, False),
-                ],
-            ).build()
-            await ctx.respond(embed=embed)
-        else:
-            await message.edit_original_response(embed=embed)
+        content = None if old_word == '' else f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+        await ctx.edit(content=content, embed=embed)
 
     except Exception as e:
         embed = EmbedBuilder(
             title=f"Definition of __{word.capitalize()}__",
             description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
         ).build()
-        await message.edit_original_response(embed=embed)
+        await ctx.edit(embed=embed)
 
 
 ####################################################################################################################
