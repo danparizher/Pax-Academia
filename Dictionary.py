@@ -21,7 +21,7 @@ def define(word: str) -> str:
 def phonetisize(word: str) -> str:
     soup = request(word.lower())
     try:
-        phonetic = soup.find('span', {'class': 'pr'}).text.replace(" ", "")
+        phonetic = soup.find("span", {"class": "pr"}).text.replace(" ", "")
     except (AttributeError, IndexError):
         phonetic = "No phonetic found"
     return phonetic.strip()
@@ -76,3 +76,9 @@ def history_and_etymology(word: str) -> str:
     except (AttributeError, IndexError):
         history = "No history found"
     return history.strip().capitalize()
+
+
+def spellcheck(word: str) -> str:
+    soup = request(word.lower())
+    spelling = soup.find("p", {"class": "spelling-suggestions"}).text
+    return spelling.strip().capitalize()

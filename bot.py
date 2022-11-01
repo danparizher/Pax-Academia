@@ -12,6 +12,7 @@ from Dictionary import (
     define,
     history_and_etymology,
     phonetisize,
+    spellcheck,
     synonymize,
     usage,
 )
@@ -87,7 +88,37 @@ async def define_command(ctx: bridge.context, word: str) -> None:
                 ("Etymology", etymology, False),
             ],
         ).build()
-        await message.edit_original_response(embed=embed)
+
+        if definition == "No definition found":
+            embed = EmbedBuilder(
+                title=f"Definition of __{word.capitalize()}__",
+                description=f'No data found for "{word.capitalize()}". Did you mean "{spellcheck(word)}"?',
+            ).build()
+            await message.edit_original_response(embed=embed)
+
+            spelling = spellcheck(word)
+
+            definition = define(spelling)
+            phonetic = phonetisize(spelling)
+            synonyms = synonymize(spelling)
+            antonyms = antonymize(spelling)
+            use = usage(spelling)
+            etymology = history_and_etymology(spelling)
+            embed = EmbedBuilder(
+                title=f"Definition of __{spelling.capitalize()}__",
+                description=definition,
+                fields=[
+                    ("Phonetic Pronunciation", phonetic, False),
+                    ("Synonyms", synonyms, True),
+                    ("Antonyms", antonyms, True),
+                    ("First Known Use", use, False),
+                    ("Etymology", etymology, False),
+                ],
+            ).build()
+            await ctx.respond(embed=embed)
+        else:
+            await message.edit_original_response(embed=embed)
+
     except Exception as e:
         embed = EmbedBuilder(
             title=f"Definition of __{word.capitalize()}__",
