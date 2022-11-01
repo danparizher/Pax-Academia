@@ -72,7 +72,7 @@ def usage(word: str) -> str:
 def history_and_etymology(word: str) -> str:
     soup = request(word.lower())
     try:
-        history = soup.find_all("p", {"class": "et"})[0].text
+        history = soup.find_all("p", {"class": "et"})[0].text.split("—")[0]
     except (AttributeError, IndexError):
         history = "No history found"
     return history.strip().capitalize()
