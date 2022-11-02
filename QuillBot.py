@@ -1,5 +1,6 @@
 from playwright.async_api import async_playwright
 
+# TODO: Find a way to circumvent timeouts, and use selectors instead.
 
 class QuillBot:
     def __init__(self, page) -> None:
@@ -7,11 +8,12 @@ class QuillBot:
 
     async def type_text(self, text: str) -> None:
         await self.page.click("div[data-gramm_editor='false']")
-        await self.page.keyboard.type(text)
+        await self.page.fill("div[data-gramm_editor='false']", text)
+        await self.cut_paste()
 
     async def fix_all_errors(self) -> None:
         try:
-            await self.page.click("text=Fix All Errors", timeout=3000)
+            await self.page.click("text=Fix All Errors", timeout=10000)
             await self.page.click("div[data-gramm_editor='false']")
             await self.page.wait_for_selector("text=Fixed all errors.")
         except Exception:
@@ -31,7 +33,7 @@ async def recursive_correcting(initial_text: str, quillbot: QuillBot) -> str:
     text = await quillbot.get_text()
     if text == initial_text:
         return text
-    await quillbot.page.wait_for_timeout(100)
+    await quillbot.page.wait_for_timeout(1000)
     await quillbot.cut_paste()
     return await recursive_correcting(text, quillbot)
 

@@ -107,6 +107,8 @@ async def define_command(ctx: bridge.context, word: str) -> None:
 )
 async def correct(ctx, *, text: str) -> None:
 
+    # TODO: Add an elapsed time counter to the embed that updates every second until the correction is finished.
+
     process_queue = Queue()
 
     await process_queue.put(ctx.author)
