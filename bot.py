@@ -62,7 +62,7 @@ async def define_command(ctx: bridge.context, word: str) -> None:
         old_word = ""
         if word_data["definition"] == "No definition found":
             old_word = word
-            word_data = await get_word_info(spellcheck(word))
+            word_data = await get_word_info(await spellcheck(word))
 
         embed = EmbedBuilder(
             title=f"Definition of __{word_data['word'].capitalize()}__",
