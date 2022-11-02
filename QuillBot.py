@@ -12,7 +12,8 @@ class QuillBot:
     async def fix_all_errors(self) -> None:
         try:
             await self.page.click("text=Fix All Errors", timeout=3000)
-            await self.page.wait_for_selector("text=Fixed all grammar errors.")
+            await self.page.click("div[data-gramm_editor='false']")
+            await self.page.wait_for_selector("text=Fixed all errors.")
         except Exception:
             return None
 
@@ -25,16 +26,14 @@ class QuillBot:
         await self.page.keyboard.press("Control+V")
 
 
-async def recursive_correcting(
-    initial_text: str, quillbot: QuillBot, iteration_count: int = 0
-) -> str:
+async def recursive_correcting(initial_text: str, quillbot: QuillBot) -> str:
     await quillbot.fix_all_errors()
     text = await quillbot.get_text()
     if text == initial_text:
         return text
-    await quillbot.page.wait_for_timeout(50)
+    await quillbot.page.wait_for_timeout(100)
     await quillbot.cut_paste()
-    return await recursive_correcting(text, quillbot, iteration_count)
+    return await recursive_correcting(text, quillbot)
 
 
 async def correcting(text: str) -> str:
@@ -49,6 +48,5 @@ async def correcting(text: str) -> str:
 
         quillbot = QuillBot(page)
 
-        # await quillbot.close_signin()
         await quillbot.type_text(text)
         return await recursive_correcting(text, quillbot)
