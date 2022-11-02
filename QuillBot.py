@@ -2,6 +2,7 @@ from playwright.async_api import async_playwright
 
 # TODO: Find a way to circumvent timeouts, and use selectors instead.
 
+
 class QuillBot:
     def __init__(self, page) -> None:
         self.page = page
