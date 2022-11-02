@@ -70,7 +70,7 @@ async def define_command(ctx: bridge.context, word: str) -> None:
             fields=[
                 ("Phonetic Pronunciation", word_data["phonetic"], False),
                 ("Synonyms", word_data["synonyms"], True),
-                ("Antonmyms", word_data["antonyms"], True),
+                ("Antonyms", word_data["antonyms"], True),
                 ("First Known Use", word_data["usage"], False),
                 ("Etymology", word_data["etymology"], False),
             ],
