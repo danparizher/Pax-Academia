@@ -58,25 +58,29 @@ async def define_command(ctx: bridge.context, word: str) -> None:
     await ctx.defer()
 
     try:
-        word_data = get_word_info(word)
-        old_word = ''
-        if word_data['definition'] == 'No definition found':
+        word_data = await get_word_info(word)
+        old_word = ""
+        if word_data["definition"] == "No definition found":
             old_word = word
-            word_data = get_word_info(spellcheck(word))
+            word_data = await get_word_info(spellcheck(word))
 
         embed = EmbedBuilder(
             title=f"Definition of __{word_data['word'].capitalize()}__",
-            description=word_data['definition'],
+            description=word_data["definition"],
             fields=[
-                ("Phonetic Pronunciation", word_data['phonetic'], False),
-                ("Synonyms", word_data['synonyms'], True),
-                ("Antonmyms", word_data['antonyms'], True),
-                ("First Known Use", word_data['usage'], False),
-                ("Etymology", word_data['etymology'], False)
-            ]
+                ("Phonetic Pronunciation", word_data["phonetic"], False),
+                ("Synonyms", word_data["synonyms"], True),
+                ("Antonmyms", word_data["antonyms"], True),
+                ("First Known Use", word_data["usage"], False),
+                ("Etymology", word_data["etymology"], False),
+            ],
         ).build()
 
-        content = None if old_word == '' else f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+        content = (
+            None
+            if old_word == ""
+            else f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+        )
         await ctx.edit(content=content, embed=embed)
 
     except Exception as e:
