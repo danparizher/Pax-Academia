@@ -33,6 +33,7 @@ def surveys() -> list[str]:
         "https://docs.google.com/forms/",
         "https://www.surveymonkey.com/",
         "https://www.qualtrics.com/",
+        "https://forms.office.com/"
     ]
     return surveys
 
