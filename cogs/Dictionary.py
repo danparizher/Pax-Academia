@@ -1,5 +1,9 @@
 import aiohttp
 import bs4
+from discord.ext import commands
+
+from globalfuncs.EmbedBuilder import EmbedBuilder
+from globalfuncs.Logging import log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
@@ -69,3 +73,56 @@ async def get_word_info(word: str) -> dict:
     except (AttributeError, IndexError):
         word_data["etymology"] = "No etymology found"
     return word_data
+
+
+class Dictionary(commands.Cog):
+    def __init__(self, bot) -> None:
+        self.bot = bot
+
+    @commands.slash_command(name="define", description="Defines a word.")
+    async def define_command(self, ctx, word: str) -> None:
+        await ctx.defer()
+
+        try:
+            word_data = await get_word_info(word)
+            old_word = ""
+            if word_data["definition"] == "No definition found":
+                old_word = word
+                word_data = await get_word_info(await spellcheck(word))
+                if word_data["definition"] == "No definition found":
+                    await ctx.edit(
+                        content=f"No results found for **{old_word.capitalize()}**."
+                    )
+                    return
+
+            embed = EmbedBuilder(
+                title=f"Definition of __{word_data['word'].capitalize()}__",
+                description=word_data["definition"],
+                fields=[
+                    ("Phonetic Pronunciation", word_data["phonetic"], False),
+                    ("Synonyms", word_data["synonyms"], True),
+                    ("Antonyms", word_data["antonyms"], True),
+                    ("First Known Use", word_data["usage"], False),
+                    ("Etymology", word_data["etymology"], False),
+                ],
+            ).build()
+
+            content = (
+                None
+                if old_word == ""
+                else f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+            )
+            await ctx.edit(content=content, embed=embed)
+
+            log(f"Define command used by {ctx.author} in {ctx.guild}.")
+
+        except Exception as e:
+            embed = EmbedBuilder(
+                title=f"Definition of __{word.capitalize()}__",
+                description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
+            ).build()
+            await ctx.edit(embed=embed)
+
+
+def setup(bot) -> None:
+    bot.add_cog(Dictionary(bot))
