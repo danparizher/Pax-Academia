@@ -7,13 +7,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-bot = commands.Bot(command_prefix="g.", intents=discord.Intents.all())
+discord_intents = discord.Intents.default()
+discord_intents.message_content = True
+bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 
 
 async def load() -> None:
-    for filename in os.listdir("./cogs"):
-        if filename.endswith(".py"):
-            bot.load_extension(f"cogs.{filename[:-3]}")
+    cogs = [
+        "DeepL",
+        "Dictionary",
+        "QuillBot",
+        "Surveys",
+    ]
+    for cog in cogs:
+        bot.load_extension(f"cogs.{cog}")
 
 
 async def main() -> None:
