@@ -1,6 +1,7 @@
 import pubchempy as pcp
-from discord.ext import commands
 from discord import option
+from discord.ext import commands
+
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
@@ -8,8 +9,15 @@ from util.Logging import log
 async def get_data(name: str) -> dict:
     compound = pcp.get_compounds(name, "name")
     return {
+        "exact_mass": compound[0].exact_mass,
+        "iupac_name": compound[0].iupac_name,
+        "charge": compound[0].charge,
         "cid": compound[0].cid,
-        "formula": compound[0].molecular_formula,
+        "complexity": compound[0].complexity,
+        "molecular_formula": compound[0].molecular_formula,
+        "molecular_weight": compound[0].molecular_weight,
+        "tpsa": compound[0].tpsa,
+        "xlogp": compound[0].xlogp,
     }
 
 
@@ -18,7 +26,7 @@ class PubChem(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        name="chemsearch", description="Searches PubChem for a compound."
+        name="chemsearch", description="Searches the database for a compound."
     )
     @option(
         name="name",
@@ -30,7 +38,17 @@ class PubChem(commands.Cog):
             data = await get_data(name)
             embed = EmbedBuilder(
                 title=f"Properties of __{name.title()}__",
-                description=f"Molecular Formula: {data['formula']}",
+                url=f"https://pubchem.ncbi.nlm.nih.gov/compound/{data['cid']}",
+                description=f"**IUPAC Name:**\n{data['iupac_name']}",
+                fields=[
+                    ["Molecular Formula", data["molecular_formula"], True],
+                    ["Exact Mass", round(float(data["exact_mass"]), 2), True],
+                    ["Charge", data["charge"], True],
+                    ["Molecular Weight", data["molecular_weight"], True],
+                    ["XLogP", data["xlogp"], True],
+                    ["TPSA", data["tpsa"], True],
+                    ["Complexity", data["complexity"], True],
+                ],
                 image=f"https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={data['cid']}&width=400&height=400",
             ).build()
 
@@ -38,10 +56,13 @@ class PubChem(commands.Cog):
 
             log(f"Chemsearch command used by {ctx.author} in {ctx.guild}.")
 
-        except Exception as e:
-            log(
-                f"An error occurred while gathering data for **{name.title()}**:\n\n{e}"
-            )
+        except IndexError:
+            embed = EmbedBuilder(
+                title="Error",
+                description=f"Compound **{name.title()}** not found. Did you spell it correctly?",
+            ).build()
+
+            await ctx.respond(embed=embed)
 
 
 def setup(bot: commands.Bot) -> None:
