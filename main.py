@@ -15,7 +15,8 @@ bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 async def load() -> None:
     cogs = [
         "DeepL",
-        "Dictionary",
+        "MerriamWebster",
+        "PubChem",
         "QuillBot",
         "Surveys",
     ]

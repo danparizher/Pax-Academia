@@ -2,8 +2,8 @@ from deepl import translate
 from discord import option
 from discord.ext import commands
 
-from globalfuncs.EmbedBuilder import EmbedBuilder
-from globalfuncs.Logging import log
+from util.EmbedBuilder import EmbedBuilder
+from util.Logging import log
 
 
 def get_language_list() -> list[str]:
@@ -61,7 +61,7 @@ async def translation(
 
 
 class Translation(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(name="translate", description="Translates a given text.")
