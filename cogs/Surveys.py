@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-from globalfuncs.EmbedBuilder import EmbedBuilder
+from util.EmbedBuilder import EmbedBuilder
 
 
 def surveys() -> list[str]:

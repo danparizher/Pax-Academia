@@ -4,8 +4,8 @@ from discord import option
 from discord.ext import commands
 from playwright.async_api import async_playwright
 
-from globalfuncs.EmbedBuilder import EmbedBuilder
-from globalfuncs.Logging import log
+from util.EmbedBuilder import EmbedBuilder
+from util.Logging import log
 
 # TODO: Find a way to circumvent timeouts, and use selectors instead.
 
@@ -63,7 +63,7 @@ async def correcting(text: str) -> str:
 
 
 class QuillBot(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(

@@ -10,6 +10,7 @@ class EmbedBuilder:
         image=None,
         fields=None,
         thumbnail=None,
+        url=None,
     ) -> None:
         self.title: str | None = title
         self.description: str | None = description
@@ -19,6 +20,7 @@ class EmbedBuilder:
         self.icon_url: str = "https://pbs.twimg.com/profile_images/988662835180797952/9fWyq5hr_400x400.jpg"
         self.image: str | None = image
         self.fields: list | None = fields
+        self.url: str | None = url
 
     def build(self) -> discord.Embed:
         embed = discord.Embed(
@@ -31,5 +33,7 @@ class EmbedBuilder:
         if self.fields:
             for field in self.fields:
                 embed.add_field(name=field[0], value=field[1], inline=field[2])
+        if self.url:
+            embed.url = self.url
         embed.set_footer(text=self.footer, icon_url=self.icon_url)
         return embed

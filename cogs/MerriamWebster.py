@@ -1,9 +1,10 @@
 import aiohttp
 import bs4
+from discord import option
 from discord.ext import commands
 
-from globalfuncs.EmbedBuilder import EmbedBuilder
-from globalfuncs.Logging import log
+from util.EmbedBuilder import EmbedBuilder
+from util.Logging import log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
@@ -76,11 +77,12 @@ async def get_word_info(word: str) -> dict:
 
 
 class Dictionary(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(name="define", description="Defines a word.")
-    async def define_command(self, ctx, word: str) -> None:
+    @option("word", str, description="The word to define.", required=True)
+    async def define(self, ctx: commands.Context, word: str) -> None:
         await ctx.defer()
 
         try:
