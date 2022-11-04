@@ -1,7 +1,3 @@
-import os
-
-import aiohttp
-import discord
 import pubchempy as pcp
 from discord.ext import commands
 from discord import option
@@ -9,23 +5,12 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 
-async def get_cid(name: str) -> tuple:
-    compound = pcp.get_compounds(name, "name")[0]
-    return compound.cid
-
-
-async def get_structure(name: str) -> None:
-    compound = pcp.get_compounds(name, "name")[0]
-    return compound.molecular_formula
-
-
-async def draw(cid: int) -> None:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            f"https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={cid}&width=400&height=400"
-        ) as resp:
-            with open("molecule.png", "wb") as f:
-                f.write(await resp.read())
+async def get_data(name: str) -> dict:
+    compound = pcp.get_compounds(name, "name")
+    return {
+        "cid": compound[0].cid,
+        "formula": compound[0].molecular_formula,
+    }
 
 
 class PubChem(commands.Cog):
@@ -42,23 +27,20 @@ class PubChem(commands.Cog):
     )
     async def pubchem(self, ctx: commands.Context, name: str) -> None:
         try:
-            cid = await get_cid(name)
-            formula = await get_structure(name)
-            await draw(cid)
+            data = await get_data(name)
             embed = EmbedBuilder(
-                title=f"Chemical Composition of __{name.capitalize()}__",
-                description=f"Molecular Formula: {formula}",
-                image="attachment://molecule.png",
+                title=f"Properties of __{name.title()}__",
+                description=f"Molecular Formula: {data['formula']}",
+                image=f"https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={data['cid']}&width=400&height=400",
             ).build()
 
-            await ctx.respond(embed=embed, file=discord.File("molecule.png"))
-            os.remove("molecule.png")
+            await ctx.respond(embed=embed)
 
             log(f"Chemsearch command used by {ctx.author} in {ctx.guild}.")
 
         except Exception as e:
             log(
-                f"An error occurred while gathering data for **{name.capitalize()}**:\n\n{e}"
+                f"An error occurred while gathering data for **{name.title()}**:\n\n{e}"
             )
 
 
