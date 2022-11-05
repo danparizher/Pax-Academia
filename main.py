@@ -19,6 +19,7 @@ def load() -> None:
         "PubChem",
         "QuillBot",
         "Surveys",
+        "Wikipedia",
     ]
     for cog in cogs:
         bot.load_extension(f"cogs.{cog}")
