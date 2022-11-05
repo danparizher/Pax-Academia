@@ -5,6 +5,16 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 
+async def get_wiki(query):
+    page = wikipedia.page(query, auto_suggest=False)
+    return {
+        "title": page.title,
+        "summary": page.summary.split("\n")[0],
+        "url": page.url,
+        "image": page.images[0],
+    }
+
+
 class Wikipedia(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -12,12 +22,12 @@ class Wikipedia(commands.Cog):
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
     async def wiki(self, ctx: commands.Context, query: str) -> None:
         try:
-            page = wikipedia.page(query)
+            page = await get_wiki(query)
             embed = EmbedBuilder(
-                title=f"**{page.title}**",
-                url=page.url,
-                description=f"{page.summary}",
-                image=page.images[0],
+                title=page["title"].title(),
+                description=page["summary"],
+                url=page["url"],
+                image=page["image"],
             ).build()
 
             await ctx.respond(embed=embed)
