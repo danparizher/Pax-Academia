@@ -109,23 +109,19 @@ class Alerts(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         # Ignore messages from bots.
-        if message.author.bot:
-            return
-
-        # Ignore messages from channels the user does not have access to.
-        if message.channel not in message.author.guild.channels:
+        if message.author.bot or message.channel not in message.author.guild.channels:
             return
 
         # Ignore messages that do not contain a keyword.
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts")
         keywords = c.fetchall()
-        if not any(keyword[0] in message.content for keyword in keywords):
+        if not any(re.search(keyword[0], message.content) for keyword in keywords):
             return
 
         # Send a DM to the user who added the alert.
         for keyword in keywords:
-            if keyword[0] in message.content:
+            if re.search(keyword[0], message.content):
                 user = await self.bot.fetch_user(keyword[1])
                 embed = EmbedBuilder(
                     title="Alert",
