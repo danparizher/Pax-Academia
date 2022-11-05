@@ -12,7 +12,7 @@ discord_intents.message_content = True
 bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 
 
-async def load() -> None:
+def load() -> None:
     cogs = [
         "DeepL",
         "MerriamWebster",
@@ -24,9 +24,9 @@ async def load() -> None:
         bot.load_extension(f"cogs.{cog}")
 
 
-async def main() -> None:
-    await load()
-    await bot.start(TOKEN)
+def main() -> None:
+    load()
+    bot.run(TOKEN)
 
 
 @bot.event
