@@ -7,7 +7,7 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-
+# TODO: Add a RegEx implementation.
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -25,7 +25,10 @@ class Alerts(commands.Cog):
     async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
         # Check if the keyword is already in the database.
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts WHERE keyword = ?", (keyword,))
+        c.execute(
+            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            (keyword, ctx.author.id),
+        )
         if c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -123,12 +126,28 @@ class Alerts(commands.Cog):
         # Send a DM to the user who added the alert.
         for keyword in keywords:
             if keyword[0] in message.content:
-                user = self.bot.get_user(keyword[1]) or message.author
+                user = await self.bot.fetch_user(keyword[1])
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"Keyword `{keyword[0]}` was mentioned in **{message.channel.mention}** by **{message.author.mention}**.",
+                    description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    fields=[
+                        ("Message", message.content, False),
+                        (
+                            "Message Link",
+                            f"[Click to see message]({message.jump_url})",
+                            False,
+                        ),
+                    ],
                 ).build()
                 await user.send(embed=embed)
+
+    @commands.slash_command(name="view-db", description="View the database.")
+    async def view_db(self, ctx: commands.Context) -> None:
+        await ctx.respond(
+            content="Alerts Database",
+            file=discord.File("util/alerts.db"),
+            ephemeral=True,
+        )
 
 
 def setup(bot) -> None:
