@@ -22,7 +22,7 @@ class Surveys(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         try:
-            if message.channel.name != "surveys":
+            if message.channel.name != "surveys" and "276969339901444096" not in [role.id for role in message.author.roles]:
                 for survey in surveys():
                     if survey in message.content:
                         embed = EmbedBuilder(
