@@ -14,8 +14,10 @@ bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 
 def load() -> None:
     cogs = [
+        "Alerts",
         "DeepL",
         "MerriamWebster",
+        "Misc",
         "PubChem",
         "QuillBot",
         "Surveys",
@@ -28,12 +30,6 @@ def load() -> None:
 def main() -> None:
     load()
     bot.run(TOKEN)
-
-
-@bot.event
-async def on_ready() -> None:
-    print(f"{bot.user.name} has connected to Discord!")
-    await bot.change_presence(activity=discord.Game(name="Academic Peace..."))
 
 
 if __name__ == "__main__":
