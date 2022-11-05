@@ -13,7 +13,9 @@ class Alerts(commands.Cog):
         self.bot = bot
         self.db = sqlite3.connect("util/alerts.db")
         c = self.db.cursor()
-        c.execute("CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER)")
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
+        )
         self.db.commit()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
@@ -33,7 +35,10 @@ class Alerts(commands.Cog):
             return
 
         # Add the keyword to the database.
-        c.execute("INSERT INTO alerts VALUES (?, ?)", (keyword, ctx.author.id))
+        c.execute(
+            "INSERT INTO alerts VALUES (?, ?, ?)",
+            (keyword, ctx.author.id, ctx.author.name),
+        )
         self.db.commit()
 
         embed = EmbedBuilder(
@@ -52,7 +57,10 @@ class Alerts(commands.Cog):
     async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
         # Check if the keyword is in the database.
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts WHERE keyword = ?", (keyword,))
+        c.execute(
+            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
+            (keyword, ctx.author.id, ctx.author.name),
+        )
         if not c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -62,7 +70,10 @@ class Alerts(commands.Cog):
             return
 
         # Remove the keyword from the database.
-        c.execute("DELETE FROM alerts WHERE keyword = ?", (keyword,))
+        c.execute(
+            "DELETE FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
+            (keyword, ctx.author.id, ctx.author.name),
+        )
         self.db.commit()
 
         embed = EmbedBuilder(
@@ -77,7 +88,7 @@ class Alerts(commands.Cog):
     async def list_alerts(self, ctx: commands.Context) -> None:
         # Get all alerts from the database.
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts")
+        c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
         # Create a list of all alerts.
@@ -98,6 +109,10 @@ class Alerts(commands.Cog):
         if message.author.bot:
             return
 
+        # Ignore messages from channels the user does not have access to.
+        if message.channel not in message.author.guild.channels:
+            return
+
         # Ignore messages that do not contain a keyword.
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts")
@@ -111,7 +126,7 @@ class Alerts(commands.Cog):
                 user = self.bot.get_user(keyword[1]) or message.author
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"Keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    description=f"Keyword `{keyword[0]}` was mentioned in **{message.channel.mention}** by **{message.author.mention}**.",
                 ).build()
                 await user.send(embed=embed)
 
