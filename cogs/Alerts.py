@@ -7,7 +7,7 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-# TODO: Add a RegEx implementation.
+
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
