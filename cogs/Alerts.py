@@ -77,7 +77,7 @@ class Alerts(commands.Cog):
             str,
             "The keyword you want to remove",
             # TODO: Add choices
-            choices=self.get_keywords(self.db, ctx.author.id, ctx.author.name),
+            # choices=self.get_keywords(self.db, ctx.author.id, ctx.author.name),
             required=True,
         ),
     ) -> None:
@@ -132,20 +132,28 @@ class Alerts(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        # Ignore messages from bots.
-        if message.author.bot or message.channel not in message.author.guild.channels:
+        # Checking if the message is from a bot, if the message is in a channel that the bot can see, and if
+        # the bot is in the guild.
+        if (
+            message.author.bot
+            or message.channel not in message.author.guild.channels
+            or not message.author.guild.get_member(self.bot.user.id)
+        ):
             return
 
         # Ignore messages that do not contain a keyword.
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts")
         keywords = c.fetchall()
-        if not any(re.search(keyword[0], message.content) for keyword in keywords):
+        if not any(
+            re.search(keyword[0], message.content, re.IGNORECASE)
+            for keyword in keywords
+        ):
             return
 
         # Send a DM to the user who added the alert.
         for keyword in keywords:
-            if re.search(keyword[0], message.content):
+            if re.search(keyword[0], message.content, re.IGNORECASE):
                 user = await self.bot.fetch_user(keyword[1])
                 embed = EmbedBuilder(
                     title="Alert",
