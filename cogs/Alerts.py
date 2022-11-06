@@ -76,6 +76,7 @@ class Alerts(commands.Cog):
         keyword: Option(
             str,
             "The keyword you want to remove",
+            # TODO: Add choices
             choices=self.get_keywords(self.db, ctx.author.id, ctx.author.name),
             required=True,
         ),
@@ -84,8 +85,8 @@ class Alerts(commands.Cog):
         # Check if the keyword is in the database.
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
-            (keyword, ctx.author.id, ctx.author.name),
+            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            (keyword, ctx.author.id),
         )
         if not c.fetchone():
             embed = EmbedBuilder(
@@ -97,8 +98,8 @@ class Alerts(commands.Cog):
 
         # Remove the keyword from the database.
         c.execute(
-            "DELETE FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
-            (keyword, ctx.author.id, ctx.author.name),
+            "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
+            (keyword, ctx.author.id),
         )
         self.db.commit()
 
