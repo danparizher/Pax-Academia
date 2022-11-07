@@ -177,6 +177,39 @@ class Alerts(commands.Cog):
             ephemeral=True,
         )
 
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        if message.author.id == self.bot.user.id:
+            return
+
+        keywords = [
+            "dm me",
+            "pay(ment)?",
+            "paypal",
+            "cashapp",
+            "cash app",
+            "venmo",
+            "dollar",
+        ]
+
+        tutor_logs = self.bot.get_channel(1038985540147626024)
+        if any(
+            re.search(keyword, message.content, re.IGNORECASE) for keyword in keywords
+        ):
+            embed = EmbedBuilder(
+                title="Alert",
+                description=f"{message.author.mention} mentioned a keyword in {message.channel.mention}.",
+                fields=[
+                    ("Message", message.content, False),
+                    (
+                        "Message Link",
+                        f"[Click to see message]({message.jump_url})",
+                        False,
+                    ),
+                ],
+            ).build()
+            await tutor_logs.send(embed=embed)
+
 
 def setup(bot) -> None:
     bot.add_cog(Alerts(bot))
