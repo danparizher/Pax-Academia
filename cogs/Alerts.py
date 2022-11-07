@@ -132,32 +132,64 @@ class Alerts(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        # Checking if the message is from a bot, if the message is in a channel that the bot can see, and if
-        # the bot is in the guild.
-        if (
-            message.author.bot
-            or message.channel not in message.author.guild.channels
-            or not message.author.guild.get_member(self.bot.user.id)
-        ):
-            return
+        async def user_alerts() -> None:
+            if (
+                message.author.bot
+                or message.channel not in message.author.guild.channels
+                or not message.author.guild.get_member(self.bot.user.id)
+            ):
+                return
 
-        # Ignore messages that do not contain a keyword.
-        c = self.db.cursor()
-        c.execute("SELECT * FROM alerts")
-        keywords = c.fetchall()
-        if not any(
-            re.search(keyword[0], message.content, re.IGNORECASE)
-            for keyword in keywords
-        ):
-            return
+            # Ignore messages that do not contain a keyword.
+            c = self.db.cursor()
+            c.execute("SELECT * FROM alerts")
+            keywords = c.fetchall()
+            if not any(
+                re.search(keyword[0], message.content, re.IGNORECASE)
+                for keyword in keywords
+            ):
+                return
 
-        # Send a DM to the user who added the alert.
-        for keyword in keywords:
-            if re.search(keyword[0], message.content, re.IGNORECASE):
-                user = await self.bot.fetch_user(keyword[1])
+            # Send a DM to the user who added the alert.
+            for keyword in keywords:
+                if re.search(keyword[0], message.content, re.IGNORECASE):
+                    user = await self.bot.fetch_user(keyword[1])
+                    embed = EmbedBuilder(
+                        title="Alert",
+                        description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                        fields=[
+                            ("Message", message.content, False),
+                            (
+                                "Message Link",
+                                f"[Click to see message]({message.jump_url})",
+                                False,
+                            ),
+                        ],
+                    ).build()
+                    await user.send(embed=embed)
+
+        async def tutor_alerts(self, message: discord.Message) -> None:
+            if message.author.id == self.bot.user.id or message.guild != self.bot.guild:
+                return
+
+            keywords = [
+                "dm me",
+                "pay(ment)?",
+                "paypal",
+                "cashapp",
+                "cash app",
+                "venmo",
+                "dollar(s)?",
+                "tutor",
+            ]
+            tutor_logs = self.bot.get_channel(1038985540147626024)
+            if any(
+                re.search(keyword, message.content, re.IGNORECASE)
+                for keyword in keywords
+            ):
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    description=f"{message.author.mention} mentioned a keyword in {message.channel.mention}.",
                     fields=[
                         ("Message", message.content, False),
                         (
@@ -167,7 +199,10 @@ class Alerts(commands.Cog):
                         ),
                     ],
                 ).build()
-                await user.send(embed=embed)
+                await tutor_logs.send(embed=embed)
+
+        await user_alerts()
+        await tutor_alerts(self, message)
 
     @commands.slash_command(name="view-db", description="View the database.")
     async def view_db(self, ctx: commands.Context) -> None:
@@ -176,39 +211,6 @@ class Alerts(commands.Cog):
             file=discord.File("util/alerts.db"),
             ephemeral=True,
         )
-
-    @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
-        if message.author.id == self.bot.user.id:
-            return
-
-        keywords = [
-            "dm me",
-            "pay(ment)?",
-            "paypal",
-            "cashapp",
-            "cash app",
-            "venmo",
-            "dollar",
-        ]
-
-        tutor_logs = self.bot.get_channel(1038985540147626024)
-        if any(
-            re.search(keyword, message.content, re.IGNORECASE) for keyword in keywords
-        ):
-            embed = EmbedBuilder(
-                title="Alert",
-                description=f"{message.author.mention} mentioned a keyword in {message.channel.mention}.",
-                fields=[
-                    ("Message", message.content, False),
-                    (
-                        "Message Link",
-                        f"[Click to see message]({message.jump_url})",
-                        False,
-                    ),
-                ],
-            ).build()
-            await tutor_logs.send(embed=embed)
 
 
 def setup(bot) -> None:
