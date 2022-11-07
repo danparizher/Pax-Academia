@@ -2,6 +2,7 @@ import re
 import sqlite3
 
 import discord
+from discord.commands import Option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
@@ -17,6 +18,18 @@ class Alerts(commands.Cog):
             "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
         )
         self.db.commit()
+
+    def get_keywords(self, db, user_id, author_name) -> list:
+        c = db.cursor()
+        c.execute(
+            "SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",
+            (user_id, author_name),
+        )
+        keywords = c.fetchall()
+        choices = []
+        for keyword in keywords:
+            choices.append(str(name=keyword[0], value=keyword[0]))
+        return choices
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -57,12 +70,23 @@ class Alerts(commands.Cog):
         name="remove-alert",
         description="Removes an alert for a keyword.",
     )
-    async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
+    async def remove_alert(
+        self,
+        ctx: commands.Context,
+        keyword: Option(
+            str,
+            "The keyword you want to remove",
+            # TODO: Add choices
+            # choices=self.get_keywords(self.db, ctx.author.id, ctx.author.name),
+            required=True,
+        ),
+    ) -> None:
+
         # Check if the keyword is in the database.
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
-            (keyword, ctx.author.id, ctx.author.name),
+            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            (keyword, ctx.author.id),
         )
         if not c.fetchone():
             embed = EmbedBuilder(
@@ -74,8 +98,8 @@ class Alerts(commands.Cog):
 
         # Remove the keyword from the database.
         c.execute(
-            "DELETE FROM alerts WHERE keyword = ? AND user_id = ? AND author_name = ?",
-            (keyword, ctx.author.id, ctx.author.name),
+            "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
+            (keyword, ctx.author.id),
         )
         self.db.commit()
 
@@ -108,20 +132,28 @@ class Alerts(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        # Ignore messages from bots.
-        if message.author.bot or message.channel not in message.author.guild.channels:
+        # Checking if the message is from a bot, if the message is in a channel that the bot can see, and if
+        # the bot is in the guild.
+        if (
+            message.author.bot
+            or message.channel not in message.author.guild.channels
+            or not message.author.guild.get_member(self.bot.user.id)
+        ):
             return
 
         # Ignore messages that do not contain a keyword.
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts")
         keywords = c.fetchall()
-        if not any(re.search(keyword[0], message.content) for keyword in keywords):
+        if not any(
+            re.search(keyword[0], message.content, re.IGNORECASE)
+            for keyword in keywords
+        ):
             return
 
         # Send a DM to the user who added the alert.
         for keyword in keywords:
-            if re.search(keyword[0], message.content):
+            if re.search(keyword[0], message.content, re.IGNORECASE):
                 user = await self.bot.fetch_user(keyword[1])
                 embed = EmbedBuilder(
                     title="Alert",
@@ -144,6 +176,39 @@ class Alerts(commands.Cog):
             file=discord.File("util/alerts.db"),
             ephemeral=True,
         )
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        if message.author.id == self.bot.user.id:
+            return
+
+        keywords = [
+            "dm me",
+            "pay(ment)?",
+            "paypal",
+            "cashapp",
+            "cash app",
+            "venmo",
+            "dollar",
+        ]
+
+        tutor_logs = self.bot.get_channel(1038985540147626024)
+        if any(
+            re.search(keyword, message.content, re.IGNORECASE) for keyword in keywords
+        ):
+            embed = EmbedBuilder(
+                title="Alert",
+                description=f"{message.author.mention} mentioned a keyword in {message.channel.mention}.",
+                fields=[
+                    ("Message", message.content, False),
+                    (
+                        "Message Link",
+                        f"[Click to see message]({message.jump_url})",
+                        False,
+                    ),
+                ],
+            ).build()
+            await tutor_logs.send(embed=embed)
 
 
 def setup(bot) -> None:

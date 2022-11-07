@@ -19,7 +19,7 @@ def load() -> None:
         "MerriamWebster",
         "Misc",
         "PubChem",
-        "QuillBot",
+        # "QuillBot",
         "Surveys",
         "Wikipedia",
     ]

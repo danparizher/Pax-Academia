@@ -84,7 +84,13 @@ class Dictionary(commands.Cog):
     @option("word", str, description="The word to define.", required=True)
     async def define(self, ctx: commands.Context, word: str) -> None:
         await ctx.defer()
-
+        if " " in word:
+            embed = EmbedBuilder(
+                title="Error",
+                description="Please enter a single word.",
+            ).build()
+            await ctx.respond(embed=embed)
+            return
         try:
             word_data = await get_word_info(word)
             old_word = ""

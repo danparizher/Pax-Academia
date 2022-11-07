@@ -25,6 +25,9 @@ class PubChem(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
+    def to_subscript(self, number: int) -> str:
+        return str(number).translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
+
     @commands.slash_command(
         name="chemsearch", description="Searches the database for a compound."
     )
@@ -41,7 +44,11 @@ class PubChem(commands.Cog):
                 url=f"https://pubchem.ncbi.nlm.nih.gov/compound/{data['cid']}",
                 description=f"**IUPAC Name:**\n{data['iupac_name']}",
                 fields=[
-                    ["Molecular Formula", data["molecular_formula"], True],
+                    [
+                        "Molecular Formula",
+                        self.to_subscript(data["molecular_formula"]),
+                        True,
+                    ],
                     ["Exact Mass", round(float(data["exact_mass"]), 2), True],
                     ["Charge", data["charge"], True],
                     ["Molecular Weight", data["molecular_weight"], True],
