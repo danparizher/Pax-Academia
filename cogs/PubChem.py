@@ -26,8 +26,7 @@ class PubChem(commands.Cog):
         self.bot = bot
 
     def to_subscript(self, number: int) -> str:
-        subscript = str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉")
-        return str(number).translate(subscript)
+        return str(number).translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
 
     @commands.slash_command(
         name="chemsearch", description="Searches the database for a compound."
