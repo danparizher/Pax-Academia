@@ -169,7 +169,7 @@ class Alerts(commands.Cog):
                     await user.send(embed=embed)
 
         async def tutor_alerts(self, message: discord.Message) -> None:
-            if message.author.id == self.bot.user.id or message.guild != self.bot.guild:
+            if message.author.id == self.bot.user.id or message.guild.id != 238956364729155585:
                 return
 
             keywords = [
