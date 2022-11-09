@@ -191,7 +191,8 @@ class Alerts(commands.Cog):
             if any(
                 temp := sorted(
                     [
-                        re.search(keyword, message.content, re.IGNORECASE) or "0"
+                        re.search(keyword, message.content, re.IGNORECASE).group(0)
+                        or ""
                         for keyword in keywords
                     ],
                     key=lambda x: len(x),
