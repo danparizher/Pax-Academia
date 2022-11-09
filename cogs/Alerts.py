@@ -8,11 +8,21 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
+
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
     conn = sqlite3.connect("util/alerts.db")
-    data = [keyword[0] for keyword in conn.cursor().execute("SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",(ctx.interaction.user.id, ctx.interaction.user.name),).fetchall()]
+    data = [
+        keyword[0]
+        for keyword in conn.cursor()
+        .execute(
+            "SELECT keyword FROM alerts WHERE user_id = ?",
+            (ctx.interaction.user.id, ctx.interaction.user.name),
+        )
+        .fetchall()
+    ]
     conn.close()
     return data
+
 
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -161,7 +171,10 @@ class Alerts(commands.Cog):
                     await user.send(embed=embed)
 
         async def tutor_alerts(self, message: discord.Message) -> None:
-            if message.author.id == self.bot.user.id or message.guild.id != 238956364729155585:
+            if (
+                message.author.id == self.bot.user.id
+                or message.guild.id != 238956364729155585
+            ):
                 return
 
             keywords = [
@@ -176,12 +189,18 @@ class Alerts(commands.Cog):
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
             if any(
-                re.search(keyword, message.content, re.IGNORECASE)
-                for keyword in keywords
+                temp := sorted(
+                    [
+                        re.search(keyword, message.content, re.IGNORECASE) or "0"
+                        for keyword in keywords
+                    ],
+                    key=lambda x: len(x),
+                    reverse=True,
+                )
             ):
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"{message.author.mention} mentioned a keyword in {message.channel.mention}.",
+                    description=f"{message.author.mention} mentioned {temp[0]} in {message.channel.mention}.",
                     fields=[
                         ("Message", message.content, False),
                         (
