@@ -15,8 +15,8 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
         keyword[0]
         for keyword in conn.cursor()
         .execute(
-            "SELECT keyword FROM alerts WHERE user_id = ?",
-            (ctx.interaction.user.id),
+            "SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",
+            (ctx.interaction.user.id, ctx.interaction.user.name),
         )
         .fetchall()
     ]
