@@ -2,12 +2,17 @@ import re
 import sqlite3
 
 import discord
-from discord.commands import Option
+from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
+def get_keywords(ctx: discord.AutocompleteContext) -> list:
+    conn = sqlite3.connect("util/alerts.db")
+    data = [keyword[0] for keyword in conn.cursor().execute("SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",(ctx.interaction.user.id, ctx.interaction.user.name),).fetchall()]
+    conn.close()
+    return data
 
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -18,18 +23,6 @@ class Alerts(commands.Cog):
             "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
         )
         self.db.commit()
-
-    def get_keywords(self, db, user_id, author_name) -> list:
-        c = db.cursor()
-        c.execute(
-            "SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",
-            (user_id, author_name),
-        )
-        keywords = c.fetchall()
-        choices = []
-        for keyword in keywords:
-            choices.append(str(name=keyword[0], value=keyword[0]))
-        return choices
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -70,16 +63,15 @@ class Alerts(commands.Cog):
         name="remove-alert",
         description="Removes an alert for a keyword.",
     )
+    @option(
+        name="keyword",
+        description="The keyword to remove.",
+        autocomplete=get_keywords,
+    )
     async def remove_alert(
         self,
         ctx: commands.Context,
-        keyword: Option(
-            str,
-            "The keyword you want to remove",
-            # TODO: Add choices
-            # choices=self.get_keywords(self.db, ctx.author.id, ctx.author.name),
-            required=True,
-        ),
+        keyword: str,
     ) -> None:
 
         # Check if the keyword is in the database.
