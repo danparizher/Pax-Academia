@@ -1,3 +1,5 @@
+import time
+
 import discord
 from discord.ext import commands
 
@@ -6,9 +8,14 @@ class Misc(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.command()
+    @commands.slash_command()
     async def ping(self, ctx: commands.Context) -> None:
-        await ctx.send("Pong!")
+        start = time.time()
+        message = await ctx.respond("Pong!")
+        end = time.time()
+        await message.edit_original_response(
+            content=f"Pong! `{round((end - start) * 1000)}ms`"
+        )
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
