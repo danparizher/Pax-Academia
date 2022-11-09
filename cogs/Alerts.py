@@ -191,7 +191,7 @@ class Alerts(commands.Cog):
             if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"{message.author.mention} mentioned {temp[0]} in {message.channel.mention}.",
+                    description=f"{message.author.mention} mentioned `{temp[0]}` in {message.channel.mention}.",
                     fields=[
                         ("Message", message.content, False),
                         (
