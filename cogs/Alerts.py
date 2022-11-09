@@ -188,17 +188,7 @@ class Alerts(commands.Cog):
                 "tutor",
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
-            if any(
-                temp := sorted(
-                    [
-                        re.search(keyword, message.content, re.IGNORECASE).group(0)
-                        or ""
-                        for keyword in keywords
-                    ],
-                    key=lambda x: len(x),
-                    reverse=True,
-                )
-            ):
+            if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
                 embed = EmbedBuilder(
                     title="Alert",
                     description=f"{message.author.mention} mentioned {temp[0]} in {message.channel.mention}.",
