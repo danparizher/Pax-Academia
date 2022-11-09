@@ -16,7 +16,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
         for keyword in conn.cursor()
         .execute(
             "SELECT keyword FROM alerts WHERE user_id = ?",
-            (ctx.interaction.user.id, ctx.interaction.user.name),
+            (ctx.interaction.user.id),
         )
         .fetchall()
     ]
@@ -186,9 +186,14 @@ class Alerts(commands.Cog):
                 "venmo",
                 "dollar(s)?",
                 "tutor",
+                "money",
+                "price",
+                "$",
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
+            # fmt: off
             if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
+            # fmt: on
                 embed = EmbedBuilder(
                     title="Alert",
                     description=f"{message.author.mention} mentioned `{temp[0]}` in {message.channel.mention}.",
