@@ -13,7 +13,6 @@ Note: Only the first instance of a slash command is documented since the other i
 
 # Dictionary with the server rules of HWH
 rules = {
-<<<<<<< HEAD
     "Rule A): Respect": "Maintain civility and conduct yourself appropriately. Avoid derogatory language, discriminatory jokes, and hate speech.",
     "Rule B): Staff Report": "Use the staff report feature for reporting rule violations only.",
     "Rule C): Backseat Moderating": "To avoid conflicts, simply use the \`@Staff Report\` ping or \`/report\` to report rule breakers.",
