@@ -1,3 +1,4 @@
+import discord
 from discord.commands import option
 from discord.ext import commands
 
@@ -33,10 +34,13 @@ class Rules(commands.Cog):
     @option(
         "rule", str, description="The rule to show.", required=True, choices=get_rules()
     )
-    async def rule(self, ctx: commands.Context, rule: str) -> None:
+    @option("user", discord.Member, description="The user to ping.", required=False)
+    async def rule(
+        self, ctx: commands.Context, rule: str, user: discord.Member
+    ) -> None:
         embed = EmbedBuilder(title=rule, description=rules[rule]).build()
 
-        await ctx.respond(embed=embed)
+        await ctx.respond(content=f"<@{user.id}>" if user else None, embed=embed)
 
         log(f"Rule command used by {ctx.author} in {ctx.guild}.")
 
