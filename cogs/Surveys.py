@@ -22,14 +22,18 @@ class Surveys(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         try:
-            if message.channel.name != "surveys" and "276969339901444096" not in [role.id for role in message.author.roles]:
+            if message.channel.name != "surveys" and "276969339901444096" not in [
+                role.id for role in message.author.roles
+            ]:
                 for survey in surveys():
                     if survey in message.content:
                         embed = EmbedBuilder(
                             title="Survey Link Detected",
                             description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
                         ).build()
-                        await message.channel.send(embed=embed)
+                        await message.channel.send(
+                            content=f"<@{message.author.id}>", embed=embed
+                        )
         except AttributeError:
             pass
         await self.bot.process_commands(message)
