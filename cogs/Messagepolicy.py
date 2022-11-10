@@ -174,8 +174,10 @@ class Messagepolicy(commands.Cog):
                         user_stats[message.user.id][0] = user_stats[message.user.id][0] + spam_cnt
                         user_stats[message.user.id][1] = user_stats[message.user.id][1] + multipost_cnt
                         user_stats[message.user.id][2] = time.time()
+                        log(f"User {message.author.mention} multiposted in {message.channel.mention}.")
                     else:  # Create a new entry if the user isn't in the data base already
                         user_stats[message.user.id] = [spam_cnt, multipost_cnt, time.time()]
+                        log(f"User {message.author.mention} multiposted in {message.channel.mention}.")
                 
                 recent_msgs.append(entry)  # Save the message to the cache list
                 
