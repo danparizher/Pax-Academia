@@ -179,17 +179,18 @@ class Alerts(commands.Cog):
 
             keywords = [
                 "dm me",
-                "pay(ment)?",
+                "pay",
                 "paypal",
                 "cashapp",
                 "cash app",
                 "venmo",
-                "dollar(s)?",
+                "dollar",
                 "tutor",
                 "money",
                 "price",
                 "$",
                 "professional",
+                "service",
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
             # fmt: off
