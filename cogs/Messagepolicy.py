@@ -138,9 +138,11 @@ class Messagepolicy(commands.Cog):
                 or message.channel not in message.author.guild.channels
                 or not message.author.guild.get_member(self.bot.user.id)
             ):
+                print("No message caching!")
                 return
             # Else the bot cachese the message
             else:
+                print("Message caching activated!")
                 files = [f.to_file() for f in message.attachments]  # Extract attachments from a message
                 shasums = []  # SHA-sums of the attachments of the message if applicable
                 for file in files:
@@ -151,18 +153,22 @@ class Messagepolicy(commands.Cog):
                 
                 content = message.content.lower()  # The text body of the message
                 entry = [content, shasums, message.author.id, message.channel.id, time.time(), message.id]
+                print("Cache entry:", entry)
                 multipost_cnt = 0
                 spam_cnt = 0
                 
                 for entry in recent_msgs:
+                    print("Checking for duplicates in logs.")
                     # Check for duplicates in texts
                     if content in entry[0]:
+                        print("Found a duplicate text message.")
                         if message.channel.id == entry[3]:
                             spam_cnt += 1
                         else:
                             multipost_cnt += 1
                     # Check for duplicates in attachments
                     for hashsum in entry[1]:
+                        print("Found a duplicate attachment.")
                         if hashsum in shasums:
                             if message.channel.id == entry[3]:
                                 spam_cnt += 1
