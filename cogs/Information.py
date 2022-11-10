@@ -1,9 +1,6 @@
-import discord
-from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
 
 
 class Information(commands.Cog):
@@ -29,7 +26,6 @@ class Information(commands.Cog):
             description="Please format your code using the following syntax:\n\`\`\`python\n# Your code here\n\`\`\`\n\nThe code will be formatted as follows:\n```python\n# Your code here\n```\n\nIf you are using a language other than Python, replace `python` with the name of your language.\n\n- Please explain what is not working, and what you have attempted so far.\n- Always show your entire code, not just the part that is not working.\n- If you are getting an error, please show the entire error message.",
         ).build()
         await ctx.respond(embed=embed)
-
 
 
 def setup(bot: commands.Bot) -> None:
