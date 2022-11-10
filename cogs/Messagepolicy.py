@@ -197,6 +197,8 @@ class Messagepolicy(commands.Cog):
                     # The oldest message is always at index 0
                     if (time.time() - entry[2]) >= keeptime:
                         user_stats.pop(0)
+        
+        await user_posts()
                 
                 
                 
