@@ -189,6 +189,7 @@ class Alerts(commands.Cog):
                 "money",
                 "price",
                 "$",
+                "professional",
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
             # fmt: off
