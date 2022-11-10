@@ -25,16 +25,19 @@ rules = {
     "academic-integrity": "Do not attempt to cheat on exams, papers, or assignments.",
     "bad-faith": "The purpose of this server is to discuss academic topics. Do not provide bad faith responses to questions or requests. Additionally, if you don't have anything useful to say, don't say it.",
     "mentioning": "You must include your question in the mention and only use it once per question (e.g. use ?mention directly after you ask your question). Include specific questions, not vague or unanswerable ones. Use the proper role(s) that pertain to your question.",
-    "spamming": "Do not send repeating messages, messages in quick succession, or reactions to a message needlessly. If a help mention (ping) is used, do not send messages unless it meaningfully contributes to the channel. Post your question in only one channel."}
+    "spamming": "Do not send repeating messages, messages in quick succession, or reactions to a message needlessly. If a help mention (ping) is used, do not send messages unless it meaningfully contributes to the channel. Post your question in only one channel.",
+}
+
 
 class Rules(commands.Cog):
     """Create a new cog enabling users to qery rules using Pax Academia and have them shown in chat."""
-    
+
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(
-        name="respect", description="Rule A) is displayed."  # The name and description of the command
+        name="respect",
+        description="Rule A) is displayed.",  # The name and description of the command
     )
     async def respect(self, ctx: commands.Context) -> None:
         """
@@ -54,10 +57,12 @@ class Rules(commands.Cog):
         # The response of the bot has the form of an embed
         embed = EmbedBuilder(
             title="Please conduct yourself respectfully.",  # The title (heading) of the embeded message
-            description=rules["respect"],  # The text that is shown in the body of the message
+            description=rules[
+                "respect"
+            ],  # The text that is shown in the body of the message
         ).build()
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="staff-reporting", description="Rule B) is displayed."
         )
@@ -65,9 +70,10 @@ class Rules(commands.Cog):
             embed = EmbedBuilder(
                 title="Please use staff report to notify us about rule violations only.",
                 description=rules["staff-reporting"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="backseat-moderating", description="Rule C) is displayed."
         )
@@ -75,19 +81,19 @@ class Rules(commands.Cog):
             embed = EmbedBuilder(
                 title="Please refrain from backseat-moderating.",
                 description=rules["backseat-moderating"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-            
-        @commands.slash_command(
-            name="underage", description="Rule D) is displayed."
-        )
+
+        @commands.slash_command(name="underage", description="Rule D) is displayed.")
         async def underage(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="The minimum age is 13 years.",
                 description=rules["underage"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="unsolicited-dm", description="Rule E) is displayed."
         )
@@ -95,19 +101,19 @@ class Rules(commands.Cog):
             embed = EmbedBuilder(
                 title="Please don't send DMs without consent.",
                 description=rules["unsolicited-dm"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
-        @commands.slash_command(
-            name="paywalls", description="Rule F) is displayed."
-        )
+
+        @commands.slash_command(name="paywalls", description="Rule F) is displayed.")
         async def paywalls(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="Trying to circumvent paywalls is not allowed.",
                 description=rules["paywalls"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="clean-content", description="Rule G) is displayed."
         )
@@ -115,29 +121,30 @@ class Rules(commands.Cog):
             embed = EmbedBuilder(
                 title="Please keep content appropriate.",
                 description=rules["clean-content"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="english-only", description="Rule H) is displayed."
         )
         async def englishonly(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title= "Please stick to English outside the language channels.",
+                title="Please stick to English outside the language channels.",
                 description=rules["english-only"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
-        @commands.slash_command(
-            name="advertising", description="Rule I) is displayed."
-        )
+
+        @commands.slash_command(name="advertising", description="Rule I) is displayed.")
         async def advertising(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="",
                 description=rules["advertising"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
         @commands.slash_command(
             name="academic-integrity", description="Rule J) is displayed."
         )
@@ -145,38 +152,37 @@ class Rules(commands.Cog):
             embed = EmbedBuilder(
                 title="",
                 description=rules["academic-integrity"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
-        @commands.slash_command(
-            name="bad-faith", description="Rule K) is displayed."
-        )
+
+        @commands.slash_command(name="bad-faith", description="Rule K) is displayed.")
         async def badfaith(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="",
                 description=rules["bad-faith"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
-        @commands.slash_command(
-            name="mentioning", description="Rule L) is displayed."
-        )
+
+        @commands.slash_command(name="mentioning", description="Rule L) is displayed.")
         async def mentioning(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="",
                 description=rules["mentioning"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
-        @commands.slash_command(
-            name="spamming", description="Rule M) is displayed."
-        )
+
+        @commands.slash_command(name="spamming", description="Rule M) is displayed.")
         async def spamming(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
                 title="",
                 description=rules["spamming"],
-        ).build()
+            ).build()
+
         await ctx.respond(embed=embed)
-        
+
+
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(Information(bot))
+    bot.add_cog(Rules(bot))
