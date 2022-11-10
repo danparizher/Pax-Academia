@@ -139,7 +139,7 @@ class Rules(commands.Cog):
         @commands.slash_command(name="advertising", description="Rule I) is displayed.")
         async def advertising(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title="",
+                title="Advertising is not allowed.",
                 description=rules["advertising"],
             ).build()
 
@@ -150,7 +150,7 @@ class Rules(commands.Cog):
         )
         async def acadintegrity(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title="",
+                title="Please maintain academic integrity.",
                 description=rules["academic-integrity"],
             ).build()
 
@@ -159,7 +159,7 @@ class Rules(commands.Cog):
         @commands.slash_command(name="bad-faith", description="Rule K) is displayed.")
         async def badfaith(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title="",
+                title="Stay on topic in the help channels and don't troll.",
                 description=rules["bad-faith"],
             ).build()
 
@@ -168,7 +168,7 @@ class Rules(commands.Cog):
         @commands.slash_command(name="mentioning", description="Rule L) is displayed.")
         async def mentioning(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title="",
+                title="Please formulate your questions clearly and use the mention command reasonably.",
                 description=rules["mentioning"],
             ).build()
 
@@ -177,7 +177,7 @@ class Rules(commands.Cog):
         @commands.slash_command(name="spamming", description="Rule M) is displayed.")
         async def spamming(self, ctx: commands.Context) -> None:
             embed = EmbedBuilder(
-                title="",
+                title="Do not spam.",
                 description=rules["spamming"],
             ).build()
 
