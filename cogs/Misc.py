@@ -8,7 +8,7 @@ class Misc(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.slash_command()
+    @commands.slash_command(name="ping", description="Pings the bot.")
     async def ping(self, ctx: commands.Context) -> None:
         start = time.time()
         message = await ctx.respond("Pong!")
