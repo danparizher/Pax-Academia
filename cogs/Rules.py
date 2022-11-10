@@ -35,9 +35,7 @@ class Rules(commands.Cog):
         "rule", str, description="The rule to show.", required=True, choices=get_rules()
     )
     @option("user", discord.User, description="The user to ping.", required=False)
-    async def rule(
-        self, ctx: commands.Context, rule: str, user: discord.User
-    ) -> None:
+    async def rule(self, ctx: commands.Context, rule: str, user: discord.User) -> None:
         embed = EmbedBuilder(title=rule, description=rules[rule]).build()
 
         await ctx.respond(content=f"<@{user.id}>" if user else None, embed=embed)
