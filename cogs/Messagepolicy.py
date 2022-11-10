@@ -158,7 +158,7 @@ class Messagepolicy(commands.Cog):
                 spam_cnt = 0
                 
                 for entry in recent_msgs:
-                    print("Checking for duplicates in logs.")
+                    print("Checking entry:", entry)
                     # Check for duplicates in texts
                     if content in entry[0]:
                         print("Found a duplicate text message.")
