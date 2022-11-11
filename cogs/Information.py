@@ -18,7 +18,7 @@ class Information(commands.Cog):
         type=discord.User,
         required=False,
     )
-    async def attempt(self, ctx: commands.Context, user: discord.Member) -> None:
+    async def attempt(self, ctx: commands.Context, user: discord.User) -> None:
         embed = EmbedBuilder(
             title="What have you attempted so far?",
             description="Please show and describe the steps you have completed so that we may help you further.",
@@ -34,7 +34,7 @@ class Information(commands.Cog):
         type=discord.User,
         required=False,
     )
-    async def codehelp(self, ctx: commands.Context, user: discord.Member) -> None:
+    async def codehelp(self, ctx: commands.Context, user: discord.User) -> None:
         embed = EmbedBuilder(
             title="Code Formatting",
             description="Please format your code using the following syntax:\n\`\`\`python\n# Your code here\n\`\`\`\n\nThe code will be formatted as follows:\n```python\n# Your code here\n```\n\nIf you are using a language other than Python, replace `python` with the name of your language.\n\n- Please explain what is not working, and what you have attempted so far.\n- Always show your entire code, not just the part that is not working.\n- If you are getting an error, please show the entire error message.",
