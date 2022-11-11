@@ -1,3 +1,5 @@
+from typing import Optional
+
 from deepl import translate
 from discord import option
 from discord.ext import commands
@@ -34,7 +36,9 @@ LANGUAGES = [
 FORMALITY_TONES = ["Formal", "Informal"]
 
 
-async def translation(text, source_language, target_language, formality_tone=None) -> str:
+async def translation(
+    text: str, source_language: str, target_language: str, formality_tone: Optional[str] = None
+) -> str:
     if source_language not in LANGUAGES or target_language not in LANGUAGES:
         return "Invalid Language"
 
@@ -91,7 +95,7 @@ class Translation(commands.Cog):
         text: str,
         source_language: str,
         target_language: str,
-        formality_tone: str = None,
+        formality_tone: Optional[str] = None,
     ) -> None:
 
         try:
