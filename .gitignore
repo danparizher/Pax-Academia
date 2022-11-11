@@ -165,4 +165,5 @@ cython_debug/
 # PAX-custom rules
 log.txt
 alerts.db
+*.sqlit*
 .vscode/

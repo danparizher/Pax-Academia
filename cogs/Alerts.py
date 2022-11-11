@@ -10,7 +10,7 @@ from util.Logging import log
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
-    conn = sqlite3.connect("util/alerts.db")
+    conn = sqlite3.connect("util/database.sqlite")
     data = [
         keyword[0]
         for keyword in conn.cursor()
@@ -27,7 +27,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/alerts.db")
+        self.db = sqlite3.connect("util/database.sqlite")
         c = self.db.cursor()
         c.execute(
             "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
@@ -221,7 +221,7 @@ class Alerts(commands.Cog):
     async def view_db(self, ctx: commands.Context) -> None:
         await ctx.respond(
             content="Alerts Database",
-            file=discord.File("util/alerts.db"),
+            file=discord.File("util/database.sqlite"),
             ephemeral=True,
         )
 
