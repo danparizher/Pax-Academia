@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import TypeAlias, Optional
 from hashlib import sha256
 import urllib.request
+import aiohttp
 
 import discord
 from discord.commands import option
@@ -30,20 +31,22 @@ class MessageFingerprint:
 
         return sha256(data).digest()
 
-    def get_attachment_hashes(self) -> set[Hash]:
+    async def get_attachment_hashes(self) -> set[Hash]:
         if self._cached_attachment_hashes is None:
             self._cached_attachment_hashes = set()
 
-            for attachment_url in self.attachment_urls:
-                try:
-                    response = urllib.request.urlopen(attachment_url)
-                except:
-                    # it's possible that Discord may have deleted the attachment, and so we would get a 404
-                    # furthermore, it's not super important that this function is 100% perfectly accurate
-                    # so it's fine to just silently drop any errors
-                    continue
+            async with aiohttp.ClientSession() as session:
+                for attachment_url in self.attachment_urls:
+                    try:
+                        async with session.get(attachment_url) as resp:
+                            attachment_data = await resp.read()
+                    except:
+                        # it's possible that Discord may have deleted the attachment, and so we would get a 404
+                        # furthermore, it's not super important that this function is 100% perfectly accurate
+                        # so it's fine to just silently drop any errors
+                        continue
 
-                self._cached_attachment_hashes.add(self.hash(response.read()))
+                    self._cached_attachment_hashes.add(self.hash(attachment_data))
 
         return self._cached_attachment_hashes
 
