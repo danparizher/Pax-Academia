@@ -174,6 +174,7 @@ class Alerts(commands.Cog):
             if (
                 message.author.id == self.bot.user.id
                 or message.guild.id != 238956364729155585
+                or message.author.bot
             ):
                 return
 
@@ -190,6 +191,7 @@ class Alerts(commands.Cog):
                 "$",
                 "professional",
                 "service",
+                "fee",
             ]
             tutor_logs = self.bot.get_channel(1038985540147626024)
             # fmt: off
