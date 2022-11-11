@@ -51,7 +51,7 @@ class Staffrequirement(commands.Cog):
             title="User info",
             description=f"User {account.mention} created on {createdate} ({createdago} ago) joined on {joindate}.",
         ).build()
-        await ctx.respond(embed=embed, ephemeral=False)
+        await ctx.respond(embed=embed, ephemeral=True)
         
 
 
