@@ -9,11 +9,6 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-keeptime = 60000  # The time to keep sent messages before they are deleted in ms
-recent_msgs = []  # All messages sent in the server within the last <keeptime> seconds
-user_stats = {}  # The uIDs of all users who were found to be spamming or multiposting
-
-
 class Staffrequirement(commands.Cog):
     """Check key account statistics of a staff applicant's account."""
     def __init__(self, bot: commands.Bot) -> None:
