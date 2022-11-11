@@ -199,60 +199,6 @@ class Messagepolicy(commands.Cog):
                         user_stats.pop(0)
         
         await user_posts()
-                
-                
-                
-
-    #     async def tutor_alerts(self, message: discord.Message) -> None:
-    #         if (
-    #             message.author.id == self.bot.user.id
-    #             or message.guild.id != 238956364729155585
-    #         ):
-    #             return
-
-    #         keywords = [
-    #             "dm me",
-    #             "pay(ment)?",
-    #             "paypal",
-    #             "cashapp",
-    #             "cash app",
-    #             "venmo",
-    #             "dollar(s)?",
-    #             "tutor",
-    #             "money",
-    #             "price",
-    #             "$",
-    #             "professional",
-    #         ]
-    #         tutor_logs = self.bot.get_channel(1038985540147626024)
-    #         # fmt: off
-    #         if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
-    #         # fmt: on
-    #             embed = EmbedBuilder(
-    #                 title="Alert",
-    #                 description=f"{message.author.mention} mentioned `{temp[0]}` in {message.channel.mention}.",
-    #                 fields=[
-    #                     ("Message", message.content, False),
-    #                     (
-    #                         "Message Link",
-    #                         f"[Click to see message]({message.jump_url})",
-    #                         False,
-    #                     ),
-    #                 ],
-    #             ).build()
-    #             await tutor_logs.send(embed=embed)
-
-    #     await user_alerts()
-    #     await tutor_alerts(self, message)
-
-    # # @commands.slash_command(name="view-db", description="View the database.")
-    # # async def view_db(self, ctx: commands.Context) -> None:
-    # #     await ctx.respond(
-    # #         content="Alerts Database",
-    # #         file=discord.File("util/alerts.db"),
-    # #         ephemeral=True,
-    # #     )
-
 
 def setup(bot) -> None:
     """Add the cog to the bot."""
