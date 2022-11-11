@@ -1,4 +1,3 @@
-import asyncio
 import os
 
 import discord
@@ -30,10 +29,6 @@ def load() -> None:
         bot.load_extension(f"cogs.{cog}")
 
 
-def main() -> None:
+if __name__ == "__main__":
     load()
     bot.run(TOKEN)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
