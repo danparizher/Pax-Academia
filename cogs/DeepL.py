@@ -5,52 +5,45 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-
-def get_language_list() -> list[str]:
-    languages = [
-        "Bulgarian",
-        "Chinese",
-        "Czech",
-        "Danish",
-        "Dutch",
-        "English",
-        "Estonian",
-        "Finnish",
-        "French",
-        "German",
-        "Greek",
-        "Hungarian",
-        "Italian",
-        "Japanese",
-        "Latvian",
-        "Lithuanian",
-        "Polish",
-        "Portuguese",
-        "Romanian",
-        "Russian",
-        "Slovak",
-        "Slovenian",
-        "Spanish",
-        "Swedish",
-    ]
-    return languages
+LANGUAGES = [
+    "Bulgarian",
+    "Chinese",
+    "Czech",
+    "Danish",
+    "Dutch",
+    "English",
+    "Estonian",
+    "Finnish",
+    "French",
+    "German",
+    "Greek",
+    "Hungarian",
+    "Italian",
+    "Japanese",
+    "Latvian",
+    "Lithuanian",
+    "Polish",
+    "Portuguese",
+    "Romanian",
+    "Russian",
+    "Slovak",
+    "Slovenian",
+    "Spanish",
+    "Swedish",
+]
+FORMALITY_TONES = ["Formal", "Informal"]
 
 
-async def translation(
-    text, source_language, target_language, formality_tone=None
-) -> str:
-
-    formality = ["formal", "informal"]
-    languages = get_language_list()
-
-    if source_language not in languages or target_language not in languages:
+async def translation(text, source_language, target_language, formality_tone=None) -> str:
+    if source_language not in LANGUAGES or target_language not in LANGUAGES:
         return "Invalid Language"
 
     if formality_tone is not None:
-        formality_tone = formality_tone.lower()
+        if formality_tone not in FORMALITY_TONES:
+            return "Invalid Formality Tone"
 
-    if formality_tone is not None and formality_tone not in formality:
-        return "Invalid Formality"
+        # the DeepL API prefers that we use the lowercase version
+        formality_tone = formality_tone.lower()
 
     return translate(
         text=text,
@@ -76,21 +69,21 @@ class Translation(commands.Cog):
         str,
         description="The language of the text.",
         required=True,
-        choices=get_language_list(),
+        choices=LANGUAGES,
     )
     @option(
         "target_language",
         str,
         description="The language to translate the text to.",
         required=True,
-        choices=get_language_list(),
+        choices=LANGUAGES,
     )
     @option(
         "formality_tone",
         str,
         description="The formality of the translation.",
         required=False,
-        choices=["Formal", "Informal"],
+        choices=FORMALITY_TONES,
     )
     async def translate(
         self,
@@ -102,9 +95,7 @@ class Translation(commands.Cog):
     ) -> None:
 
         try:
-            translated_text = await translation(
-                text, source_language, target_language, formality_tone
-            )
+            translated_text = await translation(text, source_language, target_language, formality_tone)
         except Exception as e:
             embed = EmbedBuilder(
                 title="Error",
