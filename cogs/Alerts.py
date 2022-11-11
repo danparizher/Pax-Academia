@@ -168,7 +168,10 @@ class Alerts(commands.Cog):
                             ),
                         ],
                     ).build()
-                    await user.send(embed=embed)
+                    try:
+                        await user.send(embed=embed)
+                    except discord.Forbidden:
+                        pass
 
         async def tutor_alerts(self, message: discord.Message) -> None:
             if (
