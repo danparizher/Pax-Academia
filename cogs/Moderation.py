@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import TypeAlias, Optional
 from hashlib import sha256
-import urllib.request
 import aiohttp
 import re
+import time
 
 import discord
 from discord.commands import option
@@ -17,8 +17,11 @@ Hash: TypeAlias = bytes
 # this is a simple structure that stores important information
 @dataclass
 class MessageFingerprint:
+    created_at: float  # defaults to time.time() upon initialization
     author_id: discord.Snowflake
+    guild_id: discord.Snowflake
     channel_id: discord.Snowflake
+    jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
     cached_attachment_hashes: Optional[set[Hash]] = None  # populated on the first call to `get_attachment_hashes`
@@ -26,6 +29,10 @@ class MessageFingerprint:
     content_hash: Optional[
         Hash
     ] = None  # hash of the message body (with whitespace removed), or None if there is no message body
+
+    def __init__(self, **kwargs):
+        kwargs.setdefault("created_at", time.time())
+        super().__init__(**kwargs)
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -35,6 +42,7 @@ class MessageFingerprint:
         return cls(
             author_id=message.author.id,
             channel_id=message.channel.id,
+            jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
             content_hash=cls.hash(content_without_whitespace) if content_without_whitespace else None,
         )
@@ -77,6 +85,10 @@ class MessageFingerprint:
         if self.author_id != other.author_id:
             return False
 
+        # messages in differing guilds are not applicable to fingerprinting
+        if self.guild_id != other.guild_id:
+            return False
+
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
@@ -89,6 +101,10 @@ class MessageFingerprint:
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.fingerprints: list[
+            MessageFingerprint
+        ] = []  # stores all user messages sent in the last minute (recent messages near the end)
+        self.delete_old_fingerprints_task.start()
 
     # temporarily commented out because this is not functional
     """
@@ -120,6 +136,51 @@ class Moderation(commands.Cog):
         ).build()
         await ctx.respond(embed=embed)
     """
+
+    # Records a MessageFingerprint and returns a matching fingerprint, if there is one.
+    # If there is a matching fingerprint, it is safe to assume that the message is a multipost.
+    async def record_fingerprint(self, message: discord.Message) -> MessageFingerprint | None:
+        fingerprint = MessageFingerprint.build(message)
+
+        # check if any of the fingerprints match
+        matching_fingerprint = None
+        for other_fingerprint in self.fingerprints:
+            if fingerprint.matches(other_fingerprint):
+                matching_fingerprint = other_fingerprint
+                break
+
+        # this has to happen _after_ the `matching_fingerprint` loop because a fingerprint always matches itself
+        self.fingerprints.append(fingerprint)
+
+        return matching_fingerprint
+
+    # deletes recorded fingerprints after 60 seconds
+    @tasks.loop(seconds=3)
+    async def delete_old_fingerprints_task(self):
+        # new messages are always appended to the end of the list
+        # so we will only be deleting messages from the front of the list
+        # this algorithm finds the number of messages the delete, then deletes them in bulk
+        n_fingerprints_to_delete = 0
+        for fingerprint in self.fingerprints:
+            if time.time() - fingerprint.created_at > 60:
+                n_fingerprints_to_delete += 1
+            else:
+                break
+
+        del self.fingerprints[:n_fingerprints_to_delete]
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        # Bots are allowed to multipost - don't bother fingerprinting their messages
+        if not message.author.bot:
+            previous_message = await self.record_fingerprint(message)
+            if previous_message:
+                await message.delete()
+                await message.channel.send(
+                    f"{message.author.mention}\nPlease refrain from sending the same message in multiple channels.\nDetected multipost: {previous_message.jump_url}",
+                    delete_after=15,
+                )
+                return
 
 
 def setup(bot: commands.Bot) -> None:
