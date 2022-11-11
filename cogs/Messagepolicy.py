@@ -85,13 +85,13 @@ class Messagepolicy(commands.Cog):
                 shasums = []  # SHA-sums of the attachments of the message if applicable
                 if len(files) > 0:  # TODO: Check if this mitigates some errors which appeared with content hashing
                     for file in files:
-                        h = hashlib.sha512()
+                        h = hashlib.sha256()
                         while buf := file.read(h.block_size*1000):  # 128kB appear to be the sweetspot
                             h.update(buf)
                         shasums.append(h.hexdigest())
                 
                 content = message.content.lower()  # The text body of the message
-                content = hashlib.sha512(content.encode())  # Hash the text of the message
+                content = hashlib.sha256(content.encode())  # Hash the text of the message
                 entry = [content, shasums, message.author.id, message.channel.id, time.time(), message.id]
                 print("Cache entry:", entry)
                 multipost_cnt = 0
