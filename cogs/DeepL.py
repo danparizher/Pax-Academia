@@ -1,4 +1,6 @@
 from typing import Optional
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 from deepl import translate
 from discord import option
@@ -49,12 +51,21 @@ async def translation(
         # the DeepL API prefers that we use the lowercase version
         formality_tone = formality_tone.lower()
 
-    return translate(
-        text=text,
-        source_language=source_language,
-        target_language=target_language,
-        formality_tone=formality_tone,
-    )
+    # `deepl.transate` is not asynchronous, so we simply
+    # pass it off to another thread and asynchronously wait for it to be completed
+    with ThreadPoolExecutor() as executor:
+        thread = executor.submit(
+            translate,
+            text=text,
+            source_language=source_language,
+            target_language=target_language,
+            formality_tone=formality_tone,
+        )
+
+        while thread.running():
+            await asyncio.sleep(0.1)
+
+        return thread.result()
 
 
 class Translation(commands.Cog):
