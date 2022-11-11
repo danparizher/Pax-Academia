@@ -1,6 +1,6 @@
-from typing import Optional
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
+from typing import Optional
 
 import deepl
 from discord import option
@@ -38,7 +38,12 @@ LANGUAGES = [
 FORMALITY_TONES = ["Formal", "Informal"]
 
 
-async def translate(text: str, source_language: str, target_language: str, formality_tone: Optional[str] = None) -> str:
+async def translate(
+    text: str,
+    source_language: str,
+    target_language: str,
+    formality_tone: Optional[str] = None,
+) -> str:
     if source_language not in LANGUAGES or target_language not in LANGUAGES:
         return "Invalid Language"
 
@@ -108,7 +113,9 @@ class Translation(commands.Cog):
     ) -> None:
 
         try:
-            translated_text = await translate(text, source_language, target_language, formality_tone)
+            translated_text = await translate(
+                text, source_language, target_language, formality_tone
+            )
         except Exception as e:
             embed = EmbedBuilder(
                 title="Error",
