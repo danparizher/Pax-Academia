@@ -18,12 +18,12 @@ class Staffrequirement(commands.Cog):
     @commands.slash_command(
         name="check-requirements", description="Check if the account meets requirements for staff."
     )
-    @option(
-        name="user ID",
-        description="The uID of the account to check.",
-        #autocomplete=get_keywords,
-    )
-    async def add_alert(self, ctx: commands.Context, userid: str) -> None:
+    #@option(
+    #    name="user ID",
+    #    description="The uID of the account to check.",
+    #    #autocomplete=get_keywords,
+    #)
+    async def add_alert(self, ctx: commands.Context) -> None:
         """
         Allow a member of staff to check if a user meets basic criteria for becoming a staff member.
 
@@ -40,7 +40,7 @@ class Staffrequirement(commands.Cog):
             DESCRIPTION.
 
         """
-        account = client.get_user(userid)  # Get the user matching the userid
+        account = client.get_user(ctx.author.id)  # Get the user matching the userid
         createdate = account.created_at  # The date the account was created on
         createtimestamp = account.timestamp()  # The timestamp the account was created on
         createdago = (time.time()-createdatetimestamp)/86400  # Days the account was created ago
@@ -49,7 +49,7 @@ class Staffrequirement(commands.Cog):
         
         embed = EmbedBuilder(
             title="User info",
-            description=f"User {account.mention} created on {createdate} ({createdago} ago) joined on {joindate}.",
+            description=f"{ctx.author} made a query: User {account.mention} created on {createdate} ({createdago} ago) joined on {joindate}.",
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
         
