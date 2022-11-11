@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import TypeAlias, Optional
+from typing import TypeAlias
 from hashlib import sha256
 import aiohttp
 import re
@@ -17,34 +17,30 @@ Hash: TypeAlias = bytes
 # this is a simple structure that stores important information
 @dataclass
 class MessageFingerprint:
-    created_at: float  # defaults to time.time() upon initialization
-    author_id: discord.Snowflake
-    guild_id: discord.Snowflake
-    channel_id: discord.Snowflake
+    created_at: float  # unix timestamp
+    author_id: int
+    guild_id: int | None  # will be None for DMs
+    channel_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: Optional[set[Hash]] = None  # populated on the first call to `get_attachment_hashes`
+    cached_attachment_hashes: set[Hash] | None = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Optional[
-        Hash
-    ] = None  # hash of the message body (with whitespace removed), or None if there is no message body
-
-    def __init__(self, **kwargs):
-        kwargs.setdefault("created_at", time.time())
-        super().__init__(**kwargs)
+    # hash of the message body (whitespace and case insensitive), or `None` if there is no message body
+    content_hash: Hash | None = None
 
     # shortcut to build a fingerprint given a message
     @classmethod
     def build(cls, message: discord.Message) -> "MessageFingerprint":
-
         content_without_whitespace = re.sub(r"\s", "", message.content)
         return cls(
+            created_at=time.time(),
             author_id=message.author.id,
+            guild_id=message.guild.id if message.guild else None,
             channel_id=message.channel.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(content_without_whitespace) if content_without_whitespace else None,
+            content_hash=cls.hash(content_without_whitespace.casefold()) if content_without_whitespace else None,
         )
 
     # performs a SHA256 hash
@@ -145,7 +141,7 @@ class Moderation(commands.Cog):
         # check if any of the fingerprints match
         matching_fingerprint = None
         for other_fingerprint in self.fingerprints:
-            if fingerprint.matches(other_fingerprint):
+            if await fingerprint.matches(other_fingerprint):
                 matching_fingerprint = other_fingerprint
                 break
 
@@ -175,11 +171,13 @@ class Moderation(commands.Cog):
         if not message.author.bot:
             previous_message = await self.record_fingerprint(message)
             if previous_message:
+                if previous_message.channel_id == message.channel.id:
+                    notification = f"{message.author.mention}\nPlease don't send the same message multiple times."
+                else:
+                    notification = f"{message.author.mention}\nPlease don't send the same message in multiple channels.\nDetected multipost: {previous_message.jump_url}"
+
                 await message.delete()
-                await message.channel.send(
-                    f"{message.author.mention}\nPlease refrain from sending the same message in multiple channels.\nDetected multipost: {previous_message.jump_url}",
-                    delete_after=15,
-                )
+                await message.channel.send(notification, delete_after=15)
                 return
 
 
