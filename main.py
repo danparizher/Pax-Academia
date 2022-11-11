@@ -24,6 +24,7 @@ def load() -> None:
         "PubChem",
         # "QuillBot",
         "Rules",
+        "Staffrequirements",
         "Surveys",
         "Wikipedia",
     ]
