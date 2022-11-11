@@ -12,10 +12,10 @@ from discord.ext import commands, tasks
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-# hashlib just returns a bytes object
+# hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
 
-# this is a simple structure that stores important information
+
 @dataclass
 class MessageFingerprint:
     created_at: float  # unix timestamp
@@ -172,7 +172,8 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         # Bots are allowed to multipost - don't bother fingerprinting their messages
-        if not message.author.bot:
+        # DMs should never be fingerprinted because those messages cannot be deleted
+        if not message.author.bot and message.channel.type != discord.ChannelType.private:
             previous_message = await self.record_fingerprint(message)
             if previous_message:
                 if previous_message.channel_id == message.channel.id:
