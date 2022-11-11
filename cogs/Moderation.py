@@ -86,11 +86,12 @@ class MessageFingerprint:
         return len(matching_attachments) > 0
 
 
-# TODO: Incomplete/in testing. Do not add to cog list.
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
+    # temporarily commented out because this is not functional
+    """
     @commands.slash_command(name="mkick", description="Kicks multiple users from the server.")
     @commands.has_permissions(kick_members=True)
     async def mkick(
@@ -118,6 +119,7 @@ class Moderation(commands.Cog):
             description=f"Successfully kicked {len(users)} users.",
         ).build()
         await ctx.respond(embed=embed)
+    """
 
 
 def setup(bot: commands.Bot) -> None:
