@@ -15,7 +15,7 @@ user_stats = {}  # The uIDs of all users who were found to be spamming or multip
 
 
 class Staffrequirement(commands.Cog):
-    """Check messages for multiposts or reposts in the same channel."""
+    """Check key account statistics of a staff applicant's account."""
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
