@@ -11,8 +11,5 @@ call venv/Scripts/activate
 Rem install requirements
 pip install -r requirements.txt
 
-Rem install playwright
-playwright install
-
 Rem deactivate virtual environment
 deactivate
