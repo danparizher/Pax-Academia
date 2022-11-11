@@ -10,6 +10,7 @@ from discord.commands import option
 from discord.ext import commands, tasks
 
 from util.EmbedBuilder import EmbedBuilder
+from util.Logging import log
 
 # hashlib just returns a bytes object
 Hash: TypeAlias = bytes
@@ -63,10 +64,13 @@ class MessageFingerprint:
                     try:
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
-                    except:
+                    except Exception as e:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
-                        # so it's fine to just silently drop any errors
+                        # so it's fine to just log and ignore any errors
+                        log(
+                            f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}"
+                        )
                         continue
 
                     self.cached_attachment_hashes.add(self.hash(attachment_data))
