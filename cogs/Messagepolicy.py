@@ -28,7 +28,7 @@ class Messagepolicy(commands.Cog):
         description="The keeptime in milliseconds.",
         #autocomplete=get_keywords,
     )
-    async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
+    async def change_keeptime(self, ctx: commands.Context, keyword: str) -> None:
         """
         Allow a user to set the keeptime for messages in the cache.
 
@@ -64,69 +64,6 @@ class Messagepolicy(commands.Cog):
 
         log(f"Keeptime changed by {ctx.author} in {ctx.guild} from {old_keeptime}  to {keeptime}.")
 
-    # # Allows the user to remove an alert for a keyword.
-    # @commands.slash_command(
-    #     name="remove-alert",
-    #     description="Removes an alert for a keyword.",
-    # )
-    # @option(
-    #     name="keyword",
-    #     description="The keyword to remove.",
-    #     #autocomplete=get_keywords,
-    # )
-    # async def remove_alert(
-    #     self,
-    #     ctx: commands.Context,
-    #     keyword: str,
-    # ) -> None:
-
-    #     # Check if the keyword is in the database.
-    #     c = self.db.cursor()
-    #     c.execute(
-    #         "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
-    #         (keyword, ctx.author.id),
-    #     )
-    #     if not c.fetchone():
-    #         embed = EmbedBuilder(
-    #             title="Error",
-    #             description="This keyword is not in the database.",
-    #         ).build()
-    #         await ctx.respond(embed=embed, ephemeral=True)
-    #         return
-
-    #     # Remove the keyword from the database.
-    #     c.execute(
-    #         "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
-    #         (keyword, ctx.author.id),
-    #     )
-    #     self.db.commit()
-
-    #     embed = EmbedBuilder(
-    #         title="Success",
-    #         description=f"Removed alert for keyword `{keyword}`.",
-    #     ).build()
-    #     await ctx.respond(embed=embed, ephemeral=True)
-
-    #     log(f"Alert removed by {ctx.author} in {ctx.guild}.")
-
-    # @commands.slash_command(name="list-alerts", description="Lists all alerts.")
-    # async def list_alerts(self, ctx: commands.Context) -> None:
-    #     # Get all alerts from the database.
-    #     c = self.db.cursor()
-    #     c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
-    #     alerts = c.fetchall()
-
-    #     # Create a list of all alerts.
-    #     alert_list = ""
-    #     for alert in alerts:
-    #         alert_list += f"`{alert[0]}`\n"
-
-    #     # respond the list of alerts.
-    #     embed = EmbedBuilder(
-    #         title="Alerts",
-    #         description=alert_list,
-    #     ).build()
-    #     await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
