@@ -9,7 +9,7 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
-keeptime = 60000  # The time to keep sent messages before they are deleted in ms
+
 recent_msgs = []  # All messages sent in the server within the last <keeptime> seconds
 user_stats = {}  # The uIDs of all users who were found to be spamming or multiposting
 
@@ -18,6 +18,7 @@ class Messagepolicy(commands.Cog):
     """Check messages for multiposts or reposts in the same channel."""
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.keeptime = 60  # The time to keep sent messages before they are deleted in seconds
 
     # Allows the user to set the keeptime to a value other than the default
     @commands.slash_command(
@@ -25,7 +26,7 @@ class Messagepolicy(commands.Cog):
     )
     @option(
         name="keeptime",
-        description="The keeptime in milliseconds.",
+        description="The keeptime in seconds.",
         #autocomplete=get_keywords,
     )
     async def change_keeptime(self, ctx: commands.Context, keyword: str) -> None:
@@ -37,7 +38,7 @@ class Messagepolicy(commands.Cog):
         ctx : commands.Context
             DESCRIPTION.
         keyword : str
-            The keeptime in ms in string representation. Must be greater 0.
+            The keeptime in seconds in string representation. Must be greater 0.
 
         Returns
         -------
@@ -45,9 +46,9 @@ class Messagepolicy(commands.Cog):
             DESCRIPTION.
 
         """
-        old_keeptime = keeptime
+        old_keeptime = self.keeptime
         try:
-            keeptime = int(keyword)
+            self.keeptime = int(keyword)
         except:
             embed = EmbedBuilder(
                 title="Error",
@@ -127,12 +128,12 @@ class Messagepolicy(commands.Cog):
                 # Omit old entries
                 for entry in recent_msgs:
                     # The oldest message is always at index 0
-                    if (time.time() - entry[4]) >= keeptime:
+                    if (time.time() - entry[4]) >= self.keeptime:
                         recent_msgs.pop(0)
                         
                 for entry in user_stats:
                     # The oldest message is always at index 0
-                    if (time.time() - entry[2]) >= keeptime:
+                    if (time.time() - entry[2]) >= self.keeptime:
                         user_stats.pop(0)
         
         await user_posts()
