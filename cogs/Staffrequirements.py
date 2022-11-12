@@ -1,7 +1,7 @@
 """Allow to quickly check a user account for create and join time."""
 # import re
-import hashlib  # Used for hashing images
 import time
+import datetime
 
 import discord
 from discord.commands import option
@@ -45,21 +45,19 @@ class Staffrequirement(commands.Cog):
 
         """
         account = ctx.author
-        createdate = account.created_at  # The date the account was created on
-        createtimestamp = (
-            account.created_at.timestamp()
-        )  # The timestamp the account was created on
-        createdago = (
-            time.time() - createtimestamp
-        ) / 86400  # Days the account was created ago
-        joindate = account.joined_at  # Joindate of the account
-        log(
-            f"User {account.mention} created on {createdate} ({createdago} ago) joined on {joindate}."
-        )
+        #createdate = account.created_at  # The date the account was created on
+        createtimestamp = (account.created_at.timestamp())  # The timestamp the account was created on
+        
+        timediff = (time.time() - createtimestamp)
+        created_years_ago = timediff // 31536000  # Years the account was created ago
+        created_days_ago = (timediff - 31536000*created_years_ago) / 86400
+        
+        joindate = account.joined_at.timestamp()  # Joindate of the account
+        log(f"{ctx.author} made a query: User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} years, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}.")
 
         embed = EmbedBuilder(
             title="User info",
-            description=f"{ctx.author} made a query: User {account.mention} created on {createdate} ({createdago} ago) joined on {joindate}.",
+            description=f"User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} years, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}.",
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
