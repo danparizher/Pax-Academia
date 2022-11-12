@@ -55,6 +55,9 @@ class Staffrequirement(commands.Cog):
         created_days_ago = int((timediff - 31536000 * created_years_ago) / 86400)
 
         joindate = account.joined_at.timestamp()  # Joindate of the account
+        timediff = time.time() - joindate
+        joined_days_ago = int(timediff / 86400)
+        
         log(
             f"{ctx.author} made a query: User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} years, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}."
         )
@@ -64,6 +67,19 @@ class Staffrequirement(commands.Cog):
             description=f"User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} year{'s' if created_years_ago != 1 else ''}, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}.",
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
+        
+        if (created_years_ago >= 1) and (joined_days_ago >= 30) :
+            embed = EmbedBuilder(
+                title="Application Link",
+                description=f"Congratulations, you meet the basic requirements in order to apply for staff. Please visit https://goo.gl/forms/Z3mVQwLdiNZcKHx52 for the next step. Please note that this is not a guarantee that you will be accepted."
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+        else:
+            embed = EmbedBuilder(
+                title="Missing Requirements",
+                description=f"Unfortunately your account does not meet the basic requirements to allow you to apply for staff. You need to be a server member for at least 30 days and your account must be at least one year old."
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
 
 
 def setup(bot) -> None:
