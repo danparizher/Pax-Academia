@@ -203,7 +203,7 @@ class Moderation(commands.Cog):
             fields=[("Original Message", f"[link]({matching_previous_message.jump_url})", True)],
         ).build()
 
-        await message.reply(embed=embed, delete_after=15)
+        await message.reply(embed=embed)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
