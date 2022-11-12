@@ -10,6 +10,13 @@ from util.Logging import log
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
+    """
+    It gets all the keywords from the database for the user who is currently using the command
+
+    :param ctx: discord.AutocompleteContext
+    :type ctx: discord.AutocompleteContext
+    :return: A list of keywords that the user has set up for alerts.
+    """
     conn = sqlite3.connect("util/database.sqlite")
     data = [
         keyword[0]
@@ -39,7 +46,16 @@ class Alerts(commands.Cog):
         name="add-alert", description="Adds an alert for a keyword."
     )
     async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
-        # Check if the keyword is already in the database.
+        """
+        It checks if the keyword is already in the database, if it is, it sends an error message, if it
+        isn't, it adds the keyword to the database and sends a success message.
+
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        :param keyword: str
+        :type keyword: str
+        :return: The return type is None.
+        """
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
@@ -53,7 +69,6 @@ class Alerts(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
-        # Add the keyword to the database.
         c.execute(
             "INSERT INTO alerts VALUES (?, ?, ?)",
             (keyword, ctx.author.id, ctx.author.name),
@@ -68,7 +83,6 @@ class Alerts(commands.Cog):
 
         log(f"Alert added by {ctx.author} in {ctx.guild}.")
 
-    # Allows the user to remove an alert for a keyword.
     @commands.slash_command(
         name="remove-alert",
         description="Removes an alert for a keyword.",
@@ -78,13 +92,16 @@ class Alerts(commands.Cog):
         description="The keyword to remove.",
         autocomplete=get_keywords,
     )
-    async def remove_alert(
-        self,
-        ctx: commands.Context,
-        keyword: str,
-    ) -> None:
-
-        # Check if the keyword is in the database.
+    async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
+        """
+        It removes an alert from the database.
+        
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        :param keyword: str
+        :type keyword: str
+        :return: The return value is a list of tuples.
+        """
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
@@ -98,7 +115,6 @@ class Alerts(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
-        # Remove the keyword from the database.
         c.execute(
             "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
             (keyword, ctx.author.id),
@@ -115,17 +131,20 @@ class Alerts(commands.Cog):
 
     @commands.slash_command(name="list-alerts", description="Lists all alerts.")
     async def list_alerts(self, ctx: commands.Context) -> None:
-        # Get all alerts from the database.
+        """
+        It gets all alerts from the database and responds with a list of them
+        
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        """
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
-        # Create a list of all alerts.
         alert_list = ""
         for alert in alerts:
             alert_list += f"`{alert[0]}`\n"
 
-        # respond the list of alerts.
         embed = EmbedBuilder(
             title="Alerts",
             description=alert_list,
@@ -135,6 +154,10 @@ class Alerts(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         async def user_alerts() -> None:
+            """
+            If a message contains a keyword, send a DM to the user who added the keyword
+            :return: The message.content is being returned.
+            """
             if (
                 message.author.bot
                 or message.channel not in message.author.guild.channels
@@ -174,6 +197,14 @@ class Alerts(commands.Cog):
                         pass
 
         async def tutor_alerts(self, message: discord.Message) -> None:
+            """
+            It checks if a message contains any of the keywords in the list, and if it does, it sends an embed
+            to a channel
+            
+            :param message: discord.Message
+            :type message: discord.Message
+            :return: The return value is a list of strings.
+            """
             if (
                 message.author.id == self.bot.user.id
                 or message.guild.id != 238956364729155585
@@ -219,6 +250,12 @@ class Alerts(commands.Cog):
 
     @commands.slash_command(name="view-db", description="View the database.")
     async def view_db(self, ctx: commands.Context) -> None:
+        """
+        It sends a file to the user who called the command
+        
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        """
         await ctx.respond(
             content="Alerts Database",
             file=discord.File("util/database.sqlite"),

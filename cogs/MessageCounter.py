@@ -19,6 +19,12 @@ class MessageCounter(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
+        """
+        It adds a user to the database if they don't exist, and updates their message count if they do
+
+        :param message: The message object that triggered the event
+        :return: The amount of messages a user has sent.
+        """
         if message.author.bot:
             return
 
