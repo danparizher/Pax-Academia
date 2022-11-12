@@ -17,6 +17,7 @@ def load() -> None:
         "DeepL",
         "Information",
         "MerriamWebster",
+        "MessageCounter",
         "Misc",
         # "Moderation",
         "PubChem",
