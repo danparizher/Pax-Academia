@@ -23,6 +23,7 @@ def load() -> None:
         "Rules",
         "Surveys",
         "Wikipedia",
+        "MessageCounter"
     ]
     for cog in cogs:
         bot.load_extension(f"cogs.{cog}")
