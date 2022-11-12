@@ -1,9 +1,8 @@
-# discord imports
+import sqlite3
+
 import discord
 from discord.ext import commands
 
-# other imports
-import sqlite3
 
 class MessageCounter(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -22,8 +21,10 @@ class MessageCounter(commands.Cog):
     async def on_message(self, message) -> None:
         if message.author.bot:
             return
-        
-        amount = self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (message.author.id,)).fetchone()
+
+        amount = self.cursor.execute(
+            "SELECT amount FROM messagecount WHERE uid = ?", (message.author.id,)
+        ).fetchone()
         if amount is None:
             self.add_user(message.author.id)
         else:
@@ -38,6 +39,7 @@ class MessageCounter(commands.Cog):
             "UPDATE messagecount SET amount = ? WHERE uid = ?", (amount, uid)
         )
         self.db.commit()
+
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(MessageCounter(bot))

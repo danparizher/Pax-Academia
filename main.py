@@ -17,13 +17,13 @@ def load() -> None:
         "DeepL",
         "Information",
         "MerriamWebster",
+        "MessageCounter",
         "Misc",
         # "Moderation",
         "PubChem",
         "Rules",
         "Surveys",
         "Wikipedia",
-        "MessageCounter"
     ]
     for cog in cogs:
         bot.load_extension(f"cogs.{cog}")
