@@ -20,7 +20,6 @@ def load() -> None:
         "MerriamWebster",
         "Misc",
         # "Moderation",
-        "Messagepolicy",
         "PubChem",
         # "QuillBot",
         "Rules",
