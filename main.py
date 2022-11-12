@@ -22,6 +22,7 @@ def load() -> None:
         # "Moderation",
         "PubChem",
         "Rules",
+        "StaffRequirements",
         "Surveys",
         "Wikipedia",
     ]
