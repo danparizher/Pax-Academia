@@ -25,7 +25,7 @@ class Surveys(commands.Cog):
         If the message is not in the "surveys" channel, the author does not have the "Staff" role, and
         the author is not a bot, then check if the message contains a survey link. If it does, send a
         message to the author telling them to post survey links in the "surveys" channel.
-        
+
         :param message: The message object that triggered the event
         :type message: discord.Message
         """
