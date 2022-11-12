@@ -1,19 +1,12 @@
-"""Allow to quickly check a user account for create and join time."""
-# import re
-import time
 from datetime import datetime
 
-import discord
-from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 
-class Staffrequirement(commands.Cog):
-    """Check key account statistics of a staff applicant's account."""
-
+class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
@@ -22,68 +15,61 @@ class Staffrequirement(commands.Cog):
         name="check-requirements",
         description="Check if the account meets requirements for staff.",
     )
-    # @option(
-    #    name="user ID",
-    #    description="The uID of the account to check.",
-    #    #autocomplete=get_keywords,
-    # )
-    async def add_alert(self, ctx: commands.Context) -> None:
+    async def checkreqs(self, ctx: commands.Context) -> None:
         """
-        Allow a member of staff to check if a user meets basic criteria for becoming a staff member.
-
-        Parameters
-        ----------
-        ctx : commands.Context
-            DESCRIPTION.
-        keyword : str
-            The uID to be checked.
-
-        Returns
-        -------
-        None
-            DESCRIPTION.
-
+        It checks if the user meets the requirements to apply for staff
+        
+        :param ctx: commands.Context
+        :type ctx: commands.Context
         """
         account = ctx.author
-        # createdate = account.created_at  # The date the account was created on
-        createtimestamp = (
-            account.created_at.timestamp()
-        )  # The timestamp the account was created on
+        created_years_ago = (
+            datetime.now(tz=account.created_at.tzinfo) - account.created_at
+        ).days // 365
+        created_days_ago = (
+            datetime.now(tz=account.created_at.tzinfo) - account.created_at
+        ).days % 365
 
-        timediff = time.time() - createtimestamp
-        created_years_ago = int(
-            timediff // 31536000
-        )  # Years the account was created ago
-        created_days_ago = int((timediff - 31536000 * created_years_ago) / 86400)
-
-        joindate = account.joined_at.timestamp()  # Joindate of the account
-        timediff = time.time() - joindate
-        joined_days_ago = int(timediff / 86400)
-
-        log(
-            f"{ctx.author} made a query: User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} years, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}."
-        )
+        joined_years_ago = (
+            datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
+        ).days // 365
+        joined_days_ago = (
+            datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
+        ).days % 365
 
         embed = EmbedBuilder(
             title="User info",
-            description=f"User {account.mention} created on {datetime.fromtimestamp(createtimestamp).strftime('%A, %B %d, %Y %I:%M:%S')} ({created_years_ago} year{'s' if created_years_ago != 1 else ''}, {created_days_ago} days ago) joined on {datetime.fromtimestamp(joindate).strftime('%A, %B %d, %Y %I:%M:%S')}.",
+            description=f"{account.mention} was created on {account.created_at.strftime('%B %d, %Y')} and joined on {account.joined_at.strftime('%B %d, %Y')}.",
+            fields=[
+                [
+                    "Account Age",
+                    f"**{created_years_ago}** year{'s' if created_years_ago != 1 else ''}, **{created_days_ago}** day{'s' if created_days_ago != 1 else ''}",
+                    True,
+                ],
+                [
+                    "Joined",
+                    f"**{joined_years_ago}** year{'s' if joined_years_ago != 1 else ''}, **{joined_days_ago}** day{'s' if joined_days_ago != 1 else ''} ago",
+                    True,
+                ],
+            ],
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
         if (created_years_ago >= 1) and (joined_days_ago >= 30):
             embed = EmbedBuilder(
                 title="Application Link",
-                description=f"Congratulations, you meet the basic requirements in order to apply for staff. Please visit https://goo.gl/forms/Z3mVQwLdiNZcKHx52 for the next step. Please note that this is not a guarantee that you will be accepted.",
+                description=f"Congratulations, {account.mention}! You meet the basic requirements for staff. Please fill out the application form [here](https://goo.gl/forms/Z3mVQwLdiNZcKHx52).",
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
         else:
             embed = EmbedBuilder(
                 title="Missing Requirements",
-                description=f"Unfortunately your account does not meet the basic requirements to allow you to apply for staff. You need to be a server member for at least 30 days and your account must be at least one year old.",
+                description=f"Unfortunately, you do not meet the basic requirements in order to apply for staff. Your account must be at least 1 year old and you must have been a member of the server for at least 30 days.",
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
 
+        log(f"User {account} checked their requirements in {ctx.guild}.")
+
 
 def setup(bot) -> None:
-    """Add the cog to the bot."""
-    bot.add_cog(Staffrequirement(bot))
+    bot.add_cog(StaffRequirement(bot))
