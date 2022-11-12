@@ -169,21 +169,45 @@ class Moderation(commands.Cog):
 
         del self.fingerprints[:n_fingerprints_to_delete]
 
+    # this function should be called after every on_message
+    # it will detect multiposts and reply with a warning
+    # A message is a "multipost" if it meets these criteria:
+    #   - Author is not a bot
+    #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
+    #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
+    async def check_multipost(self, message: discord.Message) -> None:
+        # author not a bot
+        if message.author.bot:
+            return
+
+        # textchannel in category ending with "HELP"
+        if not isinstance(message.channel, discord.TextChannel):
+            return
+        if not message.channel.category or message.channel.category.name.split()[-1].lower() != "help":
+            return
+
+        # matching fingerprint
+        matching_previous_message = await self.record_fingerprint(message)
+        if not matching_previous_message:
+            return
+
+        # all criteria met - a multipost has been detected!
+        # reply with a warning embed
+        if matching_previous_message.channel_id == message.channel.id:
+            description = "Please don't send the same message multiple times."
+        else:
+            description = "Please don't send the same message in multiple channels."
+        embed = EmbedBuilder(
+            title="Multi-Post Warning",
+            description=description,
+            fields=[("Original Message", f"[link]({matching_previous_message.jump_url})", True)],
+        ).build()
+
+        await message.reply(embed=embed, delete_after=15)
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
-        # Bots are allowed to multipost - don't bother fingerprinting their messages
-        # DMs should never be fingerprinted because those messages cannot be deleted
-        if not message.author.bot and message.channel.type != discord.ChannelType.private:
-            previous_message = await self.record_fingerprint(message)
-            if previous_message:
-                if previous_message.channel_id == message.channel.id:
-                    notification = f"{message.author.mention}\nPlease don't send the same message multiple times."
-                else:
-                    notification = f"{message.author.mention}\nPlease don't send the same message in multiple channels.\nDetected multipost: {previous_message.jump_url}"
-
-                await message.delete()
-                await message.channel.send(notification, delete_after=15)
-                return
+        await self.check_multipost(message)
 
 
 def setup(bot: commands.Bot) -> None:
