@@ -209,6 +209,7 @@ class Alerts(commands.Cog):
                 message.author.id == self.bot.user.id
                 or message.guild.id != 238956364729155585
                 or message.author.bot
+                or message.author.guild.get_role(276969339901444096)
             ):
                 return
 
