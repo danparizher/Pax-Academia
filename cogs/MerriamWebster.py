@@ -8,6 +8,13 @@ from util.Logging import log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
+    """
+    It takes a word as a string, and returns a BeautifulSoup object of the word's Merriam-Webster page
+
+    :param word: str
+    :type word: str
+    :return: A BeautifulSoup object.
+    """
     url = f"https://www.merriam-webster.com/dictionary/{word}"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -16,6 +23,14 @@ async def request(word: str) -> bs4.BeautifulSoup:
 
 
 async def spellcheck(word: str) -> str:
+    """
+    It takes a word as an argument, makes a request to the website, parses the response, and returns the
+    spelling suggestions
+
+    :param word: str - The word to be checked
+    :type word: str
+    :return: The return value is a string.
+    """
     try:
         soup = await request(word.lower())
         spelling = soup.find("p", {"class": "spelling-suggestions"}).text
@@ -25,6 +40,14 @@ async def spellcheck(word: str) -> str:
 
 
 async def get_word_info(word: str) -> dict:
+    """
+    It takes a word as an argument, and returns a dictionary containing the word's definition, phonetic,
+    synonyms, antonyms, usage, and etymology.
+
+    :param word: str - The word you want to get the information of
+    :type word: str
+    :return: A dictionary with the word, definition, phonetic, synonyms, antonyms, usage, and etymology.
+    """
     word_data = {}
     soup = await request(word.lower())
     word_data["word"] = word
@@ -83,6 +106,15 @@ class Dictionary(commands.Cog):
     @commands.slash_command(name="define", description="Defines a word.")
     @option("word", str, description="The word to define.", required=True)
     async def define(self, ctx: commands.Context, word: str) -> None:
+        """
+        It takes a word as an argument, and returns the definition of that word
+
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        :param word: str
+        :type word: str
+        :return: The word_data variable is being returned.
+        """
         await ctx.defer()
         if " " in word:
             embed = EmbedBuilder(

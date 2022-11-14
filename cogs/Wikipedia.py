@@ -5,7 +5,14 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 
-async def get_wiki(query):
+async def get_wiki(query) -> dict[str, str]:
+    """
+    It takes a query, gets the first page from Wikipedia, and returns a dictionary with the title,
+    summary, url, and image of the page
+    
+    :param query: The query to search for
+    :return: A dictionary with the title, summary, url, and image of the wikipedia page.
+    """
     page = wikipedia.page(query, auto_suggest=False)
     return {
         "title": page.title,
@@ -21,6 +28,14 @@ class Wikipedia(commands.Cog):
 
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
     async def wiki(self, ctx: commands.Context, query: str) -> None:
+        """
+        It searches Wikipedia for a query and returns the first result
+        
+        :param ctx: commands.Context
+        :type ctx: commands.Context
+        :param query: str
+        :type query: str
+        """
         try:
             page = await get_wiki(query)
             embed = EmbedBuilder(
