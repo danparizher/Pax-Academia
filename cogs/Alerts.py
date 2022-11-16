@@ -9,13 +9,13 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 
-def get_keywords(ctx: discord.AutocompleteContext) -> list:
+def get_user_keywords(ctx: discord.AutocompleteContext) -> list:
     conn = sqlite3.connect("util/alerts.db")
     data = [
         keyword[0]
         for keyword in conn.cursor()
         .execute(
-            "SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",
+            "SELECT keyword FROM user_alerts WHERE user_id = ? AND author_name = ?",
             (ctx.interaction.user.id, ctx.interaction.user.name),
         )
         .fetchall()
@@ -23,6 +23,18 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
     conn.close()
     return data
 
+def get_tutor_keywords() -> list:
+    conn = sqlite3.connect("util/alerts.db")
+    data = [
+        keyword[0]
+        for keyword in conn.cursor()
+        .execute(
+            "SELECT keyword FROM tutor_alerts",
+        )
+        .fetchall()
+    ]
+    conn.close()
+    return data
 
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -30,7 +42,10 @@ class Alerts(commands.Cog):
         self.db = sqlite3.connect("util/alerts.db")
         c = self.db.cursor()
         c.execute(
-            "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
+            "CREATE TABLE IF NOT EXISTS user_alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
+        )
+        c.execute(
+            "CREATE TABLE IF NOT EXISTS tutor_alerts (keyword TEXT)"
         )
         self.db.commit()
 
@@ -38,11 +53,11 @@ class Alerts(commands.Cog):
     @commands.slash_command(
         name="add-alert", description="Adds an alert for a keyword."
     )
-    async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
+    async def add_user_alert(self, ctx: commands.Context, keyword: str) -> None:
         # Check if the keyword is already in the database.
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            "SELECT * FROM user_alerts WHERE keyword = ? AND user_id = ?",
             (keyword, ctx.author.id),
         )
         if c.fetchone():
@@ -76,18 +91,14 @@ class Alerts(commands.Cog):
     @option(
         name="keyword",
         description="The keyword to remove.",
-        autocomplete=get_keywords,
+        autocomplete=get_user_keywords,
     )
-    async def remove_alert(
-        self,
-        ctx: commands.Context,
-        keyword: str,
-    ) -> None:
+    async def remove_user_alert(self, ctx: commands.Context, keyword: str) -> None:
 
         # Check if the keyword is in the database.
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            "SELECT * FROM user_alerts WHERE keyword = ? AND user_id = ?",
             (keyword, ctx.author.id),
         )
         if not c.fetchone():
@@ -100,7 +111,7 @@ class Alerts(commands.Cog):
 
         # Remove the keyword from the database.
         c.execute(
-            "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
+            "DELETE FROM user_alerts WHERE keyword = ? AND user_id = ?",
             (keyword, ctx.author.id),
         )
         self.db.commit()
@@ -114,10 +125,10 @@ class Alerts(commands.Cog):
         log(f"Alert removed by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(name="list-alerts", description="Lists all alerts.")
-    async def list_alerts(self, ctx: commands.Context) -> None:
+    async def list_user_alerts(self, ctx: commands.Context) -> None:
         # Get all alerts from the database.
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
+        c.execute("SELECT * FROM user_alerts WHERE user_id = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
         # Create a list of all alerts.
@@ -131,7 +142,9 @@ class Alerts(commands.Cog):
             description=alert_list,
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
-###############################################################################      
+
+###########################################################################################
+
     # Allows the user to add a keyword to scan for    
     @commands.slash_command(
         name="add-tutor-alert", description="Add a word to be scanned for."
@@ -140,8 +153,8 @@ class Alerts(commands.Cog):
         # Check if the keyword is already in the database.
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM tutor_alerts",
-            (keyword),
+            "SELECT * FROM tutor_alerts WHERE keyword = ?",
+            (keyword,),
         )
         if c.fetchone():
             embed = EmbedBuilder(
@@ -154,7 +167,7 @@ class Alerts(commands.Cog):
         # Add the keyword to the database.
         c.execute(
             "INSERT INTO tutor_alerts VALUES (?)",
-            (keyword),
+            (keyword,),
         )
         self.db.commit()
 
@@ -166,7 +179,7 @@ class Alerts(commands.Cog):
 
         log(f"Alert added by {ctx.author} in {ctx.guild}.")
 
-    # Allows the user to remove an alert for a keyword.
+    # Allows any staff member to remove a keyword to scan for
     @commands.slash_command(
         name="remove-tutor-alert",
         description="Remove a keyword to be scanned for.",
@@ -174,19 +187,15 @@ class Alerts(commands.Cog):
     @option(
         name="keyword",
         description="The keyword to remove.",
-        autocomplete=get_keywords,
+        autocomplete=get_tutor_keywords,
     )
-    async def remove_alert(
-        self,
-        ctx: commands.Context,
-        keyword: str,
-    ) -> None:
+    async def remove_tutor_alert(self, ctx: commands.Context, keyword: str) -> None:
 
         # Check if the keyword is in the database.
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM tutor_alerts WHERE keyword = ?",
-            (keyword),
+            (keyword,),
         )
         if not c.fetchone():
             embed = EmbedBuilder(
@@ -198,7 +207,7 @@ class Alerts(commands.Cog):
 
         # Remove the keyword from the database.
         c.execute(
-            "DELETE FROM alerts WHERE keyword = ?",
+            "DELETE FROM tutor_alerts WHERE keyword = ?",
             (keyword),
         )
         self.db.commit()
@@ -212,7 +221,7 @@ class Alerts(commands.Cog):
         log(f"Alert removed by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(name="list-tutor-alerts", description="Lists all Tutor alert words.")
-    async def list_alerts(self, ctx: commands.Context) -> None:
+    async def list_user_alerts(self, ctx: commands.Context) -> None:
         # Get all alerts from the database.
         c = self.db.cursor()
         c.execute("SELECT * FROM tutor_alerts")
@@ -230,6 +239,8 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
+###########################################################################################
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         async def user_alerts() -> None:
@@ -243,7 +254,7 @@ class Alerts(commands.Cog):
 
             # Ignore messages that do not contain a keyword.
             c = self.db.cursor()
-            c.execute("SELECT * FROM alerts")
+            c.execute("SELECT * FROM user_alerts")
             keywords = c.fetchall()
             if not any(
                 re.search(keyword[0], message.content, re.IGNORECASE)
