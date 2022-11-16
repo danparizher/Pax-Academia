@@ -131,6 +131,104 @@ class Alerts(commands.Cog):
             description=alert_list,
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
+###############################################################################      
+    # Allows the user to add a keyword to scan for    
+    @commands.slash_command(
+        name="add-tutor-alert", description="Add a word to be scanned for."
+    )
+    async def add_tutor_alert(self, ctx: commands.Context, keyword: str) -> None:
+        # Check if the keyword is already in the database.
+        c = self.db.cursor()
+        c.execute(
+            "SELECT * FROM tutor_alerts",
+            (keyword),
+        )
+        if c.fetchone():
+            embed = EmbedBuilder(
+                title="Error",
+                description="This keyword is already in the database.",
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        # Add the keyword to the database.
+        c.execute(
+            "INSERT INTO tutor_alerts VALUES (?)",
+            (keyword),
+        )
+        self.db.commit()
+
+        embed = EmbedBuilder(
+            title="Success",
+            description=f"Added tutor alert for keyword `{keyword}`.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        log(f"Alert added by {ctx.author} in {ctx.guild}.")
+
+    # Allows the user to remove an alert for a keyword.
+    @commands.slash_command(
+        name="remove-tutor-alert",
+        description="Remove a keyword to be scanned for.",
+    )
+    @option(
+        name="keyword",
+        description="The keyword to remove.",
+        autocomplete=get_keywords,
+    )
+    async def remove_alert(
+        self,
+        ctx: commands.Context,
+        keyword: str,
+    ) -> None:
+
+        # Check if the keyword is in the database.
+        c = self.db.cursor()
+        c.execute(
+            "SELECT * FROM tutor_alerts WHERE keyword = ?",
+            (keyword),
+        )
+        if not c.fetchone():
+            embed = EmbedBuilder(
+                title="Error",
+                description="This keyword is not in the database.",
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        # Remove the keyword from the database.
+        c.execute(
+            "DELETE FROM alerts WHERE keyword = ?",
+            (keyword),
+        )
+        self.db.commit()
+
+        embed = EmbedBuilder(
+            title="Success",
+            description=f"Removed alert for keyword `{keyword}`.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        log(f"Alert removed by {ctx.author} in {ctx.guild}.")
+
+    @commands.slash_command(name="list-tutor-alerts", description="Lists all Tutor alert words.")
+    async def list_alerts(self, ctx: commands.Context) -> None:
+        # Get all alerts from the database.
+        c = self.db.cursor()
+        c.execute("SELECT * FROM tutor_alerts")
+        alerts = c.fetchall()
+
+        # Create a list of all alerts.
+        alert_list = ""
+        for alert in alerts:
+            alert_list += f"`{alert[0]}`\n"
+
+        # respond the list of alerts.
+        embed = EmbedBuilder(
+            title="Alerts",
+            description=alert_list,
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -139,6 +237,7 @@ class Alerts(commands.Cog):
                 message.author.bot
                 or message.channel not in message.author.guild.channels
                 or not message.author.guild.get_member(self.bot.user.id)
+                or message.author.guild.get_role(276969339901444096)
             ):
                 return
 
@@ -174,23 +273,13 @@ class Alerts(commands.Cog):
             if (
                 message.author.id == self.bot.user.id
                 or message.guild.id != 238956364729155585
+                or message.author.guild
             ):
                 return
 
-            keywords = [
-                "dm me",
-                "pay",
-                "paypal",
-                "cash",
-                "venmo",
-                "dollar",
-                "tutor",
-                "money",
-                "price",
-                "$",
-                "professional",
-                "service",
-            ]
+            c = self.db.cursor()
+            c.execute("SELECT * FROM tutor_alerts")
+            keywords = c.fetchall()
             tutor_logs = self.bot.get_channel(1038985540147626024)
             # fmt: off
             if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
