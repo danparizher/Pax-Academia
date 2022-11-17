@@ -15,11 +15,11 @@ async def request(word: str) -> bs4.BeautifulSoup:
     :type word: str
     :return: A BeautifulSoup object.
     """
-    url = f"https://www.merriam-webster.com/dictionary/{word}"
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            soup = bs4.BeautifulSoup(await response.text(), "html.parser")
-    return soup
+        async with session.get(
+            f"https://www.merriam-webster.com/dictionary/{word}"
+        ) as response:
+            return bs4.BeautifulSoup(await response.text(), "html.parser")
 
 
 async def spellcheck(word: str) -> str:
