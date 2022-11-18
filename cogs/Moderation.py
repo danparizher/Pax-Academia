@@ -53,7 +53,7 @@ class MessageFingerprint:
 
     # Filters message content such that it is appropriate for fingerprinting, according to these rules:
     # - Makes the string case-insensitive (via str.casefold)
-    # - Removes whitespace and punctuation
+    # - Removes whitespace, punctuation, and digits
     # - Returns `None` if the resulting string is less than 15 characters
     @staticmethod
     def filter_content(content: str) -> str | None:
@@ -61,7 +61,12 @@ class MessageFingerprint:
 
         # remove all punctuation and spacing
         content = content.translate(
-            str.maketrans({unwanted_character: "" for unwanted_character in (string.whitespace + string.punctuation)})
+            str.maketrans(
+                {
+                    unwanted_character: ""
+                    for unwanted_character in (string.whitespace + string.punctuation + string.digits)
+                }
+            )
         )
 
         if len(content) < 15:
