@@ -183,7 +183,7 @@ class Moderation(commands.Cog):
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
             return
-        if not message.channel.category or message.channel.category.name.lower().endswith("help"):
+        if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
             return
 
         # matching fingerprint
