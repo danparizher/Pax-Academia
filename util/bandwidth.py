@@ -54,7 +54,7 @@ def summary(after: datetime) -> dict[str, dict[str, int | float]]:
 
 # Pretty print bandwidth information after a certain data (humans should manually invoke this function!)
 def print_summary(after: datetime) -> None:
-    print(f"Bandwidth Summary (Starting {after.strftime('%A %b %d %H:%M')})")
+    print(f"Bandwidth Summary (from {after.strftime('%A %b %d %H:%M')} to now)")
     for category, info in summary(after).items():
         print(f"* Within the {category!r} category")
         print(f"    Recorded Usages: {info['usages']}")
