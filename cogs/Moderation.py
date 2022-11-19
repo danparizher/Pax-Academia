@@ -2,11 +2,10 @@ from dataclasses import dataclass
 from typing import TypeAlias
 from hashlib import sha256
 import aiohttp
-import re
 import time
+import string
 
 import discord
-from discord.commands import option
 from discord.ext import commands, tasks
 
 from util.EmbedBuilder import EmbedBuilder
@@ -27,13 +26,13 @@ class MessageFingerprint:
     attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
     cached_attachment_hashes: set[Hash] | None = None  # populated on the first call to `get_attachment_hashes`
 
-    # hash of the message body (whitespace and case insensitive), or `None` if there is no message body
-    content_hash: Hash | None = None
+    content_hash: Hash | None = None  # hash of the message body, after being passed through `filter_content`
 
     # shortcut to build a fingerprint given a message
     @classmethod
     def build(cls, message: discord.Message) -> "MessageFingerprint":
-        content_without_whitespace = re.sub(r"\s", "", message.content)
+        filtered_content = cls.filter_content(message.content)
+
         return cls(
             created_at=time.time(),
             author_id=message.author.id,
@@ -41,7 +40,7 @@ class MessageFingerprint:
             channel_id=message.channel.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(content_without_whitespace.casefold()) if content_without_whitespace else None,
+            content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
         )
 
     # performs a SHA256 hash
@@ -51,6 +50,29 @@ class MessageFingerprint:
             data = data.encode()
 
         return sha256(data).digest()
+
+    # Filters message content such that it is appropriate for fingerprinting, according to these rules:
+    # - Makes the string case-insensitive (via str.casefold)
+    # - Removes whitespace, punctuation, and digits
+    # - Returns `None` if the resulting string is less than 15 characters
+    @staticmethod
+    def filter_content(content: str) -> str | None:
+        content = content.casefold()
+
+        # remove all punctuation and spacing
+        content = content.translate(
+            str.maketrans(
+                {
+                    unwanted_character: ""
+                    for unwanted_character in (string.whitespace + string.punctuation + string.digits)
+                }
+            )
+        )
+
+        if len(content) < 15:
+            return None
+
+        return content
 
     # retrieves and caches attachment hashes
     # the first call will actually download every attachment,
