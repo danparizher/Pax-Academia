@@ -1,25 +1,37 @@
+import json
+
 import wikipedia
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
+import util.bandwidth as bandwidth
 
 
 async def get_wiki(query) -> dict[str, str]:
     """
     It takes a query, gets the first page from Wikipedia, and returns a dictionary with the title,
     summary, url, and image of the page
-    
+
     :param query: The query to search for
     :return: A dictionary with the title, summary, url, and image of the wikipedia page.
     """
     page = wikipedia.page(query, auto_suggest=False)
-    return {
+    response = {
         "title": page.title,
         "summary": page.summary.split("\n")[0],
         "url": page.url,
         "image": page.images[0],
     }
+
+    bandwidth.log(
+        len(json.dumps(response)),  # very rough estimate
+        "inbound",
+        "wikipedia_search",
+        f"Searched wikipedia for {query!r}",
+    )
+
+    return response
 
 
 class Wikipedia(commands.Cog):
@@ -30,7 +42,7 @@ class Wikipedia(commands.Cog):
     async def wiki(self, ctx: commands.Context, query: str) -> None:
         """
         It searches Wikipedia for a query and returns the first result
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         :param query: str

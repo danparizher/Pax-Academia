@@ -10,6 +10,7 @@ from discord.ext import commands, tasks
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
+import util.bandwidth as bandwidth
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
@@ -86,6 +87,12 @@ class MessageFingerprint:
                     try:
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
+                            bandwidth.log(
+                                len(attachment_data),  # this doesn't account for HTTP/TCP overhead or compression
+                                "inbound",
+                                "download_attachment",
+                                f"HTTP GET {attachment_url}",
+                            )
                     except Exception as e:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
