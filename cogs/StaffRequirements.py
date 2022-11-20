@@ -4,7 +4,7 @@ from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-
+from os import getenv
 
 class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -55,10 +55,10 @@ class StaffRequirement(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        if (created_years_ago >= 1) and (joined_days_ago >= 30):
+        if (created_years_ago >= 1) and (joined_days_ago >= 30 or joined_years_ago >= 1):
             embed = EmbedBuilder(
                 title="Application Link",
-                description=f"Congratulations, {account.mention}! You meet the basic requirements for staff. Please fill out the application form [here](https://goo.gl/forms/Z3mVQwLdiNZcKHx52).",
+                description=f"Congratulations, {account.mention}! You meet the basic requirements for staff. Please fill out the application form [here]({getenv('staff_google_form')}).",
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
         else:
