@@ -4,12 +4,14 @@ from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
+from util.threaded_async import make_async
 
 
-async def get_data(name: str) -> dict:
+@make_async
+def get_data(name: str) -> dict:
     """
     It takes a string as an argument, and returns a dictionary of data about the compound
-    
+
     :param name: The name of the compound you want to get data for
     :type name: str
     :return: A dictionary of the compound's data.
@@ -36,16 +38,14 @@ class PubChem(commands.Cog):
         """
         It takes a number and returns a string with the number's digits replaced by their subscript
         equivalents
-        
+
         :param number: int
         :type number: int
         :return: The subscripted version of the number.
         """
         return str(number).translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
 
-    @commands.slash_command(
-        name="chemsearch", description="Searches the database for a compound."
-    )
+    @commands.slash_command(name="chemsearch", description="Searches the database for a compound.")
     @option(
         name="name",
         description="The name of the compound to be searched.",
@@ -54,7 +54,7 @@ class PubChem(commands.Cog):
     async def pubchem(self, ctx: commands.Context, name: str) -> None:
         """
         It takes a string, searches for it on PubChem, and returns a Discord embed with the results
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         :param name: str
