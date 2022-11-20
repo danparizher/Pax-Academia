@@ -29,18 +29,37 @@ __all__ = ["make_async"]
 if __name__ == "__main__":
     import time
 
-    @make_async
-    def test():
+    async def original():
         print("before")
         time.sleep(1)
         print("after")
 
-    async def main():
-        await asyncio.gather(test(), test())
+    async def run_original():
+        await asyncio.gather(original(), original())
 
-    asyncio.run(main())
-    # output:
+    print("original:")
+    asyncio.run(run_original())
     """
+    original:
+    before
+    after
+    before
+    after
+    """
+
+    @make_async
+    def made_async():
+        print("before")
+        time.sleep(1)
+        print("after")
+
+    async def run_made_async():
+        await asyncio.gather(made_async(), made_async())
+
+    print("\nmade_async:")
+    asyncio.run(run_made_async())
+    """
+    made_async:
     before
     before
     after
