@@ -71,7 +71,10 @@ def translate(
         formality_tone = formality_tone.lower()
 
     return deepl.translate(
-        text=text, source_language=source_language, target_language=target_language, formality_tone=formality_tone
+        text=text,
+        source_language=source_language,
+        target_language=target_language,
+        formality_tone=formality_tone,
     )
 
 
@@ -130,7 +133,9 @@ class Translation(commands.Cog):
         :return: The translated text.
         """
         try:
-            translated_text = await translate(text, source_language, target_language, formality_tone)
+            translated_text = await translate(
+                text, source_language, target_language, formality_tone
+            )
         except Exception as e:
             embed = EmbedBuilder(
                 title="Error",
