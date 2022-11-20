@@ -1,4 +1,5 @@
-# General purpose utility bot for the Homework Help Discord server
+# Pax Academia
+General purpose utility bot for the Homework Help Discord server
 
 ## environment
 
