@@ -1,10 +1,16 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
+import discord.ui
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 from os import getenv
+
+class StaffAppView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        self.add_item(discord.ui.Button(label="Apply Now", url=getenv('staff_google_form')))
 
 class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -23,48 +29,40 @@ class StaffRequirement(commands.Cog):
         :type ctx: commands.Context
         """
         account = ctx.author
-        created_years_ago = (
-            datetime.now(tz=account.created_at.tzinfo) - account.created_at
-        ).days // 365
-        created_days_ago = (
-            datetime.now(tz=account.created_at.tzinfo) - account.created_at
-        ).days % 365
 
-        joined_years_ago = (
-            datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
-        ).days // 365
-        joined_days_ago = (
-            datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
-        ).days % 365
+        time_since_creation = datetime.now(tz=account.created_at.tzinfo) - account.created_at
+        time_since_join = datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
 
-        embed = EmbedBuilder(
-            title="User info",
-            description=f"{account.mention} was created on {account.created_at.strftime('%B %d, %Y')} and joined on {account.joined_at.strftime('%B %d, %Y')}.",
-            fields=[
-                [
-                    "Account Age",
-                    f"**{created_years_ago}** year{'s' if created_years_ago != 1 else ''}, **{created_days_ago}** day{'s' if created_days_ago != 1 else ''}",
-                    True,
-                ],
-                [
-                    "Joined",
-                    f"**{joined_years_ago}** year{'s' if joined_years_ago != 1 else ''}, **{joined_days_ago}** day{'s' if joined_days_ago != 1 else ''} ago",
-                    True,
-                ],
+        fields=[
+            [
+                "Created",
+                f"{account.created_at.strftime('%B %d, %Y')}\n{round(time_since_creation.days/365.25)} year(s), {round(time_since_creation.days % 365.25)} day(s) ago",
+                True
             ],
-        ).build()
-        await ctx.respond(embed=embed, ephemeral=True)
+            [
+                "Joined",
+                f"{account.joined_at.strftime('%B %d, %Y')}\n{round(time_since_join.days/365.25)} year(s), {round(time_since_join.days % 365.25)} day(s) ago",
+                True
+            ]
+        ]
 
-        if (created_years_ago >= 1) and (joined_days_ago >= 30 or joined_years_ago >= 1):
+        # if staff requirements are met
+        # time since creation is at least 1 year (52 weeks) AND
+        # time since join is at least 30 days
+        if time_since_creation >= timedelta(weeks=52) and time_since_join >= timedelta(days=30):
             embed = EmbedBuilder(
-                title="Application Link",
-                description=f"Congratulations, {account.mention}! You meet the basic requirements for staff. Please fill out the application form [here]({getenv('staff_google_form')}).",
+                title="Congratulations!",
+                description="You meet the basic requirements for staff. You may apply for staff below.",
+                fields=fields,
+                color=0x39ff14 # GREEN
             ).build()
-            await ctx.respond(embed=embed, ephemeral=True)
+            await ctx.respond(embed=embed, ephemeral=True, view=StaffAppView())
         else:
             embed = EmbedBuilder(
                 title="Missing Requirements",
                 description=f"Unfortunately, you do not meet the basic requirements in order to apply for staff. Your account must be at least 1 year old and you must have been a member of the server for at least 30 days.",
+                fields=fields,
+                color=0xff0000 # RED
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
 
