@@ -88,8 +88,7 @@ def strfdelta(num: float, word: str) -> str:
     :type word: str
     :return: A string with the number of days, hours, minutes, and seconds.
     """
-    rounded_num = round(num)
-    return f"{rounded_num} {word}{'s' if rounded_num != 1 else ''}"
+    return f"{num:.0f} {word}{'s' if num != 1 else ''}"
 
 
 def check_missing_requirements(
