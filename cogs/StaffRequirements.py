@@ -36,12 +36,12 @@ class StaffRequirement(commands.Cog):
         fields=[
             [
                 "Created",
-                f"{account.created_at.strftime('%B %d, %Y')}\n{round(time_since_creation.days/365.25)} year(s), {round(time_since_creation.days % 365.25)} day(s) ago",
+                f"{account.created_at.strftime('%B %d, %Y')}\n{strfdelta(time_since_creation.days/365.25,'year')}, {strfdelta(time_since_creation.days % 365.25, 'day')} ago",
                 True
             ],
             [
                 "Joined",
-                f"{account.joined_at.strftime('%B %d, %Y')}\n{round(time_since_join.days/365.25)} year(s), {round(time_since_join.days % 365.25)} day(s) ago",
+                f"{account.joined_at.strftime('%B %d, %Y')}\n{strfdelta(time_since_join.days/365.25, 'year')}, {strfdelta(time_since_join.days % 365.25, 'day')} ago",
                 True
             ]
         ]
@@ -68,6 +68,9 @@ class StaffRequirement(commands.Cog):
 
         log(f"User {account} checked their requirements in {ctx.guild}.")
 
+def strfdelta(num: float, word: str) -> str:
+    rounded_num = round(num)
+    return f"{rounded_num} {word if rounded_num == 1 else word + 's'}"
 
 def setup(bot) -> None:
     bot.add_cog(StaffRequirement(bot))
