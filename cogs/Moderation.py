@@ -1,16 +1,16 @@
-from dataclasses import dataclass
-from typing import TypeAlias
-from hashlib import sha256
-import aiohttp
-import time
 import string
+import time
+from dataclasses import dataclass
+from hashlib import sha256
+from typing import TypeAlias
 
+import aiohttp
 import discord
 from discord.ext import commands, tasks
 
+import util.bandwidth as bandwidth
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-import util.bandwidth as bandwidth
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
