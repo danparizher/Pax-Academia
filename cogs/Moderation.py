@@ -24,10 +24,16 @@ class MessageFingerprint:
     channel_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
-    attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: set[Hash] | None = None  # populated on the first call to `get_attachment_hashes`
+    attachment_urls: list[
+        str
+    ]  # the discord content URLs for each of the message's uploaded attachments
+    cached_attachment_hashes: set[
+        Hash
+    ] | None = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Hash | None = None  # hash of the message body, after being passed through `filter_content`
+    content_hash: Hash | None = (
+        None  # hash of the message body, after being passed through `filter_content`
+    )
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -41,7 +47,9 @@ class MessageFingerprint:
             channel_id=message.channel.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
+            content_hash=cls.hash(filtered_content)
+            if filtered_content is not None
+            else None,
         )
 
     # performs a SHA256 hash
@@ -65,7 +73,9 @@ class MessageFingerprint:
             str.maketrans(
                 {
                     unwanted_character: ""
-                    for unwanted_character in (string.whitespace + string.punctuation + string.digits)
+                    for unwanted_character in (
+                        string.whitespace + string.punctuation + string.digits
+                    )
                 }
             )
         )
@@ -83,12 +93,16 @@ class MessageFingerprint:
             self.cached_attachment_hashes = set()
 
             async with aiohttp.ClientSession() as session:
-                for attachment_url in self.attachment_urls[:5]:  # only load first 5 attachments to prevent abuse
+                for attachment_url in self.attachment_urls[
+                    :5
+                ]:  # only load first 5 attachments to prevent abuse
                     try:
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
                             bandwidth.log(
-                                len(attachment_data),  # this doesn't account for HTTP/TCP overhead or compression
+                                len(
+                                    attachment_data
+                                ),  # this doesn't account for HTTP/TCP overhead or compression
                                 "inbound",
                                 "download_attachment",
                                 f"HTTP GET {attachment_url}",
@@ -106,25 +120,36 @@ class MessageFingerprint:
 
         return self.cached_attachment_hashes
 
-    # returns True if two message fingerprints are similar (i.e. if the message is a 'multipost')
-    # specifically, if at least one of the attachments are identical or if the message body
-    # is identical and not blank
+    # returns True if two message fingerprints are similar
+    # specifically, if at least one of the attachments are identical
+    # or if the message body is identical and not blank
     async def matches(self, other: "MessageFingerprint") -> bool:
-        # different authors cannot have matching fingerprints
-        if self.author_id != other.author_id:
-            return False
-
-        # messages in differing guilds are not applicable to fingerprinting
-        if self.guild_id != other.guild_id:
-            return False
-
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
 
         # otherwise, at least one of the attachments must match
-        matching_attachments = await self.get_attachment_hashes() & await other.get_attachment_hashes()
+        matching_attachments = (
+            await self.get_attachment_hashes() & await other.get_attachment_hashes()
+        )
         return len(matching_attachments) > 0
+
+    # a message is a multipost of another message if both messages:
+    # - were sent by the same author
+    # - were sent in the same guild
+    # - were sent in different channels
+    # - the fingerprints match (see `matches`)
+    async def is_multipost_of(self, other: "MessageFingerprint") -> bool:
+        if self.author_id != other.author_id:
+            return False
+
+        if self.guild_id != other.guild_id:
+            return False
+
+        if self.channel_id == other.channel_id:
+            return False
+
+        return await self.matches(other)
 
 
 class Moderation(commands.Cog):
@@ -132,7 +157,9 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.fingerprints: list[
             MessageFingerprint
-        ] = []  # stores all user messages sent in the last minute (recent messages near the end)
+        ] = (
+            []
+        )  # stores all user messages sent in the last minute (recent messages near the end)
         self.delete_old_fingerprints_task.start()
 
     # temporarily commented out because this is not functional
@@ -166,22 +193,23 @@ class Moderation(commands.Cog):
         await ctx.respond(embed=embed)
     """
 
-    # Records a MessageFingerprint and returns a matching fingerprint, if there is one.
-    # If there is a matching fingerprint, it is safe to assume that the message is a multipost.
-    async def record_fingerprint(self, message: discord.Message) -> MessageFingerprint | None:
+    # Records a MessageFingerprint and returns a fingerprint that this message is a multipost of, if there is one.
+    async def record_fingerprint(
+        self, message: discord.Message
+    ) -> MessageFingerprint | None:
         fingerprint = MessageFingerprint.build(message)
 
-        # check if any of the fingerprints match
-        matching_fingerprint = None
+        # find existing multipost
+        multipost_of = None
         for other_fingerprint in self.fingerprints:
-            if await fingerprint.matches(other_fingerprint):
-                matching_fingerprint = other_fingerprint
+            if await fingerprint.is_multipost_of(other_fingerprint):
+                multipost_of = other_fingerprint
                 break
 
         # this has to happen _after_ the `matching_fingerprint` loop because a fingerprint always matches itself
         self.fingerprints.append(fingerprint)
 
-        return matching_fingerprint
+        return multipost_of
 
     # deletes recorded fingerprints after 60 seconds
     @tasks.loop(seconds=3)
@@ -212,7 +240,10 @@ class Moderation(commands.Cog):
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
             return
-        if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
+        if (
+            not message.channel.category
+            or not message.channel.category.name.lower().endswith("help")
+        ):
             return
 
         # matching fingerprint
@@ -229,7 +260,13 @@ class Moderation(commands.Cog):
         embed = EmbedBuilder(
             title="Multi-Post Warning",
             description=description,
-            fields=[("Original Message", f"[link]({matching_previous_message.jump_url})", True)],
+            fields=[
+                (
+                    "Original Message",
+                    f"[link]({matching_previous_message.jump_url})",
+                    True,
+                )
+            ],
         ).build()
 
         await message.reply(embed=embed)
