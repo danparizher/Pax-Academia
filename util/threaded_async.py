@@ -1,6 +1,6 @@
 import asyncio
-from typing import TypeVar, ParamSpec, Callable, Awaitable
 from concurrent.futures import ThreadPoolExecutor
+from typing import Awaitable, Callable, ParamSpec, TypeVar
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -29,12 +29,12 @@ __all__ = ["make_async"]
 if __name__ == "__main__":
     import time
 
-    async def original():
+    async def original() -> None:
         print("before")
         time.sleep(1)
         print("after")
 
-    async def run_original():
+    async def run_original() -> None:
         await asyncio.gather(original(), original())
 
     print("original:")
@@ -48,12 +48,12 @@ if __name__ == "__main__":
     """
 
     @make_async
-    def made_async():
+    def made_async() -> None:
         print("before")
         time.sleep(1)
         print("after")
 
-    async def run_made_async():
+    async def run_made_async() -> None:
         await asyncio.gather(made_async(), made_async())
 
     print("\nmade_async:")

@@ -3,9 +3,9 @@ import json
 import wikipedia
 from discord.ext import commands
 
+import util.bandwidth as bandwidth
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-import util.bandwidth as bandwidth
 from util.threaded_async import make_async
 
 
@@ -80,5 +80,5 @@ class Wikipedia(commands.Cog):
             await ctx.respond(embed=embed)
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Wikipedia(bot))
