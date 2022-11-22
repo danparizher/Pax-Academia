@@ -246,24 +246,18 @@ class Moderation(commands.Cog):
         ):
             return
 
-        # matching fingerprint
-        matching_previous_message = await self.record_fingerprint(message)
-        if not matching_previous_message:
+        previous_message = await self.record_fingerprint(message)
+        if not previous_message:
             return
 
-        # all criteria met - a multipost has been detected!
-        # reply with a warning embed
-        if matching_previous_message.channel_id == message.channel.id:
-            description = "Please don't send the same message multiple times."
-        else:
-            description = "Please don't send the same message in multiple channels."
+        # a multipost has been detected! reply with a warning embed
         embed = EmbedBuilder(
             title="Multi-Post Warning",
-            description=description,
+            description="Please don't send the same message in multiple channels.",
             fields=[
                 (
                     "Original Message",
-                    f"[link]({matching_previous_message.jump_url})",
+                    f"[link]({previous_message.jump_url})",
                     True,
                 )
             ],
