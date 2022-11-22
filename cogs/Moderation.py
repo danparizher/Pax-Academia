@@ -24,16 +24,10 @@ class MessageFingerprint:
     channel_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
-    attachment_urls: list[
-        str
-    ]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: set[
-        Hash
-    ] | None = None  # populated on the first call to `get_attachment_hashes`
+    attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
+    cached_attachment_hashes: set[Hash] | None = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Hash | None = (
-        None  # hash of the message body, after being passed through `filter_content`
-    )
+    content_hash: Hash | None = None  # hash of the message body, after being passed through `filter_content`
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -47,9 +41,7 @@ class MessageFingerprint:
             channel_id=message.channel.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(filtered_content)
-            if filtered_content is not None
-            else None,
+            content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
         )
 
     # performs a SHA256 hash
@@ -73,9 +65,7 @@ class MessageFingerprint:
             str.maketrans(
                 {
                     unwanted_character: ""
-                    for unwanted_character in (
-                        string.whitespace + string.punctuation + string.digits
-                    )
+                    for unwanted_character in (string.whitespace + string.punctuation + string.digits)
                 }
             )
         )
@@ -93,16 +83,12 @@ class MessageFingerprint:
             self.cached_attachment_hashes = set()
 
             async with aiohttp.ClientSession() as session:
-                for attachment_url in self.attachment_urls[
-                    :5
-                ]:  # only load first 5 attachments to prevent abuse
+                for attachment_url in self.attachment_urls[:5]:  # only load first 5 attachments to prevent abuse
                     try:
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
                             bandwidth.log(
-                                len(
-                                    attachment_data
-                                ),  # this doesn't account for HTTP/TCP overhead or compression
+                                len(attachment_data),  # this doesn't account for HTTP/TCP overhead or compression
                                 "inbound",
                                 "download_attachment",
                                 f"HTTP GET {attachment_url}",
@@ -129,9 +115,7 @@ class MessageFingerprint:
             return True
 
         # otherwise, at least one of the attachments must match
-        matching_attachments = (
-            await self.get_attachment_hashes() & await other.get_attachment_hashes()
-        )
+        matching_attachments = await self.get_attachment_hashes() & await other.get_attachment_hashes()
         return len(matching_attachments) > 0
 
     # a message is a multipost of another message if both messages:
@@ -157,9 +141,7 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.fingerprints: list[
             MessageFingerprint
-        ] = (
-            []
-        )  # stores all user messages sent in the last minute (recent messages near the end)
+        ] = []  # stores all user messages sent in the last minute (recent messages near the end)
         self.delete_old_fingerprints_task.start()
 
     # temporarily commented out because this is not functional
@@ -194,9 +176,7 @@ class Moderation(commands.Cog):
     """
 
     # Records a MessageFingerprint and returns a fingerprint that this message is a multipost of, if there is one.
-    async def record_fingerprint(
-        self, message: discord.Message
-    ) -> MessageFingerprint | None:
+    async def record_fingerprint(self, message: discord.Message) -> MessageFingerprint | None:
         fingerprint = MessageFingerprint.build(message)
 
         # find existing multipost
@@ -240,10 +220,7 @@ class Moderation(commands.Cog):
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
             return
-        if (
-            not message.channel.category
-            or not message.channel.category.name.lower().endswith("help")
-        ):
+        if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
             return
 
         previous_message = await self.record_fingerprint(message)
