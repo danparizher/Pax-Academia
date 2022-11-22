@@ -106,18 +106,10 @@ class MessageFingerprint:
 
         return self.cached_attachment_hashes
 
-    # returns True if two message fingerprints are similar (i.e. if the message is a 'multipost')
-    # specifically, if at least one of the attachments are identical or if the message body
-    # is identical and not blank
+    # returns True if two message fingerprints are similar
+    # specifically, if at least one of the attachments are identical
+    # or if the message body is identical and not blank
     async def matches(self, other: "MessageFingerprint") -> bool:
-        # different authors cannot have matching fingerprints
-        if self.author_id != other.author_id:
-            return False
-
-        # messages in differing guilds are not applicable to fingerprinting
-        if self.guild_id != other.guild_id:
-            return False
-
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
@@ -125,6 +117,23 @@ class MessageFingerprint:
         # otherwise, at least one of the attachments must match
         matching_attachments = await self.get_attachment_hashes() & await other.get_attachment_hashes()
         return len(matching_attachments) > 0
+
+    # a message is a multipost of another message if both messages:
+    # - were sent by the same author
+    # - were sent in the same guild
+    # - were sent in different channels
+    # - the fingerprints match (see `matches`)
+    async def is_multipost_of(self, other: "MessageFingerprint") -> bool:
+        if self.author_id != other.author_id:
+            return False
+
+        if self.guild_id != other.guild_id:
+            return False
+
+        if self.channel_id == other.channel_id:
+            return False
+
+        return await self.matches(other)
 
 
 class Moderation(commands.Cog):
@@ -166,22 +175,21 @@ class Moderation(commands.Cog):
         await ctx.respond(embed=embed)
     """
 
-    # Records a MessageFingerprint and returns a matching fingerprint, if there is one.
-    # If there is a matching fingerprint, it is safe to assume that the message is a multipost.
+    # Records a MessageFingerprint and returns a fingerprint that this message is a multipost of, if there is one.
     async def record_fingerprint(self, message: discord.Message) -> MessageFingerprint | None:
         fingerprint = MessageFingerprint.build(message)
 
-        # check if any of the fingerprints match
-        matching_fingerprint = None
+        # find existing multipost
+        multipost_of = None
         for other_fingerprint in self.fingerprints:
-            if await fingerprint.matches(other_fingerprint):
-                matching_fingerprint = other_fingerprint
+            if await fingerprint.is_multipost_of(other_fingerprint):
+                multipost_of = other_fingerprint
                 break
 
         # this has to happen _after_ the `matching_fingerprint` loop because a fingerprint always matches itself
         self.fingerprints.append(fingerprint)
 
-        return matching_fingerprint
+        return multipost_of
 
     # deletes recorded fingerprints after 60 seconds
     @tasks.loop(seconds=3)
@@ -215,21 +223,21 @@ class Moderation(commands.Cog):
         if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
             return
 
-        # matching fingerprint
-        matching_previous_message = await self.record_fingerprint(message)
-        if not matching_previous_message:
+        previous_message = await self.record_fingerprint(message)
+        if not previous_message:
             return
 
-        # all criteria met - a multipost has been detected!
-        # reply with a warning embed
-        if matching_previous_message.channel_id == message.channel.id:
-            description = "Please don't send the same message multiple times."
-        else:
-            description = "Please don't send the same message in multiple channels."
+        # a multipost has been detected! reply with a warning embed
         embed = EmbedBuilder(
             title="Multi-Post Warning",
-            description=description,
-            fields=[("Original Message", f"[link]({matching_previous_message.jump_url})", True)],
+            description="Please don't send the same message in multiple channels.",
+            fields=[
+                (
+                    "Original Message",
+                    f"[link]({previous_message.jump_url})",
+                    True,
+                )
+            ],
         ).build()
 
         await message.reply(embed=embed)
