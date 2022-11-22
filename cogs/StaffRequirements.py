@@ -3,7 +3,6 @@ from os import getenv
 
 import discord.ui
 from discord.ext import commands
-
 from humanize import precisedelta
 
 from util.EmbedBuilder import EmbedBuilder
@@ -36,7 +35,9 @@ class StaffRequirement(commands.Cog):
         """
         account = ctx.author
 
-        time_since_creation = datetime.now(tz=account.created_at.tzinfo) - account.created_at
+        time_since_creation = (
+            datetime.now(tz=account.created_at.tzinfo) - account.created_at
+        )
         time_since_join = datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
 
         fields = [
@@ -57,7 +58,9 @@ class StaffRequirement(commands.Cog):
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
         # time since join is at least 30 days
-        if time_since_creation >= timedelta(weeks=52) and time_since_join >= timedelta(days=30):
+        if time_since_creation >= timedelta(weeks=52) and time_since_join >= timedelta(
+            days=30
+        ):
             embed = EmbedBuilder(
                 title="Congratulations!",
                 description="You meet the basic requirements for staff. You may apply for staff below.",
@@ -68,7 +71,7 @@ class StaffRequirement(commands.Cog):
         else:
             wait_time = max(
                 timedelta(weeks=52) - time_since_creation,
-                timedelta(days=30) - time_since_join
+                timedelta(days=30) - time_since_join,
             )
 
             embed = EmbedBuilder(
@@ -83,6 +86,7 @@ class StaffRequirement(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
 
         log(f"User {account} checked their requirements in {ctx.guild}.")
+
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(StaffRequirement(bot))
