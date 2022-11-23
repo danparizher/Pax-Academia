@@ -240,7 +240,14 @@ class Moderation(commands.Cog):
             ],
         ).build()
 
-        await message.reply(embed=embed)
+        try:
+            await message.reply(embed=embed)
+        except discord.errors.HTTPException as e:
+            if "unknown message".casefold() in repr(e).casefold():
+                # the multiposted message has already been deleted - we can simply ignore this error
+                pass
+            else:
+                raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
