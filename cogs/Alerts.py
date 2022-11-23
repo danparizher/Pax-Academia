@@ -1,6 +1,6 @@
+import base64
 import re
 import sqlite3
-import base64
 
 import discord
 from discord.commands import option
@@ -8,7 +8,6 @@ from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-
 
 # used to encode/ decode user input to protect against SQLi
 b64ify = lambda x: base64.b64encode(x.encode()).decode()
@@ -103,7 +102,7 @@ class Alerts(commands.Cog):
     async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
         """
         It removes an alert from the database.
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         :param keyword: str
@@ -143,7 +142,7 @@ class Alerts(commands.Cog):
     async def list_alerts(self, ctx: commands.Context) -> None:
         """
         It gets all alerts from the database and responds with a list of them
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
@@ -210,7 +209,7 @@ class Alerts(commands.Cog):
             """
             It checks if a message contains any of the keywords in the list, and if it does, it sends an embed
             to a channel
-            
+
             :param message: discord.Message
             :type message: discord.Message
             :return: The return value is a list of strings.
@@ -263,7 +262,7 @@ class Alerts(commands.Cog):
     async def view_db(self, ctx: commands.Context) -> None:
         """
         It sends a file to the user who called the command
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
