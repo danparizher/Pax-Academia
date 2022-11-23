@@ -10,7 +10,7 @@ from util.threaded_async import make_async
 
 
 @make_async
-def get_wiki(query) -> dict[str, str]:
+def get_wiki_without_logging(query) -> dict[str, str]:
     """
     It takes a query, gets the first page from Wikipedia, and returns a dictionary with the title,
     summary, url, and image of the page
@@ -25,6 +25,12 @@ def get_wiki(query) -> dict[str, str]:
         "url": page.url,
         "image": page.images[0],
     }
+
+    return response
+
+
+async def get_wiki(query) -> dict[str, str]:
+    response = await get_wiki_without_logging(query)
 
     bandwidth.log(
         len(json.dumps(response)),  # very rough estimate
