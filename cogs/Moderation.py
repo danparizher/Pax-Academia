@@ -278,11 +278,7 @@ class Moderation(commands.Cog):
         # If you delete your message then re-send it in another channel, that's fine
         # so we can remove the original message fingerprint
         for i, fingerprint in enumerate(self.fingerprints):
-            if (
-                payload.message_id == fingerprint.message_id
-                and payload.channel_id == fingerprint.channel_id
-                and payload.guild_id == fingerprint.guild_id
-            ):
+            if payload.message_id == fingerprint.message_id:
                 del self.fingerprints[i]
                 break
 
