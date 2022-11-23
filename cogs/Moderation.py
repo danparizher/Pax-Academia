@@ -23,6 +23,7 @@ class MessageFingerprint:
     author_id: int
     guild_id: int | None  # will be None for DMs
     channel_id: int
+    message_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
@@ -40,6 +41,7 @@ class MessageFingerprint:
             author_id=message.author.id,
             guild_id=message.guild.id if message.guild else None,
             channel_id=message.channel.id,
+            message_id=message.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
             content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
@@ -273,6 +275,17 @@ class Moderation(commands.Cog):
             # so we can delete the warning message
             warning_message = self.multipost_warnings.pop(payload.message_id)
             await warning_message.delete()
+
+        # If you delete your message then re-send it in another channel, that's fine
+        # so we can remove the original message fingerprint
+        for i, fingerprint in enumerate(self.fingerprints):
+            if (
+                payload.message_id == fingerprint.message_id
+                and payload.channel_id == fingerprint.channel_id
+                and payload.guild_id == fingerprint.guild_id
+            ):
+                del self.fingerprints[i]
+                break
 
 
 def setup(bot: commands.Bot) -> None:
