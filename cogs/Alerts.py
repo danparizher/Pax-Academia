@@ -1,3 +1,4 @@
+import base64
 import re
 import sqlite3
 
@@ -7,6 +8,10 @@ from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
+
+# used to encode/ decode user input to protect against SQLi
+b64ify = lambda x: base64.b64encode(x.encode()).decode()
+deb64ify = lambda y: base64.b64decode(y.encode()).decode()
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
@@ -28,7 +33,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
         .fetchall()
     ]
     conn.close()
-    return data
+    return [deb64ify(item) for item in data]
 
 
 class Alerts(commands.Cog):
@@ -56,10 +61,12 @@ class Alerts(commands.Cog):
         :type keyword: str
         :return: The return type is None.
         """
+        b64_keyword = b64ify(keyword)
+
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
-            (keyword, ctx.author.id),
+            (b64_keyword, ctx.author.id),
         )
         if c.fetchone():
             embed = EmbedBuilder(
@@ -71,7 +78,7 @@ class Alerts(commands.Cog):
 
         c.execute(
             "INSERT INTO alerts VALUES (?, ?, ?)",
-            (keyword, ctx.author.id, ctx.author.name),
+            (b64_keyword, ctx.author.id, ctx.author.name),
         )
         self.db.commit()
 
@@ -95,17 +102,19 @@ class Alerts(commands.Cog):
     async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
         """
         It removes an alert from the database.
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         :param keyword: str
         :type keyword: str
         :return: The return value is a list of tuples.
         """
+        b64_keyword = b64ify(keyword)
+
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
-            (keyword, ctx.author.id),
+            (b64_keyword, ctx.author.id),
         )
         if not c.fetchone():
             embed = EmbedBuilder(
@@ -117,7 +126,7 @@ class Alerts(commands.Cog):
 
         c.execute(
             "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
-            (keyword, ctx.author.id),
+            (b64_keyword, ctx.author.id),
         )
         self.db.commit()
 
@@ -133,7 +142,7 @@ class Alerts(commands.Cog):
     async def list_alerts(self, ctx: commands.Context) -> None:
         """
         It gets all alerts from the database and responds with a list of them
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
@@ -143,7 +152,7 @@ class Alerts(commands.Cog):
 
         alert_list = ""
         for alert in alerts:
-            alert_list += f"`{alert[0]}`\n"
+            alert_list += f"`{deb64ify(alert[0])}`\n"
 
         embed = EmbedBuilder(
             title="Alerts",
@@ -170,18 +179,18 @@ class Alerts(commands.Cog):
             c.execute("SELECT * FROM alerts")
             keywords = c.fetchall()
             if not any(
-                re.search(keyword[0], message.content, re.IGNORECASE)
+                re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE)
                 for keyword in keywords
             ):
                 return
 
             # Send a DM to the user who added the alert.
             for keyword in keywords:
-                if re.search(keyword[0], message.content, re.IGNORECASE):
+                if re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE):
                     user = await self.bot.fetch_user(keyword[1])
                     embed = EmbedBuilder(
                         title="Alert",
-                        description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                        description=f"Your keyword `{deb64ify(keyword[0])}` was mentioned in {message.channel.mention} by {message.author.mention}.",
                         fields=[
                             ("Message", message.content, False),
                             (
@@ -200,7 +209,7 @@ class Alerts(commands.Cog):
             """
             It checks if a message contains any of the keywords in the list, and if it does, it sends an embed
             to a channel
-            
+
             :param message: discord.Message
             :type message: discord.Message
             :return: The return value is a list of strings.
@@ -253,7 +262,7 @@ class Alerts(commands.Cog):
     async def view_db(self, ctx: commands.Context) -> None:
         """
         It sends a file to the user who called the command
-        
+
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
