@@ -1,7 +1,6 @@
 import string
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import TypeAlias
 
@@ -214,7 +213,7 @@ class Moderation(commands.Cog):
         # delete cached multipost warnings older than 10 minutes
         multipost_warnings_to_delete = []
         for original_message_id, warning_message in self.multipost_warnings.items():
-            if (datetime.now() - warning_message.created_at) > timedelta(minutes=10):
+            if time.time() - warning_message.created_at.timestamp() > 600:
                 multipost_warnings_to_delete.append(original_message_id)
 
         for message_id in multipost_warnings_to_delete:
