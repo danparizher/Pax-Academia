@@ -22,6 +22,7 @@ class MessageFingerprint:
     author_id: int
     guild_id: int | None  # will be None for DMs
     channel_id: int
+    message_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
@@ -39,6 +40,7 @@ class MessageFingerprint:
             author_id=message.author.id,
             guild_id=message.guild.id if message.guild else None,
             channel_id=message.channel.id,
+            message_id=message.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
             content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
@@ -142,7 +144,8 @@ class Moderation(commands.Cog):
         self.fingerprints: list[
             MessageFingerprint
         ] = []  # stores all user messages sent in the last minute (recent messages near the end)
-        self.delete_old_fingerprints_task.start()
+        self.multipost_warnings: dict[int, discord.Message] = {}  # multiposted message ID -> the warning message
+        self.clear_old_cached_data.start()
 
     # temporarily commented out because this is not functional
     """
@@ -191,9 +194,10 @@ class Moderation(commands.Cog):
 
         return multipost_of
 
-    # deletes recorded fingerprints after 60 seconds
+    # deletes recorded fingerprints after 60 seconds,
+    # and clears out logged `multipost_warnings` after 10 minutes
     @tasks.loop(seconds=3)
-    async def delete_old_fingerprints_task(self):
+    async def clear_old_cached_data(self):
         # new messages are always appended to the end of the list
         # so we will only be deleting messages from the front of the list
         # this algorithm finds the number of messages the delete, then deletes them in bulk
@@ -205,6 +209,15 @@ class Moderation(commands.Cog):
                 break
 
         del self.fingerprints[:n_fingerprints_to_delete]
+
+        # delete cached multipost warnings older than 10 minutes
+        multipost_warnings_to_delete = []
+        for original_message_id, warning_message in self.multipost_warnings.items():
+            if time.time() - warning_message.created_at.timestamp() > 600:
+                multipost_warnings_to_delete.append(original_message_id)
+
+        for message_id in multipost_warnings_to_delete:
+            del self.multipost_warnings[message_id]
 
     # this function should be called after every on_message
     # it will detect multiposts and reply with a warning
@@ -241,7 +254,8 @@ class Moderation(commands.Cog):
         ).build()
 
         try:
-            await message.reply(embed=embed)
+            warning = await message.reply(embed=embed)
+            self.multipost_warnings[message.id] = warning
         except discord.errors.HTTPException as e:
             if "unknown message".casefold() in repr(e).casefold():
                 # the multiposted message has already been deleted - we can simply ignore this error
@@ -252,6 +266,21 @@ class Moderation(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         await self.check_multipost(message)
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent):
+        if payload.message_id in self.multipost_warnings:
+            # The person deleted their message after seeing out multipost warning
+            # so we can delete the warning message
+            warning_message = self.multipost_warnings.pop(payload.message_id)
+            await warning_message.delete()
+
+        # If you delete your message then re-send it in another channel, that's fine
+        # so we can remove the original message fingerprint
+        for i, fingerprint in enumerate(self.fingerprints):
+            if payload.message_id == fingerprint.message_id:
+                del self.fingerprints[i]
+                break
 
 
 def setup(bot: commands.Bot) -> None:
