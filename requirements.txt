@@ -3,6 +3,6 @@ beautifulsoup4==4.11.1
 deepl_translate==1.2.0
 humanize==4.4.0
 pubchempy==1.0.4
-py-cord==2.3.0
+py-cord==2.3.1
 python-dotenv==0.21.0
 wikipedia==1.4.0
