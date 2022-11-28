@@ -220,8 +220,8 @@ class Moderation(commands.Cog):
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
     #   - Original Message - No action taken
-    #   - First Multipost - React to the original message with a custom multipost emoji, and reply with a warning to the multipost
-    #   - Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
+    #   - Second Message - React to both the original and second message with a custom emoji, and warn the author under the second message
+    #   - Third and Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
     #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
