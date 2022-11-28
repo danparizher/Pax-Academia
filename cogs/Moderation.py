@@ -15,6 +15,8 @@ from util.Logging import log
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
 
+MULTIPOST_EMOJI = ":multipost:1046614585760813147"
+
 
 @dataclass
 class MessageFingerprint:
@@ -178,23 +180,19 @@ class Moderation(commands.Cog):
         await ctx.respond(embed=embed)
     """
 
-    # Records a MessageFingerprint and returns a fingerprint that this message is a multipost of, if there is one.
-    async def record_fingerprint(self, message: discord.Message) -> MessageFingerprint | None:
+    # Records a MessageFingerprint and returns a list of fingerprints that this message is a multipost of
+    async def record_fingerprint(self, message: discord.Message) -> list[MessageFingerprint]:
         fingerprint = MessageFingerprint.build(message)
-
-        # find existing multipost
-        multipost_of = None
-        for other_fingerprint in self.fingerprints:
-            if await fingerprint.is_multipost_of(other_fingerprint):
-                multipost_of = other_fingerprint
-                break
-
-        # this has to happen _after_ the `matching_fingerprint` loop because a fingerprint always matches itself
         self.fingerprints.append(fingerprint)
+
+        multipost_of: list[MessageFingerprint] = []
+        for other_fingerprint in self.fingerprints:
+            if fingerprint is not other_fingerprint and await fingerprint.is_multipost_of(other_fingerprint):
+                multipost_of.append(other_fingerprint)
 
         return multipost_of
 
-    # deletes recorded fingerprints after 60 seconds,
+    # deletes recorded fingerprints after 5 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
     @tasks.loop(seconds=3)
     async def clear_old_cached_data(self):
@@ -203,7 +201,7 @@ class Moderation(commands.Cog):
         # this algorithm finds the number of messages the delete, then deletes them in bulk
         n_fingerprints_to_delete = 0
         for fingerprint in self.fingerprints:
-            if time.time() - fingerprint.created_at > 60:
+            if time.time() - fingerprint.created_at > 300:
                 n_fingerprints_to_delete += 1
             else:
                 break
@@ -220,7 +218,10 @@ class Moderation(commands.Cog):
             del self.multipost_warnings[message_id]
 
     # this function should be called after every on_message
-    # it will detect multiposts and reply with a warning
+    # it will detect multiposts and will apply the following moderation:
+    #   - Original Message - No action taken
+    #   - First Multipost - React to the original message with a custom multipost emoji, and reply with a warning to the multipost
+    #   - Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
     #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
@@ -236,32 +237,76 @@ class Moderation(commands.Cog):
         if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
             return
 
-        previous_message = await self.record_fingerprint(message)
-        if not previous_message:
+        previous_messages = await self.record_fingerprint(message)
+        n_previous_messages = len(previous_messages)
+
+        # Original Message - No action taken
+        if n_previous_messages == 0:
             return
 
-        # a multipost has been detected! reply with a warning embed
-        embed = EmbedBuilder(
-            title="Multi-Post Warning",
-            description="Please don't send the same message in multiple channels.",
-            fields=[
-                (
-                    "Original Message",
-                    f"[link]({previous_message.jump_url})",
-                    True,
-                )
-            ],
-        ).build()
+        # First Multipost - React to the original message with a custom multipost emoji, and reply with a warning to the multipost
+        elif n_previous_messages == 1:
+            original_message = previous_messages[0]
 
-        try:
-            warning = await message.reply(embed=embed)
-            self.multipost_warnings[message.id] = warning
-        except discord.errors.HTTPException as e:
-            if "unknown message".casefold() in repr(e).casefold():
-                # the multiposted message has already been deleted - we can simply ignore this error
-                pass
-            else:
-                raise
+            embed = EmbedBuilder(
+                title="Multi-Post Warning",
+                description="Please don't send the same message in multiple channels.",
+                fields=[
+                    (
+                        "Original Message",
+                        f"[link]({original_message.jump_url})",
+                        True,
+                    )
+                ],
+            ).build()
+
+            try:
+                await self.bot.http.add_reaction(
+                    original_message.channel_id, original_message.message_id, MULTIPOST_EMOJI
+                )
+                await message.add_reaction(MULTIPOST_EMOJI)
+
+                warning = await message.reply(embed=embed)
+                self.multipost_warnings[message.id] = warning
+            except discord.errors.HTTPException as e:
+                if "unknown message".casefold() in repr(e).casefold():
+                    # The multipost has already been deleted, take no action
+                    return
+                else:
+                    # unknown error, just raise it
+                    raise
+
+        # Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
+        else:
+            first_message, second_message, *_other_messages = previous_messages
+
+            embed = EmbedBuilder(
+                title="Multi-Post Deleted",
+                description="Please don't send the same message in multiple channels. Your message has been deleted.",
+                fields=[
+                    (
+                        "First Message",
+                        f"[link]({first_message.jump_url})",
+                        True,
+                    ),
+                    (
+                        "Second Message",
+                        f"[link]({second_message.jump_url})",
+                        True,
+                    ),
+                ],
+            ).build()
+
+            try:
+                await message.reply(message.author.mention, embed=embed, delete_after=15)
+                await message.delete()
+            except discord.errors.HTTPException as e:
+                if "unknown message".casefold() in repr(e).casefold():
+                    # The multiposted message has already been deleted, take no action
+                    return
+                else:
+                    # unknown error, just raise it
+                    raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
