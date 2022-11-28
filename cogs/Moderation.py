@@ -318,7 +318,14 @@ class Moderation(commands.Cog):
             # The person deleted their message after seeing out multipost warning
             # so we can delete the warning message
             warning_message = self.multipost_warnings.pop(payload.message_id)
-            await warning_message.delete()
+            try:
+                await warning_message.delete()
+            except discord.errors.HTTPException as e:
+                if "unknown message".casefold() in repr(e).casefold():
+                    # a mod probably already deleted the warning message
+                    return
+                else:
+                    raise
 
         # If you delete your message then re-send it in another channel, that's fine
         # so we can remove the original message fingerprint
