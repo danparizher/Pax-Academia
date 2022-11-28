@@ -192,7 +192,7 @@ class Moderation(commands.Cog):
 
         return multipost_of
 
-    # deletes recorded fingerprints after 5 minutes,
+    # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
     @tasks.loop(seconds=3)
     async def clear_old_cached_data(self):
@@ -201,7 +201,7 @@ class Moderation(commands.Cog):
         # this algorithm finds the number of messages the delete, then deletes them in bulk
         n_fingerprints_to_delete = 0
         for fingerprint in self.fingerprints:
-            if time.time() - fingerprint.created_at > 300:
+            if time.time() - fingerprint.created_at > 120:
                 n_fingerprints_to_delete += 1
             else:
                 break
