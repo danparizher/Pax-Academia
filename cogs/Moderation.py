@@ -4,6 +4,7 @@ import time
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import TypeAlias
+import os
 
 import aiohttp
 import discord
@@ -16,7 +17,7 @@ from util.Logging import log
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
 
-MULTIPOST_EMOJI = ":multipost:1046975245761912873"
+MULTIPOST_EMOJI = os.getenv("MULTIPOST_EMOJI", ":regional_indicator_m:")
 ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
 
 
