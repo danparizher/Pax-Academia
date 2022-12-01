@@ -234,7 +234,7 @@ class Moderation(commands.Cog):
         if message.author.bot:
             return
 
-        # author not staff
+        # author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
         if isinstance(message.author, discord.Member):
             if ALLOW_MULTIPOST_FOR_ROLE.casefold() in (role.name.casefold() for role in message.author.roles):
                 return
