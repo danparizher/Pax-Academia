@@ -16,7 +16,7 @@ from util.Logging import log
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
 
-MULTIPOST_EMOJI = ":multipost:1046975245761912873"
+MULTIPOST_EMOJI = os.getenv("MULTIPOST_EMOJI", ":regional_indicator_m:")
 ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
 
 
@@ -197,7 +197,7 @@ class Moderation(commands.Cog):
     # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
     @tasks.loop(seconds=3)
-    async def clear_old_cached_data(self):
+    async def clear_old_cached_data(self) -> None:
         # new messages are always appended to the end of the list
         # so we will only be deleting messages from the front of the list
         # this algorithm finds the number of messages the delete, then deletes them in bulk
@@ -324,7 +324,7 @@ class Moderation(commands.Cog):
         await self.check_multipost(message)
 
     @commands.Cog.listener()
-    async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent):
+    async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent) -> None:
         if payload.message_id in self.multipost_warnings:
             # The person deleted their message after seeing out multipost warning
             # so we can delete the warning message
