@@ -1,9 +1,9 @@
+import os
 import string
 import time
 from dataclasses import dataclass
 from hashlib import sha256
 from typing import TypeAlias
-import os
 
 import aiohttp
 import discord
