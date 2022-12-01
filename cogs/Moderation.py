@@ -17,7 +17,7 @@ from util.Logging import log
 Hash: TypeAlias = bytes
 
 MULTIPOST_EMOJI = ":multipost:1046975245761912873"
-ROLE_CAN_MULTIPOST = os.getenv("ROLE_CAN_MULTIPOST", "staff")
+ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE", "staff")
 
 
 @dataclass
@@ -226,7 +226,7 @@ class Moderation(commands.Cog):
     #   - Third and Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
-    #   - Author doesn't have the ROLE_CAN_MULTIPOST role
+    #   - Author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
     #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
     #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
     async def check_multipost(self, message: discord.Message) -> None:
@@ -236,7 +236,7 @@ class Moderation(commands.Cog):
 
         # author not staff
         if isinstance(message.author, discord.Member):
-            if ROLE_CAN_MULTIPOST.casefold() in (role.name.casefold() for role in message.author.roles):
+            if ALLOW_MULTIPOST_FOR_ROLE.casefold() in (role.name.casefold() for role in message.author.roles):
                 return
 
         # textchannel in category ending with "HELP"
