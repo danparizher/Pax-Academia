@@ -17,7 +17,7 @@ from util.Logging import log
 Hash: TypeAlias = bytes
 
 MULTIPOST_EMOJI = ":multipost:1046975245761912873"
-ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE", "staff")
+ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
 
 
 @dataclass
@@ -235,9 +235,12 @@ class Moderation(commands.Cog):
             return
 
         # author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
-        if isinstance(message.author, discord.Member):
-            if ALLOW_MULTIPOST_FOR_ROLE.casefold() in (role.name.casefold() for role in message.author.roles):
-                return
+        if (
+            isinstance(message.author, discord.Member)
+            and ALLOW_MULTIPOST_FOR_ROLE is not None
+            and ALLOW_MULTIPOST_FOR_ROLE.casefold() in (role.name.casefold() for role in message.author.roles)
+        ):
+            return
 
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
