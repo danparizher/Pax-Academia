@@ -224,12 +224,18 @@ class Moderation(commands.Cog):
     #   - Third and Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
+    #   - Author is not staff (technically staff _could_ multipost, but we trust them not to)
     #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
     #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
     async def check_multipost(self, message: discord.Message) -> None:
         # author not a bot
         if message.author.bot:
             return
+
+        # author not staff
+        if isinstance(message.author, discord.Member):
+            if "staff" in (role.name.lower() for role in message.author.roles):
+                return
 
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
