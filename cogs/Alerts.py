@@ -276,9 +276,19 @@ class Alerts(commands.Cog):
             writer.writerow(["keyword", "user_id", "user_name"])
             writer.writerows(alerts)
 
+        c.execute("SELECT * FROM messagecount")
+        messagecount = c.fetchall()
+        with open("util/messagecount.csv", "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["user_id", "message_count"])
+            writer.writerows(messagecount)
+
         await ctx.respond(
-            content="Alerts Database",
-            file=discord.File("util/alerts.csv"),
+            content="Database",
+            files=[
+                discord.File("util/alerts.csv"),
+                discord.File("util/messagecount.csv"),
+            ],
             ephemeral=True,
         )
 

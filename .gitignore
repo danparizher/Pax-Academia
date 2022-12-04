@@ -167,4 +167,4 @@ log.txt
 *.db
 *.sqlit*
 .vscode/
-.csv
+*.csv
