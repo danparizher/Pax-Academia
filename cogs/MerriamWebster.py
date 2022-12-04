@@ -52,50 +52,54 @@ async def get_word_info(word: str) -> dict:
     soup = await request(word.lower())
     word_data["word"] = word
     try:
-        word_data["definition"] = soup.find("span", {"class": "dtText"}).text.split(
+        word_data["Definition"] = soup.find("span", {"class": "dtText"}).text.split(
             ":"
         )[1]
+        word_data["Definition"] = word_data["Definition"]
     except (AttributeError, IndexError):
-        word_data["definition"] = "No definition found"
+        word_data["Definition"] = "No definition found"
+
     try:
-        word_data["phonetic"] = soup.find("span", {"class": "pr"}).text.replace(" ", "")
+        word_data["Phonetic Pronunciation"] = soup.find(
+            "a", {"class": "play-pron-v2"}
+        ).text
     except (AttributeError, IndexError):
-        word_data["phonetic"] = "No phonetic found"
+        word_data["Phonetic Pronunciation"] = "No phonetic pronunciation found"
+    # try:
+    #     word_data["Synonyms"] = soup.find("div", {"class": "synonyms"}).text
+    #     word_data["Synonyms"] = ", ".join(
+    #         [
+    #             synonym.text.replace(", ", "").capitalize()
+    #             for synonym in word_data["Synonyms"]
+    #             if "(" not in synonym.text
+    #         ]
+    #     )
+    # except (AttributeError, IndexError):
+    #     word_data["Synonyms"] = "No synonyms found"
+    # try:
+    #     word_data["Antonyms"] = soup.find_all("ul", {"class": "mw-list"})[1].find_all(
+    #         "li"
+    #     )
+    #     word_data["Antonyms"] = ", ".join(
+    #         [
+    #             antonym.text.replace(", ", "").capitalize()
+    #             for antonym in word_data["Antonyms"]
+    #             if "(" not in antonym.text
+    #         ]
+    #     )
+    # except (AttributeError, IndexError):
+    #     word_data["Antonyms"] = "No antonyms found"
     try:
-        word_data["synonyms"] = soup.find("ul", {"class": "mw-list"}).find_all("li")
-        word_data["synonyms"] = ", ".join(
-            [
-                synonym.text.replace(", ", "").capitalize()
-                for synonym in word_data["synonyms"]
-                if "(" not in synonym.text
-            ]
-        )
+        word_data["First Known Usage"] = soup.find("p", {"class": "ety-sl"}).text
+        word_data["First Known Usage"] = word_data["First Known Usage"].split(",")[0]
     except (AttributeError, IndexError):
-        word_data["synonyms"] = "No synonyms found"
+        word_data["First Known Usage"] = "No usage found"
     try:
-        word_data["antonyms"] = soup.find_all("ul", {"class": "mw-list"})[1].find_all(
-            "li"
-        )
-        word_data["antonyms"] = ", ".join(
-            [
-                antonym.text.replace(", ", "").capitalize()
-                for antonym in word_data["antonyms"]
-                if "(" not in antonym.text
-            ]
-        )
-    except (AttributeError, IndexError):
-        word_data["antonyms"] = "No antonyms found"
-    try:
-        word_data["usage"] = soup.find("p", {"class": "ety-sl"}).text
-        word_data["usage"] = word_data["usage"].split(",")[0]
-    except (AttributeError, IndexError):
-        word_data["usage"] = "No use found"
-    try:
-        word_data["etymology"] = soup.find_all("p", {"class": "et"})[0].text.split("—")[
+        word_data["Etymology"] = soup.find_all("p", {"class": "et"})[0].text.split("—")[
             0
         ]
     except (AttributeError, IndexError):
-        word_data["etymology"] = "No etymology found"
+        word_data["Etymology"] = "No etymology found"
     return word_data
 
 
@@ -126,25 +130,29 @@ class Dictionary(commands.Cog):
         try:
             word_data = await get_word_info(word)
             old_word = ""
-            if word_data["definition"] == "No definition found":
+            if word_data["Definition"] == "No definition found":
                 old_word = word
                 word_data = await get_word_info(await spellcheck(word))
-                if word_data["definition"] == "No definition found":
+                if word_data["Definition"] == "No definition found":
                     await ctx.edit(
                         content=f"No results found for **{old_word.capitalize()}**."
                     )
                     return
 
+            fields = []
+
+            for key, value in word_data.items():
+                if (
+                    value != "No {} found".format(key.lower())
+                    and key != "word"
+                    and key != "Definition"
+                ):
+                    fields.append([key.title(), value, False])
+
             embed = EmbedBuilder(
                 title=f"Definition of __{word_data['word'].capitalize()}__",
-                description=word_data["definition"],
-                fields=[
-                    ("Phonetic Pronunciation", word_data["phonetic"], False),
-                    ("Synonyms", word_data["synonyms"], True),
-                    ("Antonyms", word_data["antonyms"], True),
-                    ("First Known Use", word_data["usage"], False),
-                    ("Etymology", word_data["etymology"], False),
-                ],
+                description=word_data["Definition"],
+                fields=fields if fields else None,
             ).build()
 
             content = (
