@@ -1,4 +1,5 @@
 import base64
+import csv
 import re
 import sqlite3
 
@@ -266,9 +267,28 @@ class Alerts(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
+
+        c = self.db.cursor()
+        c.execute("SELECT * FROM alerts")
+        alerts = c.fetchall()
+        with open("util/alerts.csv", "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["keyword", "user_id", "user_name"])
+            writer.writerows(alerts)
+
+        c.execute("SELECT * FROM messagecount")
+        messagecount = c.fetchall()
+        with open("util/messagecount.csv", "w") as f:
+            writer = csv.writer(f)
+            writer.writerow(["user_id", "message_count"])
+            writer.writerows(messagecount)
+
         await ctx.respond(
-            content="Alerts Database",
-            file=discord.File("util/database.sqlite"),
+            content="Database",
+            files=[
+                discord.File("util/alerts.csv"),
+                discord.File("util/messagecount.csv"),
+            ],
             ephemeral=True,
         )
 
