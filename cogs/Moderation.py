@@ -3,7 +3,7 @@ import string
 import time
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import TypeAlias, Annotated
+from typing import Annotated, TypeAlias
 
 import aiohttp
 import discord
