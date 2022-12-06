@@ -1,3 +1,4 @@
+import asyncio
 import json
 
 import wikipedia
@@ -6,10 +7,8 @@ from discord.ext import commands
 import util.bandwidth as bandwidth
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-from util.threaded_async import make_async
 
 
-@make_async
 def get_wiki_without_logging(query) -> dict[str, str]:
     """
     It takes a query, gets the first page from Wikipedia, and returns a dictionary with the title,
@@ -30,7 +29,7 @@ def get_wiki_without_logging(query) -> dict[str, str]:
 
 
 async def get_wiki(query) -> dict[str, str]:
-    response = await get_wiki_without_logging(query)
+    response = await asyncio.to_thread(get_wiki_without_logging, query)
 
     bandwidth.log(
         len(json.dumps(response)),  # very rough estimate
