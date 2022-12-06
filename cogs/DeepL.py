@@ -79,9 +79,7 @@ class Translation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
-    @commands.slash_command(
-        name="translate", description="Translates a given text."
-    )
+    @commands.slash_command(name="translate", description="Translates a given text.")
     @option(
         "text",
         str,
