@@ -294,9 +294,9 @@ class Moderation(commands.Cog):
                 )
                 await message.add_reaction(MULTIPOST_EMOJI)
 
-                await self.delete_previous_multipost_warnings(fingerprint.channel_id, fingerprint.author_id)
                 warning = await message.reply(embed=embed)
                 self.multipost_warnings[message.id] = (warning, fingerprint)
+                await self.delete_previous_multipost_warnings(fingerprint.channel_id, fingerprint.author_id)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
