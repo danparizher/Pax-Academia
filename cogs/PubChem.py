@@ -1,13 +1,13 @@
+import asyncio
+
 import pubchempy as pcp
 from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-from util.threaded_async import make_async
 
 
-@make_async
 def get_data(name: str) -> dict:
     """
     It takes a string as an argument, and returns a dictionary of data about the compound
@@ -63,7 +63,7 @@ class PubChem(commands.Cog):
         :type name: str
         """
         try:
-            data = await get_data(name)
+            data = await asyncio.to_thread(get_data, name)
             embed = EmbedBuilder(
                 title=f"Properties of __{name.title()}__",
                 url=f"https://pubchem.ncbi.nlm.nih.gov/compound/{data['cid']}",

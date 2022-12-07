@@ -1,3 +1,4 @@
+import asyncio
 from typing import Optional
 
 import deepl
@@ -6,7 +7,6 @@ from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
-from util.threaded_async import make_async
 
 LANGUAGES = [
     "Bulgarian",
@@ -37,7 +37,6 @@ LANGUAGES = [
 FORMALITY_TONES = ["Formal", "Informal"]
 
 
-@make_async
 def translate(
     text: str,
     source_language: str,
@@ -131,8 +130,12 @@ class Translation(commands.Cog):
         :return: The translated text.
         """
         try:
-            translated_text = await translate(
-                text, source_language, target_language, formality_tone
+            translated_text = await asyncio.to_thread(
+                translate,
+                text,
+                source_language,
+                target_language,
+                formality_tone,
             )
         except Exception as e:
             embed = EmbedBuilder(
