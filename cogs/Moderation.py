@@ -3,7 +3,7 @@ import string
 import time
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import TypeAlias
+from typing import Annotated, TypeAlias
 
 import aiohttp
 import discord
@@ -148,7 +148,13 @@ class Moderation(commands.Cog):
         self.fingerprints: list[
             MessageFingerprint
         ] = []  # stores all user messages sent in the last minute (recent messages near the end)
-        self.multipost_warnings: dict[int, discord.Message] = {}  # multiposted message ID -> the warning message
+        self.multipost_warnings: dict[
+            Annotated[int, "Multiposted Message ID"],
+            tuple[
+                Annotated[discord.Message, "Bot's Warning Message"],
+                Annotated[MessageFingerprint, "Offending Message's Fingerprint"],
+            ],
+        ] = {}
         self.clear_old_cached_data.start()
 
     # temporarily commented out because this is not functional
@@ -182,8 +188,8 @@ class Moderation(commands.Cog):
         await ctx.respond(embed=embed)
     """
 
-    # Records a MessageFingerprint and returns a list of fingerprints that this message is a multipost of
-    async def record_fingerprint(self, message: discord.Message) -> list[MessageFingerprint]:
+    # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
+    async def record_fingerprint(self, message: discord.Message) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
@@ -192,7 +198,7 @@ class Moderation(commands.Cog):
             if fingerprint is not other_fingerprint and await fingerprint.is_multipost_of(other_fingerprint):
                 multipost_of.append(other_fingerprint)
 
-        return multipost_of
+        return fingerprint, multipost_of
 
     # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
@@ -212,12 +218,23 @@ class Moderation(commands.Cog):
 
         # delete cached multipost warnings older than 10 minutes
         multipost_warnings_to_delete = []
-        for original_message_id, warning_message in self.multipost_warnings.items():
+        for original_message_id, (warning_message, _fingerprint) in self.multipost_warnings.items():
             if time.time() - warning_message.created_at.timestamp() > 600:
                 multipost_warnings_to_delete.append(original_message_id)
 
         for message_id in multipost_warnings_to_delete:
             del self.multipost_warnings[message_id]
+
+    async def delete_previous_multipost_warnings(self, channel_id: int, author_id: int):
+        to_delete: list[int] = []
+
+        for warning_message_id, (multipost_warning, offenders_fingerprint) in self.multipost_warnings.items():
+            if offenders_fingerprint.channel_id == channel_id and offenders_fingerprint.author_id == author_id:
+                to_delete.append(warning_message_id)
+
+        for warning_message_id in to_delete:
+            multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(warning_message_id)
+            await multipost_warning.delete()
 
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
@@ -248,7 +265,7 @@ class Moderation(commands.Cog):
         if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
             return
 
-        previous_messages = await self.record_fingerprint(message)
+        fingerprint, previous_messages = await self.record_fingerprint(message)
         n_previous_messages = len(previous_messages)
 
         # Original Message - No action taken
@@ -278,7 +295,8 @@ class Moderation(commands.Cog):
                 await message.add_reaction(MULTIPOST_EMOJI)
 
                 warning = await message.reply(embed=embed)
-                self.multipost_warnings[message.id] = warning
+                self.multipost_warnings[message.id] = (warning, fingerprint)
+                await self.delete_previous_multipost_warnings(fingerprint.channel_id, fingerprint.author_id)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
@@ -328,7 +346,7 @@ class Moderation(commands.Cog):
         if payload.message_id in self.multipost_warnings:
             # The person deleted their message after seeing out multipost warning
             # so we can delete the warning message
-            warning_message = self.multipost_warnings.pop(payload.message_id)
+            warning_message, _fingerprint = self.multipost_warnings.pop(payload.message_id)
             try:
                 await warning_message.delete()
             except discord.errors.HTTPException as e:
