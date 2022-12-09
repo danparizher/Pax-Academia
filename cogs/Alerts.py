@@ -267,7 +267,11 @@ class Alerts(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
-
+        #TODO: remove hardcode and implement permanent fix
+        CODEOWNERS = [279614239679971328, 882779998782636042, 154670542237073419, 74576452854480896] # Hardcoded only as hotfix (shuler, spencer, rust, czar)
+        if ctx.author.id not in CODEOWNERS:
+            await ctx.respond(content="Not allowed", ephemeral=True)
+            return
         c = self.db.cursor()
         c.execute("SELECT * FROM alerts")
         alerts = c.fetchall()
