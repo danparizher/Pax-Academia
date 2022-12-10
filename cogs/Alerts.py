@@ -11,8 +11,10 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 # used to encode/ decode user input to protect against SQLi
-b64ify = lambda x: base64.b64encode(x.encode()).decode()
-deb64ify = lambda y: base64.b64decode(y.encode()).decode()
+
+
+def b64ify(x): return base64.b64encode(x.encode()).decode()
+def deb64ify(y): return base64.b64decode(y.encode()).decode()
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
@@ -267,8 +269,9 @@ class Alerts(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
-        #TODO: remove hardcode and implement permanent fix
-        CODEOWNERS = [279614239679971328, 882779998782636042, 154670542237073419, 74576452854480896, 198067816245624833] # Hardcoded only as hotfix (shuler, spencer, rust, czar)
+        # TODO: remove hardcode and implement permanent fix
+        CODEOWNERS = [279614239679971328, 882779998782636042, 154670542237073419, 74576452854480896,
+                      198067816245624833]  # Hardcoded only as hotfix (shuler, spencer, rust, czar)
         if ctx.author.id not in CODEOWNERS:
             await ctx.respond(content="Not allowed", ephemeral=True)
             return
@@ -294,6 +297,7 @@ class Alerts(commands.Cog):
                 writer.writerow(column_names)
                 writer.writerows(content)
 
+        # assumption that there are <10 different tables
         await ctx.respond(
             content="Databases",
             files=[discord.File(f"util/{table}.csv") for table in table_names],
