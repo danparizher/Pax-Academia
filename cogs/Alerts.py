@@ -11,8 +11,14 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
 
 # used to encode/ decode user input to protect against SQLi
-b64ify = lambda x: base64.b64encode(x.encode()).decode()
-deb64ify = lambda y: base64.b64decode(y.encode()).decode()
+
+
+def b64ify(x: str) -> str:
+    return base64.b64encode(x.encode()).decode()
+
+
+def deb64ify(y: str) -> str:
+    return base64.b64decode(y.encode()).decode()
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
@@ -267,32 +273,45 @@ class Alerts(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
-        #TODO: remove hardcode and implement permanent fix
-        CODEOWNERS = [279614239679971328, 882779998782636042, 154670542237073419, 74576452854480896] # Hardcoded only as hotfix (shuler, spencer, rust, czar)
+        # TODO: remove hardcode and implement permanent fix
+        CODEOWNERS = [
+            279614239679971328,
+            882779998782636042,
+            154670542237073419,
+            74576452854480896,
+            198067816245624833,
+        ]  # Hardcoded only as hotfix (shuler, spencer, rust, czar)
         if ctx.author.id not in CODEOWNERS:
             await ctx.respond(content="Not allowed", ephemeral=True)
             return
+
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts")
-        alerts = c.fetchall()
-        with open("util/alerts.csv", "w") as f:
-            writer = csv.writer(f)
-            writer.writerow(["keyword", "user_id", "user_name"])
-            writer.writerows(alerts)
+        c.execute(
+            """SELECT 
+                        name
+                    FROM 
+                        sqlite_schema
+                    WHERE 
+                        type ='table' AND 
+                        name NOT LIKE 'sqlite_%'"""
+        )
+        table_names = [x[0] for x in c.fetchall()]
 
-        c.execute("SELECT * FROM messagecount")
-        messagecount = c.fetchall()
-        with open("util/messagecount.csv", "w") as f:
-            writer = csv.writer(f)
-            writer.writerow(["user_id", "message_count"])
-            writer.writerows(messagecount)
+        for table in table_names:
+            c.execute(f"SELECT * FROM {table}")
+            content = c.fetchall()
+            c.execute(f"PRAGMA table_info({table})")
+            column_names = [x[1] for x in c.fetchall()]
 
+            with open(f"util/{table}.csv", "w") as f:
+                writer = csv.writer(f)
+                writer.writerow(column_names)
+                writer.writerows(content)
+
+        # assumption that there are <10 different tables
         await ctx.respond(
-            content="Database",
-            files=[
-                discord.File("util/alerts.csv"),
-                discord.File("util/messagecount.csv"),
-            ],
+            content="Databases",
+            files=[discord.File(f"util/{table}.csv") for table in table_names],
             ephemeral=True,
         )
 
