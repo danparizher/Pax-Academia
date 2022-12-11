@@ -13,8 +13,12 @@ from util.Logging import log
 # used to encode/ decode user input to protect against SQLi
 
 
-def b64ify(x): return base64.b64encode(x.encode()).decode()
-def deb64ify(y): return base64.b64decode(y.encode()).decode()
+def b64ify(x: str) -> str:
+    return base64.b64encode(x.encode()).decode()
+
+
+def deb64ify(y: str) -> str:
+    return base64.b64decode(y.encode()).decode()
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
@@ -270,20 +274,27 @@ class Alerts(commands.Cog):
         :type ctx: commands.Context
         """
         # TODO: remove hardcode and implement permanent fix
-        CODEOWNERS = [279614239679971328, 882779998782636042, 154670542237073419, 74576452854480896,
-                      198067816245624833]  # Hardcoded only as hotfix (shuler, spencer, rust, czar)
+        CODEOWNERS = [
+            279614239679971328,
+            882779998782636042,
+            154670542237073419,
+            74576452854480896,
+            198067816245624833,
+        ]  # Hardcoded only as hotfix (shuler, spencer, rust, czar)
         if ctx.author.id not in CODEOWNERS:
             await ctx.respond(content="Not allowed", ephemeral=True)
             return
 
         c = self.db.cursor()
-        c.execute("""SELECT 
+        c.execute(
+            """SELECT 
                         name
                     FROM 
                         sqlite_schema
                     WHERE 
                         type ='table' AND 
-                        name NOT LIKE 'sqlite_%'""")
+                        name NOT LIKE 'sqlite_%'"""
+        )
         table_names = [x[0] for x in c.fetchall()]
 
         for table in table_names:
