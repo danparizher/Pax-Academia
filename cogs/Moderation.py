@@ -95,8 +95,9 @@ class MessageFingerprint:
                         # from
                         # "https://media.discordapp.net/attachments/123/456/filename.png"
                         # to
-                        # "https://media.discordapp.net/attachments/123/456/[REDACTED].png"
+                        # "https://media.discordapp.net/attachments/[REDACTED]/[REDACTED]/[REDACTED].png"
                         redacted_url = re.sub(r"/[^/]*?\.([^\.]*)$", r"/[REDACTED].\1", attachment_url)
+                        redacted_url = re.sub(r"\d+", r"[REDACTED]", redacted_url)
 
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
