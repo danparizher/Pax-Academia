@@ -1,4 +1,5 @@
 import os
+import re
 import string
 import time
 from dataclasses import dataclass
@@ -91,13 +92,20 @@ class MessageFingerprint:
             async with aiohttp.ClientSession() as session:
                 for attachment_url in self.attachment_urls[:5]:  # only load first 5 attachments to prevent abuse
                     try:
+                        # from
+                        # "https://media.discordapp.net/attachments/123/456/filename.png"
+                        # to
+                        # "https://media.discordapp.net/attachments/[REDACTED]/[REDACTED]/[REDACTED].png"
+                        redacted_url = re.sub(r"/[^/]*?\.([^\.]*)$", r"/[REDACTED].\1", attachment_url)
+                        redacted_url = re.sub(r"\d+", r"[REDACTED]", redacted_url)
+
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
                             bandwidth.log(
                                 len(attachment_data),  # this doesn't account for HTTP/TCP overhead or compression
                                 "inbound",
                                 "download_attachment",
-                                f"HTTP GET {attachment_url}",
+                                f"HTTP GET {redacted_url}",
                             )
                     except Exception as e:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
