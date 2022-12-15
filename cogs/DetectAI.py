@@ -1,3 +1,4 @@
+import io
 import os
 
 import discord
@@ -21,9 +22,9 @@ class AI(commands.Cog):
     )
     async def ai(self, ctx: commands.Context, text: str) -> None:
         """
-        It takes a string, goes to a website, fills in a text box, clicks a button, waits for a certain
-        element to appear, takes a screenshot of the element, sends the screenshot to the channel, and
-        deletes the screenshot
+        It opens a headless browser, goes to the website, fills in the text, clicks the button, waits for
+        the result, takes a screenshot of the result, closes the browser, and sends the screenshot to the
+        channel
         
         :param ctx: commands.Context - The context of the command
         :type ctx: commands.Context
@@ -39,12 +40,10 @@ class AI(commands.Cog):
             await page.fill("textarea", text)
             await page.click("button")
             await page.wait_for_selector("text=top k count")
-            await page.locator("#all_result").screenshot(
-                path=f"util/screenshot_{ctx.author.id}.png"
-            )
+            screenshot = await page.locator("#all_result").screenshot()
+            file_ = io.BytesIO(screenshot)
             await browser.close()
-            await ctx.respond(file=discord.File(f"util/screenshot_{ctx.author.id}.png"))
-            os.remove(f"util/screenshot_{ctx.author.id}.png")
+            await ctx.respond(file=discord.File(file_, filename="result.png"))
 
 
 def setup(bot: commands.Bot) -> None:
