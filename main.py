@@ -15,6 +15,7 @@ def load() -> None:
     cogs = [
         "Alerts",
         "DeepL",
+        "DetectAI",
         "Information",
         "MerriamWebster",
         "MessageCounter",
