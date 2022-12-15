@@ -20,6 +20,16 @@ class AI(commands.Cog):
         required=True,
     )
     async def ai(self, ctx: commands.Context, text: str) -> None:
+        """
+        It takes a string, goes to a website, fills in a text box, clicks a button, waits for a certain
+        element to appear, takes a screenshot of the element, sends the screenshot to the channel, and
+        deletes the screenshot
+        
+        :param ctx: commands.Context - The context of the command
+        :type ctx: commands.Context
+        :param text: str
+        :type text: str
+        """
         await ctx.defer()
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
