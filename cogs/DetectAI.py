@@ -25,7 +25,7 @@ class AI(commands.Cog):
         It opens a headless browser, goes to the website, fills in the text, clicks the button, waits for
         the result, takes a screenshot of the result, closes the browser, and sends the screenshot to the
         channel
-        
+
         :param ctx: commands.Context - The context of the command
         :type ctx: commands.Context
         :param text: str
