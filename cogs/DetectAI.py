@@ -31,7 +31,7 @@ class AI(commands.Cog):
         :param text: str
         :type text: str
         """
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context()
