@@ -199,7 +199,7 @@ class Alerts(commands.Cog):
                         title="Alert",
                         description=f"Your keyword `{deb64ify(keyword[0])}` was mentioned in {message.channel.mention} by {message.author.mention}.",
                         fields=[
-                            ("Message", message.content, False),
+                            ("Message", message.content[:1024], False),
                             (
                                 "Message Link",
                                 f"[Click to see message]({message.jump_url})",
@@ -212,58 +212,7 @@ class Alerts(commands.Cog):
                     except discord.Forbidden:
                         pass
 
-        async def tutor_alerts(self, message: discord.Message) -> None:
-            """
-            It checks if a message contains any of the keywords in the list, and if it does, it sends an embed
-            to a channel
-
-            :param message: discord.Message
-            :type message: discord.Message
-            :return: The return value is a list of strings.
-            """
-            if (
-                message.author.id == self.bot.user.id
-                or message.guild.id != 238956364729155585
-                or message.author.bot
-                or message.author.guild.get_role(276969339901444096)
-            ):
-                return
-
-            keywords = [
-                "dm me",
-                "pay",
-                "paypal",
-                "cash",
-                "venmo",
-                "dollar",
-                "tutor",
-                "money",
-                "price",
-                "$",
-                "professional",
-                "service",
-                "fee",
-            ]
-            tutor_logs = self.bot.get_channel(1038985540147626024)
-            # fmt: off
-            if any(temp := sorted((lambda y: [x.group(0) for x in y if x != ""])([re.search(keyword, message.content, re.IGNORECASE) or "" for keyword in keywords]), key=lambda x: len(x), reverse=True,)):
-            # fmt: on
-                embed = EmbedBuilder(
-                    title="Alert",
-                    description=f"{message.author.mention} mentioned `{temp[0]}` in {message.channel.mention}.",
-                    fields=[
-                        ("Message", message.content, False),
-                        (
-                            "Message Link",
-                            f"[Click to see message]({message.jump_url})",
-                            False,
-                        ),
-                    ],
-                ).build()
-                await tutor_logs.send(embed=embed)
-
         await user_alerts()
-        await tutor_alerts(self, message)
 
     @commands.slash_command(name="view-db", description="View the database.")
     async def view_db(self, ctx: commands.Context) -> None:
