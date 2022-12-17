@@ -214,56 +214,6 @@ class Alerts(commands.Cog):
 
         await user_alerts()
 
-    @commands.slash_command(name="view-db", description="View the database.")
-    async def view_db(self, ctx: commands.Context) -> None:
-        """
-        It sends a file to the user who called the command
-
-        :param ctx: commands.Context
-        :type ctx: commands.Context
-        """
-        # TODO: remove hardcode and implement permanent fix
-        CODEOWNERS = [
-            279614239679971328,
-            882779998782636042,
-            154670542237073419,
-            74576452854480896,
-            198067816245624833,
-        ]  # Hardcoded only as hotfix (shuler, spencer, rust, czar)
-        if ctx.author.id not in CODEOWNERS:
-            await ctx.respond(content="Not allowed", ephemeral=True)
-            return
-
-        c = self.db.cursor()
-        c.execute(
-            """SELECT 
-                        name
-                    FROM 
-                        sqlite_schema
-                    WHERE 
-                        type ='table' AND 
-                        name NOT LIKE 'sqlite_%'"""
-        )
-        table_names = [x[0] for x in c.fetchall()]
-
-        for table in table_names:
-            c.execute(f"SELECT * FROM {table}")
-            content = c.fetchall()
-            c.execute(f"PRAGMA table_info({table})")
-            column_names = [x[1] for x in c.fetchall()]
-
-            with open(f"util/{table}.csv", "w") as f:
-                writer = csv.writer(f)
-                writer.writerow(column_names)
-                writer.writerows(content)
-
-        # assumption that there are <10 different tables
-        await ctx.respond(
-            content="Databases",
-            files=[discord.File(f"util/{table}.csv") for table in table_names],
-            ephemeral=True,
-        )
-
 
 def setup(bot) -> None:
     bot.add_cog(Alerts(bot))
