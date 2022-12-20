@@ -14,6 +14,7 @@ from util.Logging import log
 #TODO: Add logging
 #TODO: Clean code
 #TODO: Add submission time to the database
+
 class StaffAppView(discord.ui.View):
     def __init__(self, db, author):
         super().__init__()
@@ -215,7 +216,7 @@ class StaffAppView(discord.ui.View):
         select.disabled = True
         await interaction.response.edit_message(view=self)
     
-    @discord.ui.button(label="Other Questions", style=discord.ButtonStyle.primary, row=3, disabled=True)
+    @discord.ui.button(label="Next Questions", style=discord.ButtonStyle.primary, row=3, disabled=True)
     async def button_callback(self, button, interaction):
         await interaction.response.send_modal(StaffAppModal(self.db, self.author, title="Input answers"))
 
@@ -357,7 +358,7 @@ class StaffRequirement(commands.Cog):
                 timedelta(days=30) - time_since_join,
             )
             desc = f"""Unfortunately, you do not meet the basic requirements in order to apply for staff.
-                Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel."""
+                Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
             if wait_time > timedelta(0):
                 desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
             if msg_amount < 500:
