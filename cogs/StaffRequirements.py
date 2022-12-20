@@ -12,10 +12,26 @@ from util.Logging import log
 
 
 class StaffAppView(discord.ui.View):
-    def __init__(self, db):
+    def __init__(self, db, author):
         super().__init__()
         self.db = db
         self.cursor = self.db.cursor()
+        self.author = author
+
+    async def disable_if_done(self, interaction):
+        if all([True if field_content != None else False for field_content in self.cursor.execute('SELECT * FROM staffapp WHERE uid = ?', (self.author,)).fetchone()]):
+            #TODO change color, change text
+            embed = discord.Embed(
+                title="Staff Application",
+                description="You have completed your staff application.\n Please wait for a staff member to review your application.\n *(You can re-apply by running this command again)*",
+                color=0x00FF00
+            )
+            await interaction.response.edit_message(embed=None, content="DONE", view=None)
+            #await interaction.delete_original_message()
+            return True
+        return False
+
+
     @discord.ui.select( 
         placeholder = "Do you agree to the Non-Disclosure Agreement?",
         row=0,
@@ -37,7 +53,6 @@ class StaffAppView(discord.ui.View):
     async def nda_callback(self, select, interaction):
         self.cursor.execute("UPDATE staffapp SET nda = ? WHERE uid = ?", (True if (answer := select.values[0]) == "I Agree" else False, interaction.user.id))
         self.db.commit()
-        select.disabled = True
         if answer == "I do NOT Agree":
             embed = discord.Embed(
                 title="Staff Application",
@@ -46,13 +61,20 @@ class StaffAppView(discord.ui.View):
             )
             await interaction.response.edit_message(embed=embed, view=None)
             return
-        await interaction.response.edit_message(view=self)
+        else:
+            for child in self.children:
+                print(child)
+                child.disabled = False
+            select.disabled = True
+            await interaction.response.edit_message(view=self)
+
     
     @discord.ui.select(
         placeholder = "What is your timezone?",
         row=1,
         min_values = 1,
         max_values = 1,
+        disabled=True,
         options = [
             discord.SelectOption(
                 label="UTC-12:00",
@@ -160,6 +182,7 @@ class StaffAppView(discord.ui.View):
     async def timezone_callback(self, select, interaction):
         self.cursor.execute("UPDATE staffapp SET timezone = ? WHERE uid = ?", (select.values[0], interaction.user.id))
         self.db.commit()
+        await self.disable_if_done(interaction)
         select.disabled = True
         await interaction.response.edit_message(view=self)
     
@@ -168,6 +191,7 @@ class StaffAppView(discord.ui.View):
         row=2,
         min_values = 1,
         max_values = 1,
+        disabled=True,
         options = [
             discord.SelectOption(
                 label="1 - 2 Hours",
@@ -199,28 +223,44 @@ class StaffAppView(discord.ui.View):
     async def time_callback(self, select, interaction):
         self.cursor.execute("UPDATE staffapp SET hours_available_wk = ? WHERE uid = ?", (select.values[0], interaction.user.id))
         self.db.commit()
+        await self.disable_if_done(interaction)
         select.disabled = True
         await interaction.response.edit_message(view=self)
     
-    @discord.ui.button(label="Other Questions", style=discord.ButtonStyle.primary, row=3)
+    @discord.ui.button(label="Other Questions", style=discord.ButtonStyle.primary, row=3, disabled=True)
     async def button_callback(self, button, interaction):
-        await interaction.response.send_modal(StaffAppModal(self.db, title="Input answers"))
-        
+        data = await interaction.response.send_modal(StaffAppModal(self.db, self.author, title="Input answers"))
+
 
 class StaffAppModal(discord.ui.Modal):
-    def __init__(self, db, *args, **kwargs) -> None:
+    def __init__(self, db, author, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.db = db
         self.cursor = self.db.cursor()
+        self.author = author
 
         self.add_item(discord.ui.InputText(label="First Name (Eg. John)", style=discord.InputTextStyle.short))
         self.add_item(discord.ui.InputText(label="Why do you want to become a staff member", style=discord.InputTextStyle.long))
         self.add_item(discord.ui.InputText(label="How can you contribute if you are given staff", style=discord.InputTextStyle.long))
+    
+    async def disable_if_done(self, interaction):
+        if all([True if field_content != None else False for field_content in self.cursor.execute('SELECT * FROM staffapp WHERE uid = ?', (self.author,)).fetchone()]):
+            #TODO change color, change text
+            embed = discord.Embed(
+                title="Staff Application",
+                description="You have completed your staff application.\n Please wait for a staff member to review your application.\n *(You can re-apply by running this command again)*",
+                color=0x00FF00
+            )
+            await interaction.response.edit_message(embed=None, content="DONE", view=None)
+            #await interaction.delete_original_message()
+            return True
+        return False
 
     async def callback(self, interaction: discord.Interaction):
         self.cursor.execute("UPDATE staffapp SET first_name = ?, staff_reason = ?, contribute_reason = ? WHERE uid = ?", (self.children[0].value, self.children[1].value, self.children[2].value, interaction.user.id))
         self.db.commit()
-        await interaction.response.send_message("Thank you for your application! We will review it and get back to you as soon as possible.", ephemeral=True)
+        #await interaction.response.send_message("Thank you for your application! We will review it and get back to you as soon as possible.", ephemeral=True)
+        await self.disable_if_done(interaction)
 
 class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -254,6 +294,21 @@ class StaffRequirement(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
+        self.author = ctx.author.id
+        # check if the user has answered every field in the staffapp table
+        try:
+            filled_in = all([True if field_content != None else False for field_content in self.cursor.execute('SELECT * FROM staffapp WHERE uid = ?', (ctx.author.id,)).fetchone()])
+        except TypeError:
+            filled_in = False
+        if filled_in:
+            embed = discord.Embed(
+                title="You have already applied for staff!",
+                description="Your application has already been submitted. We will review it and get back to you as soon as possible.",
+                color=0xFFD700,
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
         msg_amount = self.fetch_message_count(ctx.author.id)
         account = ctx.author
 
@@ -284,7 +339,8 @@ class StaffRequirement(commands.Cog):
 
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
-        # time since join is at least 30 days
+        # time since join is at least 30 days AND
+        # message amount is at least 500
         if time_since_creation >= timedelta(weeks=52) and time_since_join >= timedelta(
             days=30
         ) and msg_amount >= 500:
@@ -308,7 +364,7 @@ class StaffRequirement(commands.Cog):
                 fields=fields,
                 color=0x39FF14,  # GREEN
             ).build()
-            await ctx.respond(embed=embed, ephemeral=True, view=StaffAppView(self.db))
+            await ctx.respond(embed=embed, ephemeral=True, view=StaffAppView(self.db, self.author))
         else:
             wait_time = max(
                 timedelta(weeks=52) - time_since_creation,
