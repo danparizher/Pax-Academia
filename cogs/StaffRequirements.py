@@ -6,6 +6,7 @@ from discord.ext import commands
 from humanize import precisedelta
 
 import sqlite3
+from time import time
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import log
@@ -13,7 +14,6 @@ from util.Logging import log
 #TODO: Clean up text in the congrats embed
 #TODO: Add logging
 #TODO: Clean code
-#TODO: Add submission time to the database
 
 class StaffAppView(discord.ui.View):
     def __init__(self, db, author):
@@ -245,7 +245,7 @@ class StaffAppModal(discord.ui.Modal):
         return False
 
     async def callback(self, interaction: discord.Interaction):
-        self.cursor.execute("UPDATE staffapp SET first_name = ?, staff_reason = ?, contribute_reason = ? WHERE uid = ?", (self.children[0].value, self.children[1].value, self.children[2].value, interaction.user.id))
+        self.cursor.execute("UPDATE staffapp SET first_name = ?, staff_reason = ?, contribute_reason = ?, submission_time = ? WHERE uid = ?", (self.children[0].value, self.children[1].value, self.children[2].value, time() // 1 ,interaction.user.id))
         self.db.commit()
         await self.disable_if_done(interaction)
 
@@ -262,12 +262,16 @@ class StaffRequirement(commands.Cog):
             timezone TEXT,
             hours_available_wk TEXT,
             staff_reason TEXT,
-            contribute_reason TEXT
+            contribute_reason TEXT,
+            submission_time INTEGER
         )""")
 
     def fetch_message_count(self, uid):
-        self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (uid,))
-        return self.cursor.fetchone()[0]
+        try:
+            self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (uid,))
+            return self.cursor.fetchone()[0]
+        except TypeError:
+            return 0
 
     # Allows the user to set the keeptime to a value other than the default
     @commands.slash_command(
