@@ -19,7 +19,14 @@ class AI(commands.Cog):
         description="The text to run through the AI.",
         required=True,
     )
-    async def ai(self, ctx: commands.Context, text: str) -> None:
+    @option(
+        "ephemeral",
+        bool,
+        description="Whether the response should be ephemeral or not. Only staff can make this False.",
+        required=False,
+        default=True,
+    )
+    async def ai(self, ctx: commands.Context, text: str, ephemeral: bool) -> None:
         """
         It opens a headless browser, goes to the website, fills in the text, clicks the button, waits for
         the result, takes a screenshot of the result, closes the browser, and sends the screenshot to the
@@ -30,7 +37,10 @@ class AI(commands.Cog):
         :param text: str
         :type text: str
         """
-        await ctx.defer(ephemeral=True)
+        if "Staff" not in [role.name for role in ctx.author.roles]:
+            ephemeral = True
+        await ctx.defer(ephemeral=ephemeral)
+
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
             context = await browser.new_context()
