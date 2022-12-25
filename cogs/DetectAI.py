@@ -5,6 +5,8 @@ from discord import option
 from discord.ext import commands
 from playwright.async_api import async_playwright
 
+from util.EmbedBuilder import EmbedBuilder
+
 
 class AI(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -41,18 +43,27 @@ class AI(commands.Cog):
             ephemeral = True
         await ctx.defer(ephemeral=ephemeral)
 
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            context = await browser.new_context()
-            page = await context.new_page()
-            await page.goto("http://gltr.io/dist/index.html")
-            await page.fill("textarea", text)
-            await page.click("button")
-            await page.wait_for_selector("text=top k count")
-            screenshot = await page.locator("#all_result").screenshot()
-            file_ = io.BytesIO(screenshot)
-            await browser.close()
-            await ctx.respond(file=discord.File(file_, filename="result.png"))
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                context = await browser.new_context()
+                page = await context.new_page()
+                await page.goto("http://gltr.io/dist/index.html")
+                await page.fill("textarea", text)
+                await page.click("button")
+                await page.wait_for_selector("text=top k count")
+                screenshot = await page.locator("#all_result").screenshot()
+                file_ = io.BytesIO(screenshot)
+                await browser.close()
+                await ctx.respond(file=discord.File(file_, filename="result.png"))
+        except Exception as e:
+            await ctx.respond(
+                embed=EmbedBuilder(
+                    title="Error",
+                    description=f"An error occurred while running the command:\n\n{e}",
+                ).build(),
+                ephemeral=True,
+            )
 
 
 def setup(bot: commands.Bot) -> None:

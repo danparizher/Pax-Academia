@@ -74,7 +74,7 @@ class Wikipedia(commands.Cog):
                 description="The search term you entered is ambiguous. Please be more specific.",
             ).build()
 
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
 
         except wikipedia.exceptions.PageError:
             embed = EmbedBuilder(
@@ -82,7 +82,7 @@ class Wikipedia(commands.Cog):
                 description="The search term you entered does not exist on Wikipedia.",
             ).build()
 
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
 
 
 def setup(bot: commands.Bot) -> None:

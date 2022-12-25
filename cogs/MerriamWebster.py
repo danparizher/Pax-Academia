@@ -169,7 +169,7 @@ class Dictionary(commands.Cog):
                 title=f"Definition of __{word.capitalize()}__",
                 description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
             ).build()
-            await ctx.edit(embed=embed)
+            await ctx.edit(embed=embed, ephemeral=True)
 
 
 def setup(bot) -> None:

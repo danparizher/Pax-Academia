@@ -143,7 +143,7 @@ class Translation(commands.Cog):
                 description=f"An error occurred while translating the text:\n\n{e}",
             ).build()
 
-            await ctx.send(embed=embed)
+            await ctx.send(embed=embed, ephemeral=True)
             return
 
         embed = EmbedBuilder(

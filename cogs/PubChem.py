@@ -94,7 +94,7 @@ class PubChem(commands.Cog):
                 description=f"Compound **{name.title()}** not found. Did you spell it correctly?",
             ).build()
 
-            await ctx.respond(embed=embed)
+            await ctx.respond(embed=embed, ephemeral=True)
 
 
 def setup(bot: commands.Bot) -> None:
