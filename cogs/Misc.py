@@ -10,7 +10,7 @@ class Misc(commands.Cog):
     async def ping(self, ctx: commands.Context) -> None:
         """
         It sends a message, then edits that message to say "Pong!" and the latency of the bot
-        
+
         :param ctx: The context of the command
         :type ctx: commands.Context
         """
@@ -25,7 +25,11 @@ class Misc(commands.Cog):
         The above function is a coroutine that prints a message to the console when the bot is ready
         """
         print(f"{self.bot.user.name} has connected to Discord!")
-        await self.bot.change_presence(activity=discord.Game(name="Academic Peace..."))
+        await self.bot.change_presence(
+            activity=discord.Activity(
+                name="Academic Peace...", type=discord.ActivityType.watching
+            )
+        )
 
 
 def setup(bot: commands.Bot) -> None:
