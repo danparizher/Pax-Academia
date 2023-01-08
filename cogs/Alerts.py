@@ -194,7 +194,9 @@ class Alerts(commands.Cog):
             # Send a DM to the user who added the alert.
             for keyword in keywords:
                 if re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE):
-                    user = await self.bot.fetch_user(keyword[1])
+                    member = await message.channel.guild.fetch_member(keyword[1])
+                    if not message.channel.permissions_for(member).view_channel:
+                        return
                     embed = EmbedBuilder(
                         title="Alert",
                         description=f"Your keyword `{deb64ify(keyword[0])}` was mentioned in {message.channel.mention} by {message.author.mention}.",
@@ -208,7 +210,7 @@ class Alerts(commands.Cog):
                         ],
                     ).build()
                     try:
-                        await user.send(embed=embed)
+                        await member.send(embed=embed)
                     except discord.Forbidden:
                         pass
 
