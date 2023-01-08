@@ -194,7 +194,10 @@ class Alerts(commands.Cog):
             # Send a DM to the user who added the alert.
             for keyword in keywords:
                 if re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE):
-                    member = await message.channel.guild.fetch_member(keyword[1])
+                    try:
+                        member = await message.channel.guild.fetch_member(keyword[1])
+                    except discord.NotFound:
+                        return
                     if not message.channel.permissions_for(member).view_channel:
                         return
                     embed = EmbedBuilder(
