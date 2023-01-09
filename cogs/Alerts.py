@@ -55,7 +55,7 @@ class Alerts(commands.Cog):
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
-        name="add-alert", description="Adds an alert for a keyword."
+        name="alerts-add", description="Adds an alert for a keyword."
     )
     async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
         """
@@ -98,7 +98,7 @@ class Alerts(commands.Cog):
         log(f"Alert added by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(
-        name="remove-alert",
+        name="alerts-remove",
         description="Removes an alert for a keyword.",
     )
     @option(
@@ -145,7 +145,7 @@ class Alerts(commands.Cog):
 
         log(f"Alert removed by {ctx.author} in {ctx.guild}.")
 
-    @commands.slash_command(name="list-alerts", description="Lists all alerts.")
+    @commands.slash_command(name="alerts-list", description="Lists all alerts.")
     async def list_alerts(self, ctx: commands.Context) -> None:
         """
         It gets all alerts from the database and responds with a list of them
