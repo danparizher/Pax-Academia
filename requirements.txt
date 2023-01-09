@@ -2,7 +2,7 @@ aiohttp==3.8.3
 beautifulsoup4==4.11.1
 deepl_translate==1.2.0
 humanize==4.4.0
-playwright==1.29.0
+playwright==1.29.1
 pubchempy==1.0.4
 py-cord==2.3.2
 python-dotenv==0.21.0
