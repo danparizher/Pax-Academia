@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 
+from util.EmbedBuilder import EmbedBuilder
+
 
 class Misc(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -9,15 +11,18 @@ class Misc(commands.Cog):
     @commands.slash_command(name="ping", description="Pings the bot.")
     async def ping(self, ctx: commands.Context) -> None:
         """
-        It sends a message, then edits that message to say "Pong!" and the latency of the bot
+        It creates an embed with the title "Pong!" and the description "Latency: {round(self.bot.latency *
+        1000)}ms" and then sends it to the channel the command was used in
         
-        :param ctx: The context of the command
+        :param ctx: commands.Context
         :type ctx: commands.Context
         """
-        message = await ctx.respond("Pinging...")
-        await message.edit_original_response(
-            content=f"Pong! {round(self.bot.latency * 1000)}ms"
-        )
+        embed = EmbedBuilder(
+            title="Pong!",
+            description=f"Latency: {round(self.bot.latency * 1000)}ms",
+        ).build()
+
+        await ctx.respond(embed=embed)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -25,7 +30,11 @@ class Misc(commands.Cog):
         The above function is a coroutine that prints a message to the console when the bot is ready
         """
         print(f"{self.bot.user.name} has connected to Discord!")
-        await self.bot.change_presence(activity=discord.Game(name="Academic Peace..."))
+        await self.bot.change_presence(
+            activity=discord.Activity(
+                name="Academic Peace...", type=discord.ActivityType.watching
+            )
+        )
 
 
 def setup(bot: commands.Bot) -> None:
