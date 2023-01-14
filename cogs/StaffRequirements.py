@@ -249,42 +249,97 @@ class StaffAppModal(discord.ui.Modal):
         self.db.commit()
         await self.disable_if_done(interaction)
 
+
 class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db= sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS staffapp (
-            uid INTEGER PRIMARY KEY,
-            discord_name TEXT,
+            appid INTEGER PRIMARY KEY, 
+            uid INTEGER NOT NULL,
+            discord_name TEXT NOT NULL,
             first_name TEXT,
             nda BOOLEAN,
             timezone TEXT,
             hours_available_wk TEXT,
             staff_reason TEXT,
             contribute_reason TEXT,
-            submission_time INTEGER
+            submission_time INTEGER,
+            completed BOOLEAN NOT NULL,
+            marked_spam BOOLEAN NOT NULL,
+            application_status BOOLEAN
+            
         )""")
 
-    def fetch_message_count(self, uid):
+    def fetch_message_count(self, uid) -> int:
+        """
+        fetches the message count of a user
+        """
         try:
             self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (uid,))
             return self.cursor.fetchone()[0]
         except TypeError:
             return 0
 
-    # Allows the user to set the keeptime to a value other than the default
+    def user_is_spam(self, uid:int) -> bool:
+        """
+        Returns a boolean representing whether the user is marked as spam or not
+        """
+        self.cursor.execute("SELECT marked_spam FROM staffapp WHERE uid = ?", (uid,))
+        return any(self.cursor.fetchall())
+
+    def ongoing_application(self, uid:int) -> bool:
+        #! Missing a challenge
+        """
+        Returns a boolean representing whether the user has an ongoing application or not
+        """
+        self.cursor.execute("SELECT completed FROM staffapp WHERE uid = ?", (uid,))
+        return all( result := self.cursor.fetchall()) if len(result) > 0 else False
+
+    def uncompleted_application(self, uid:int) -> bool:
+        """
+        Returns a boolean representing whether the user has an uncompleted application or not
+        """
+        self.cursor.execute("SELECT completed FROM staffapp WHERE uid = ?", (uid,))
+        return not all( result := self.cursor.fetchall()) if len(result) > 0 else False
+
     @commands.slash_command(
         name="apply-for-staff",
         description="Apply for a staff position if your account meets the requirements!",
     )
-    async def checkreqs(self, ctx: commands.Context) -> None:
+    async def apply(self, ctx: commands.Context) -> None:
         """
-        It checks if the user meets the requirements to apply for staff
+        Checks if the user meets the requirements to apply for staff and sends application form if they do
 
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
+        # step one: is the user marked as spam?
+        if self.user_is_spam(ctx.author.id):
+            embed = discord.Embed(
+                title="You have been marked as spam!",
+                description="Your application(s) have been marked as spam by a staff member. You cannot apply for staff.",
+                color=0xFF0000,  #RED
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        # step two: does the user have an ongoing application?
+        if self.ongoing_application(ctx.author.id):
+            embed = discord.Embed(
+                title="You have already applied for staff!",
+                description="Your application has already been submitted. We will review it and get back to you as soon as possible.",
+                color=0xFFD700,  #GOLD
+            )
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        # step three: does the user have an uncompleted application?
+
+
+
+        #! TODO: Rewrite submitted check
         self.author = ctx.author.id
         # check if the user has answered every field in the staffapp table
         try:
@@ -295,11 +350,11 @@ class StaffRequirement(commands.Cog):
             embed = discord.Embed(
                 title="You have already applied for staff!",
                 description="Your application has already been submitted. We will review it and get back to you as soon as possible.",
-                color=0xFFD700,
+                color=0xFFD700,  #GOLD
             )
             await ctx.respond(embed=embed, ephemeral=True)
             return
-
+        
         msg_amount = self.fetch_message_count(ctx.author.id)
         account = ctx.author
 
@@ -352,7 +407,7 @@ class StaffRequirement(commands.Cog):
                             
                 **Non-disclosure agreement**
                 You agree not to disclose any information within the staff channels and/or any confidential Homework Help assets without explicit leave.\n""",
-                fields=fields,
+                fields=None,
                 color=0x39FF14,  # GREEN
             ).build()
             await ctx.respond(embed=embed, ephemeral=True, view=StaffAppView(self.db, self.author))
