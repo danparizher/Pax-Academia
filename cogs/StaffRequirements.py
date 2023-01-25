@@ -25,7 +25,11 @@ class StaffRequirement(commands.Cog):
 
     def fetch_message_count(self, uid: int) -> int:
         """
-        fetches the message count of a user
+        It fetches the amount of messages a user has sent in the server
+
+        :param uid: The user ID of the user you want to fetch the message count of
+        :type uid: int
+        :return: The amount of messages the user has sent.
         """
         try:
             self.conn.cursor().execute(
@@ -48,7 +52,6 @@ class StaffRequirement(commands.Cog):
         :type ctx: commands.Context
         """
         account = ctx.author
-        # Message amount gets fetched from the database
         msg_amount = (
             self.conn.cursor()
             .execute("SELECT amount FROM messagecount WHERE uid = ?", (account.id,))
