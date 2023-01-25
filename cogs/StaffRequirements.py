@@ -13,8 +13,7 @@ class StaffAppView(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
         self.add_item(
-            discord.ui.Button(label="Apply Now",
-                              url=getenv("staff_google_form"))
+            discord.ui.Button(label="Apply Now", url=getenv("staff_google_form"))
         )
 
 
@@ -27,8 +26,7 @@ class StaffRequirement(commands.Cog):
         fetches the message count of a user
         """
         try:
-            self.cursor.execute(
-                "SELECT amount FROM messagecount WHERE uid = ?", (uid,))
+            self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (uid,))
             return self.cursor.fetchone()[0]
         except TypeError:
             return 0
@@ -50,8 +48,7 @@ class StaffRequirement(commands.Cog):
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
-        time_since_join = datetime.now(
-            tz=account.joined_at.tzinfo) - account.joined_at
+        time_since_join = datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
 
         fields = [
             [
@@ -66,19 +63,17 @@ class StaffRequirement(commands.Cog):
                 {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
                 True,
             ],
-            [
-                "Messages",
-                f"{msg_amount} messages",
-                True
-            ],
+            ["Messages", f"{msg_amount} messages", True],
         ]
 
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
         # time since join is at least 30 days
-        if time_since_creation >= timedelta(weeks=52) and time_since_join >= timedelta(
-            days=30
-        ) and msg_amount >= 500:
+        if (
+            time_since_creation >= timedelta(weeks=52)
+            and time_since_join >= timedelta(days=30)
+            and msg_amount >= 500
+        ):
             embed = EmbedBuilder(
                 title="Congratulations!",
                 description="You meet the basic requirements for staff. You may apply for staff below.",
