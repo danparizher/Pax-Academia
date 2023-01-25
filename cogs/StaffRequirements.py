@@ -1,3 +1,4 @@
+import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 
@@ -20,14 +21,17 @@ class StaffAppView(discord.ui.View):
 class StaffRequirement(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.conn = sqlite3.connect("util/database.sqlite")
 
-    def fetch_message_count(self, uid) -> int:
+    def fetch_message_count(self, uid: int) -> int:
         """
         fetches the message count of a user
         """
         try:
-            self.cursor.execute("SELECT amount FROM messagecount WHERE uid = ?", (uid,))
-            return self.cursor.fetchone()[0]
+            self.conn.cursor().execute(
+                "SELECT amount FROM messagecount WHERE uid = ?", (uid,)
+            )
+            return self.conn.cursor().fetchone()[0]
         except TypeError:
             return 0
 
@@ -44,7 +48,12 @@ class StaffRequirement(commands.Cog):
         :type ctx: commands.Context
         """
         account = ctx.author
-        msg_amount = self.fetch_message_count(ctx.author.id)
+        # Message amount gets fetched from the database
+        msg_amount = (
+            self.conn.cursor()
+            .execute("SELECT amount FROM messagecount WHERE uid = ?", (account.id,))
+            .fetchone()[0]
+        )
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
@@ -68,7 +77,8 @@ class StaffRequirement(commands.Cog):
 
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
-        # time since join is at least 30 days
+        # time since join is at least 30 days AND
+        # message amount is at least 500
         if (
             time_since_creation >= timedelta(weeks=52)
             and time_since_join >= timedelta(days=30)
@@ -91,7 +101,8 @@ class StaffRequirement(commands.Cog):
             if wait_time > timedelta(0):
                 desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
             if msg_amount < 500:
-                desc += f"""\n\nYou need to send **{(left := 500 - msg_amount)}** more message{"" if left == 1 else "s"}."""
+                left = 500 - msg_amount
+                desc += f"""\n\nYou need to send **{left}** more message{"" if left == 1 else "s"}."""
             embed = EmbedBuilder(
                 title="Missing Requirements",
                 description=desc,
