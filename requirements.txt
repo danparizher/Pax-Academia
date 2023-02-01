@@ -5,5 +5,5 @@ humanize==4.4.0
 playwright==1.29.1
 pubchempy==1.0.4
 py-cord==2.3.2
-python-dotenv==0.21.0
+python-dotenv==0.21.1
 wikipedia==1.4.0
