@@ -1,5 +1,5 @@
 aiohttp==3.8.3
-beautifulsoup4==4.11.1
+beautifulsoup4==4.11.2
 deepl_translate==1.2.0
 humanize==4.4.0
 playwright==1.29.1
