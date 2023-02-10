@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 
+from discord import Member
 import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
@@ -51,7 +52,22 @@ class StaffRequirement(commands.Cog):
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
+
+        # Grab the discord.Member
         account = ctx.author
+        if not isinstance(account, Member):
+            if ctx.guild is None:
+                embed = EmbedBuilder(
+                    title="Not Applicable",
+                    description="This command does not work in direct messages.",
+                    fields=[],
+                    color=0xFFFF00,  # YELLOW
+                ).build()
+                await ctx.respond(embed=embed, ephemeral=True)
+                return
+            
+            account = await ctx.guild.fetch_member(account.id)
+
         msg_amount = (
             self.conn.cursor()
             .execute("SELECT amount FROM messagecount WHERE uid = ?", (account.id,))
@@ -60,7 +76,8 @@ class StaffRequirement(commands.Cog):
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
-        time_since_join = datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
+        joined_at = account.joined_at or datetime.now()
+        time_since_join = datetime.now(tz=joined_at.tzinfo) - joined_at
 
         fields = [
             [
