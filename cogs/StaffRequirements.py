@@ -60,7 +60,9 @@ class StaffRequirement(commands.Cog):
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
-        time_since_join = datetime.now(tz=account.joined_at.tzinfo) - account.joined_at
+        time_since_join = (
+            datetime.now(tz=ctx.guild.me.joined_at.tzinfo) - ctx.guild.me.joined_at
+        )
 
         fields = [
             [
@@ -71,7 +73,7 @@ class StaffRequirement(commands.Cog):
             ],
             [
                 "Joined",
-                f"""{account.joined_at.strftime('%B %d, %Y')}
+                f"""{ctx.guild.me.joined_at.strftime('%B %d, %Y')}
                 {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
                 True,
             ],
@@ -99,7 +101,7 @@ class StaffRequirement(commands.Cog):
                 timedelta(weeks=52) - time_since_creation,
                 timedelta(days=30) - time_since_join,
             )
-            desc = f"""Unfortunately, you do not meet the basic requirements in order to apply for staff.
+            desc = """Unfortunately, you do not meet the basic requirements in order to apply for staff.
                 Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
             if wait_time > timedelta(0):
                 desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
