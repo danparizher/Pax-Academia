@@ -6,7 +6,7 @@ from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 LANGUAGES = [
     "Bulgarian",
@@ -160,7 +160,7 @@ class Translation(commands.Cog):
 
         await ctx.send(embed=embed)
 
-        log(f"Translate command used by {ctx.author} in {ctx.guild}.")
+        Log(f"Translate command used by {ctx.author} in {ctx.guild}.")
 
 
 def setup(bot) -> None:

@@ -2,12 +2,12 @@ import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 
+from discord import Member
 import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
-
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 
 class StaffAppView(discord.ui.View):
@@ -26,7 +26,6 @@ class StaffRequirement(commands.Cog):
     def fetch_message_count(self, uid: int) -> int:
         """
         It fetches the amount of messages a user has sent in the server
-
         :param uid: The user ID of the user you want to fetch the message count of
         :type uid: int
         :return: The amount of messages the user has sent.
@@ -47,11 +46,25 @@ class StaffRequirement(commands.Cog):
     async def checkreqs(self, ctx: commands.Context) -> None:
         """
         It checks if the user meets the requirements to apply for staff
-
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
+
+        # Grab the discord.Member
         account = ctx.author
+        if not isinstance(account, Member):
+            if ctx.guild is None:
+                embed = EmbedBuilder(
+                    title="Not Applicable",
+                    description="This command does not work in direct messages.",
+                    fields=[],
+                    color=0xFFFF00,  # YELLOW
+                ).build()
+                await ctx.respond(embed=embed, ephemeral=True)
+                return
+
+            account = await ctx.guild.fetch_member(account.id)
+
         msg_amount = (
             self.conn.cursor()
             .execute("SELECT amount FROM messagecount WHERE uid = ?", (account.id,))
@@ -60,9 +73,8 @@ class StaffRequirement(commands.Cog):
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
-        time_since_join = (
-            datetime.now(tz=ctx.guild.me.joined_at.tzinfo) - ctx.guild.me.joined_at
-        )
+        joined_at = account.joined_at or datetime.now()
+        time_since_join = datetime.now(tz=joined_at.tzinfo) - joined_at
 
         fields = [
             [
@@ -73,13 +85,12 @@ class StaffRequirement(commands.Cog):
             ],
             [
                 "Joined",
-                f"""{ctx.guild.me.joined_at.strftime('%B %d, %Y')}
+                f"""{account.joined_at.strftime('%B %d, %Y')}
                 {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
                 True,
             ],
             ["Messages", f"{msg_amount} messages", True],
         ]
-
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
         # time since join is at least 30 days AND
@@ -115,8 +126,7 @@ class StaffRequirement(commands.Cog):
                 color=0xFF0000,  # RED
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
-
-        log(f"User {account} checked their requirements in {ctx.guild}.")
+        Log(f"User {account} checked their requirements in {ctx.guild}.")
 
 
 def setup(bot: commands.Bot) -> None:

@@ -1,5 +1,4 @@
 import base64
-import csv
 import re
 import sqlite3
 
@@ -8,7 +7,7 @@ from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 # used to encode/ decode user input to protect against SQLi
 
@@ -95,7 +94,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        log(f"Alert added by {ctx.author} in {ctx.guild}.")
+        Log(f"Alert added by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(
         name="alerts-remove",
@@ -143,7 +142,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        log(f"Alert removed by {ctx.author} in {ctx.guild}.")
+        Log(f"Alert removed by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
     async def list_alerts(self, ctx: commands.Context) -> None:
