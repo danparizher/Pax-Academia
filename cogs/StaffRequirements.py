@@ -65,7 +65,6 @@ class StaffRequirement(commands.Cog):
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
 
-            
             account = await ctx.guild.fetch_member(account.id)
 
         msg_amount = (
