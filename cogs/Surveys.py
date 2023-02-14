@@ -4,7 +4,7 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 
 
-def surveys() -> list[str]:
+def survey_list() -> list[str]:
     surveys = [
         "https://forms.gle/",
         "https://docs.google.com/forms/",
@@ -36,7 +36,7 @@ class Surveys(commands.Cog):
                 not in [role.id for role in message.author.roles]
                 and not message.author.bot
             ):
-                for survey in surveys():
+                for survey in survey_list():
                     if survey in message.content:
                         embed = EmbedBuilder(
                             title="Survey Link Detected",

@@ -3,9 +3,9 @@
 import datetime
 
 
-class log:
+class Log:
     def __init__(self, message) -> None:
-        with open("log.txt", "a") as log:
+        with open("log.txt", "a", encoding="utf-8") as log_file:
             now = datetime.datetime.now()
             now_str: str = now.strftime("%Y-%m-%d %H:%M:%S")
-            log.write(f"{now_str} - {message}\n")
+            log_file.write(f"{now_str} - {message}\n")

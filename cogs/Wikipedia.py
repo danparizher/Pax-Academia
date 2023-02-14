@@ -4,9 +4,9 @@ import json
 import wikipedia
 from discord.ext import commands
 
-import util.bandwidth as bandwidth
+from util import bandwidth
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 
 def get_wiki_without_logging(query) -> dict[str, str]:
@@ -66,7 +66,7 @@ class Wikipedia(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            log(f"Wikipedia command used by {ctx.author} in {ctx.guild}.")
+            Log(f"Wikipedia command used by {ctx.author} in {ctx.guild}.")
 
         except wikipedia.exceptions.DisambiguationError:
             embed = EmbedBuilder(

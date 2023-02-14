@@ -10,9 +10,9 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-import util.bandwidth as bandwidth
+from util import bandwidth
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
@@ -111,7 +111,7 @@ class MessageFingerprint:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
                         # so it's fine to just log and ignore any errors
-                        log(
+                        Log(
                             f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}"
                         )
                         continue
@@ -164,37 +164,7 @@ class Moderation(commands.Cog):
             ],
         ] = {}
         self.clear_old_cached_data.start()
-
-    # temporarily commented out because this is not functional
-    """
-    @commands.slash_command(name="mkick", description="Kicks multiple users from the server.")
-    @commands.has_permissions(kick_members=True)
-    async def mkick(
-        self,
-        ctx: commands.Context,
-        users: option(
-            name="users",
-            description="The users to kick.",
-            type=str,
-            required=True,
-        ),
-        reason: option(
-            name="reason",
-            description="The reason for kicking the user.",
-            type=str,
-            required=False,
-        ),
-    ) -> None:
-        for user_id in users.split(" "):
-            user = ctx.guild.get_member(int(user_id))
-            if user is not None:
-                await ctx.guild.kick(user, reason=reason)
-        embed = EmbedBuilder(
-            title="Success!",
-            description=f"Successfully kicked {len(users)} users.",
-        ).build()
-        await ctx.respond(embed=embed)
-    """
+    
 
     # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
     async def record_fingerprint(self, message: discord.Message) -> tuple[MessageFingerprint, list[MessageFingerprint]]:

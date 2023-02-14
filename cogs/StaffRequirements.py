@@ -4,11 +4,12 @@ from os import getenv
 
 from discord import Member
 import discord.ui
+from discord import Member
 from discord.ext import commands
 from humanize import precisedelta
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 
 class StaffAppView(discord.ui.View):
@@ -27,7 +28,6 @@ class StaffRequirement(commands.Cog):
     def fetch_message_count(self, uid: int) -> int:
         """
         It fetches the amount of messages a user has sent in the server
-
         :param uid: The user ID of the user you want to fetch the message count of
         :type uid: int
         :return: The amount of messages the user has sent.
@@ -48,7 +48,6 @@ class StaffRequirement(commands.Cog):
     async def checkreqs(self, ctx: commands.Context) -> None:
         """
         It checks if the user meets the requirements to apply for staff
-
         :param ctx: commands.Context
         :type ctx: commands.Context
         """
@@ -65,7 +64,7 @@ class StaffRequirement(commands.Cog):
                 ).build()
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
-            
+
             account = await ctx.guild.fetch_member(account.id)
 
         msg_amount = (
@@ -94,7 +93,6 @@ class StaffRequirement(commands.Cog):
             ],
             ["Messages", f"{msg_amount} messages", True],
         ]
-
         # if staff requirements are met
         # time since creation is at least 1 year (52 weeks) AND
         # time since join is at least 30 days AND
@@ -116,7 +114,7 @@ class StaffRequirement(commands.Cog):
                 timedelta(weeks=52) - time_since_creation,
                 timedelta(days=30) - time_since_join,
             )
-            desc = f"""Unfortunately, you do not meet the basic requirements in order to apply for staff.
+            desc = """Unfortunately, you do not meet the basic requirements in order to apply for staff.
                 Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
             if wait_time > timedelta(0):
                 desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
@@ -130,8 +128,7 @@ class StaffRequirement(commands.Cog):
                 color=0xFF0000,  # RED
             ).build()
             await ctx.respond(embed=embed, ephemeral=True)
-
-        log(f"User {account} checked their requirements in {ctx.guild}.")
+        Log(f"User {account} checked their requirements in {ctx.guild}.")
 
 
 def setup(bot: commands.Bot) -> None:

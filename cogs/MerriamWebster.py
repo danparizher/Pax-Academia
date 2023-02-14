@@ -4,7 +4,7 @@ from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
@@ -143,7 +143,7 @@ class Dictionary(commands.Cog):
 
             for key, value in word_data.items():
                 if (
-                    value != "No {} found".format(key.lower())
+                    value != f"No {key.lower()} found"
                     and key != "word"
                     and key != "Definition"
                 ):
@@ -162,7 +162,7 @@ class Dictionary(commands.Cog):
             )
             await ctx.edit(content=content, embed=embed)
 
-            log(f"Define command used by {ctx.author} in {ctx.guild}.")
+            Log(f"Define command used by {ctx.author} in {ctx.guild}.")
 
         except Exception as e:
             embed = EmbedBuilder(

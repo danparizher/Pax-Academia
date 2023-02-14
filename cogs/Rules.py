@@ -3,7 +3,7 @@ from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import log
+from util.Logging import Log
 
 rules = {
     "Rule A): Respect": "Maintain civility and conduct yourself appropriately. Avoid derogatory language, discriminatory jokes, and hate speech.",
@@ -40,7 +40,7 @@ class Rules(commands.Cog):
 
         await ctx.respond(content=f"<@{user.id}>" if user else None, embed=embed)
 
-        log(f"Rule command used by {ctx.author} in {ctx.guild}.")
+        Log(f"Rule command used by {ctx.author} in {ctx.guild}.")
 
 
 def setup(bot: commands.Bot) -> None:

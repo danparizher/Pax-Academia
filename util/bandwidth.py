@@ -14,7 +14,7 @@ database.commit()
 
 # logs bandwidth that gets used
 def log(
-    bytes: int | float,  # how many bytes were used?
+    bytes_used: int | float,  # how many bytes were used?
     direction: Literal["inbound"] | Literal["outbound"],  # inbound = download, outbound = upload
     category: str | None = None,  # very general description of the type of usage (i.e. "download_attachment")
     detail: str | None = None,  # specific description of the usage (i.e. "HTTP GET http://url.com")
@@ -23,7 +23,7 @@ def log(
 
     cursor.execute(
         "INSERT INTO bandwidth (timestamp, bytes, direction, category, detail) VALUES (?, ?, ?, ?, ?)",
-        (datetime.now(), bytes, direction, category, detail),
+        (datetime.now(), bytes_used, direction, category, detail),
     )
 
     database.commit()
