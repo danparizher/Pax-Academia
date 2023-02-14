@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 
+from discord import Member
 import discord.ui
 from discord import Member
 from discord.ext import commands
@@ -64,6 +65,7 @@ class StaffRequirement(commands.Cog):
                 await ctx.respond(embed=embed, ephemeral=True)
                 return
 
+            
             account = await ctx.guild.fetch_member(account.id)
 
         msg_amount = (
