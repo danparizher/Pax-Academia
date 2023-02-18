@@ -16,7 +16,7 @@ def load() -> None:
         "Alerts",
         "DeepL",
         "DetectAI",
-        "Information",
+        "Tips",
         "MerriamWebster",
         "MessageCounter",
         "Misc",
