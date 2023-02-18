@@ -44,9 +44,9 @@ class Tips(commands.Cog):
     @commands.slash_command(name="tip", description="Sends various homework-help tips.")
     @option(
         name="tip",
-        parameter_name="tip_enum_value",
         description="The tip to send.",
-        type=Enum("TipsEnum", {key: index for index, key in enumerate(TIPS)}),
+        type=str,
+        choices=TIPS,
         required=True,
     )
     @option(
@@ -62,16 +62,11 @@ class Tips(commands.Cog):
         choices=["Yes", "No"],
         required=False,
     )
-    async def tip(
-        self, ctx: ApplicationContext, tip_enum_value: Enum, ping: Member | None = None, anonymous: str = "No"
-    ) -> None:
-        tip_title = tip_enum_value.name
-        tip_description: str = TIPS[tip_title]
-
+    async def tip(self, ctx: ApplicationContext, tip: str, ping: Member | None = None, anonymous: str = "No") -> None:
         message_content = None if ping is None else ping.mention
         embed = EmbedBuilder(
-            title=f"Tip: {tip_title.capitalize()}.",
-            description=tip_description,
+            title=f"Tip: {tip.capitalize()}.",
+            description=TIPS[tip],
             color=0x32DC64,  # a nice pastel green
         ).build()
 
