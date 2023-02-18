@@ -1,12 +1,12 @@
+import csv
 import io
 import sqlite3
-import csv
-from typing import Iterable
 from dataclasses import dataclass
+from typing import Iterable
 
 import discord
-from discord.ext import commands
 from discord.commands.context import ApplicationContext
+from discord.ext import commands
 from discord.interactions import Interaction
 
 DATABASE_FILES = [
@@ -29,7 +29,7 @@ def grep_tables() -> list[Table]:
     tables: list[Table] = []
 
     for database_file in DATABASE_FILES:
-        database_name = database_file.split("/")[-1].split(".")[0]
+        database_name = database_file.rsplit("/", maxsplit=1)[-1][-1].split(".")[0]
 
         with sqlite3.connect(database_file) as conn:
             cursor = conn.cursor()
@@ -107,20 +107,26 @@ class Misc(commands.Cog):
         print(f"{self.bot.user.name} has connected to Discord!")
 
         await self.bot.change_presence(
-            activity=discord.Activity(name="Academic Peace...", type=discord.ActivityType.watching)
+            activity=discord.Activity(
+                name="Academic Peace...", type=discord.ActivityType.watching
+            )
         )
 
-    @commands.has_role("Administrator")  # since this command is very costly and may display sensitive data
+    @commands.has_role(
+        "Administrator"
+    )  # since this command is very costly and may display sensitive data
     @commands.slash_command(
         name="dump_database",
         description="Download all database tables as CSV files.",
-        guild_ids=[238956364729155585],  # only available in the HwH server, where this bot is developed
+        guild_ids=[
+            238956364729155585
+        ],  # only available in the HwH server, where this bot is developed
         guild_only=True,
     )
     async def dump_database(self, ctx: ApplicationContext) -> None:
         message = await ctx.respond(f"{LOADING_EMOJI} Gathering table information...")
 
-        async def edit(text):
+        async def edit(text: str) -> None:
             if isinstance(message, Interaction):
                 await message.edit_original_response(content=text)
             else:
@@ -131,7 +137,9 @@ class Misc(commands.Cog):
 
         for i, (table, file) in enumerate(zip(tables, dump_tables_to_csv(tables))):
             await ctx.send_followup(
-                (f"Database: `{table.database_file_path}`\nTable: `{table.name}`"), file=file, ephemeral=True
+                (f"Database: `{table.database_file_path}`\nTable: `{table.name}`"),
+                file=file,
+                ephemeral=True,
             )
             await edit(f"{LOADING_EMOJI} Dumped {i + 1}/{len(tables)} table(s).")
 
