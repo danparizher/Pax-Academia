@@ -77,10 +77,7 @@ class MessageFingerprint:
             )
         )
 
-        if len(content) < 15:
-            return None
-
-        return content
+        return None if len(content) < 15 else content
 
     # retrieves and caches attachment hashes
     # the first call will actually download every attachment,
@@ -194,22 +191,28 @@ class Moderation(commands.Cog):
 
         del self.fingerprints[:n_fingerprints_to_delete]
 
-        # delete cached multipost warnings older than 10 minutes
-        multipost_warnings_to_delete = []
-        for original_message_id, (warning_message, _fingerprint) in self.multipost_warnings.items():
-            if time.time() - warning_message.created_at.timestamp() > 600:
-                multipost_warnings_to_delete.append(original_message_id)
-
+        # delete multipost warnings that are more than 10 minutes old
+        multipost_warnings_to_delete = [
+            original_message_id
+            for original_message_id, (
+                warning_message,
+                _fingerprint,
+            ) in self.multipost_warnings.items()
+            if time.time() - warning_message.created_at.timestamp() > 600
+        ]
         for message_id in multipost_warnings_to_delete:
             del self.multipost_warnings[message_id]
 
-    async def delete_previous_multipost_warnings(self, channel_id: int, author_id: int):
-        to_delete: list[int] = []
-
-        for warning_message_id, (multipost_warning, offenders_fingerprint) in self.multipost_warnings.items():
-            if offenders_fingerprint.channel_id == channel_id and offenders_fingerprint.author_id == author_id:
-                to_delete.append(warning_message_id)
-
+    async def delete_previous_multipost_warnings(self, channel_id: int, author_id: int) -> None:
+        to_delete = [
+            warning_message_id
+            for warning_message_id, (
+                multipost_warning,
+                offenders_fingerprint,
+            ) in self.multipost_warnings.items()
+            if offenders_fingerprint.channel_id == channel_id
+            and offenders_fingerprint.author_id == author_id
+        ]
         for warning_message_id in to_delete:
             multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(warning_message_id)
             await multipost_warning.delete()

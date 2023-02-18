@@ -1,3 +1,5 @@
+import contextlib
+
 import discord
 from discord.ext import commands
 
@@ -5,14 +7,13 @@ from util.EmbedBuilder import EmbedBuilder
 
 
 def survey_list() -> list[str]:
-    surveys = [
+    return [
         "https://forms.gle/",
         "https://docs.google.com/forms/",
         "https://www.surveymonkey.com/",
         "https://www.qualtrics.com/",
         "https://forms.office.com/",
     ]
-    return surveys
 
 
 class Surveys(commands.Cog):
@@ -29,7 +30,7 @@ class Surveys(commands.Cog):
         :param message: The message object that triggered the event
         :type message: discord.Message
         """
-        try:
+        with contextlib.suppress(AttributeError):
             if (
                 message.channel.name != "surveys"
                 and "276969339901444096"
@@ -42,14 +43,10 @@ class Surveys(commands.Cog):
                             title="Survey Link Detected",
                             description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
                         ).build()
-                        try:
+                        with contextlib.suppress(discord.errors.Forbidden):
                             await message.channel.send(
                                 content=f"<@{message.author.id}>", embed=embed
                             )
-                        except discord.errors.Forbidden:
-                            pass
-        except AttributeError:
-            pass
         await self.bot.process_commands(message)
 
 

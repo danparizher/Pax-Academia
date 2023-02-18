@@ -1,4 +1,5 @@
 import base64
+import contextlib
 import re
 import sqlite3
 
@@ -211,10 +212,8 @@ class Alerts(commands.Cog):
                             ),
                         ],
                     ).build()
-                    try:
+                    with contextlib.suppress(discord.Forbidden):
                         await member.send(embed=embed)
-                    except discord.Forbidden:
-                        pass
 
         await user_alerts()
 
