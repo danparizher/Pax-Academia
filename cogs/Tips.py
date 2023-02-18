@@ -1,9 +1,6 @@
-from dataclasses import dataclass
-
 from discord import option, Member
 from discord.ext import commands
 from discord.commands.context import ApplicationContext
-from enum import Enum
 
 from util.EmbedBuilder import EmbedBuilder
 
