@@ -110,7 +110,7 @@ class Misc(commands.Cog):
     @commands.slash_command(
         name="dump_database",
         description="Download all database tables as CSV files.",
-        guild_ids=[865461626580107274],  # only available in the HwH server, where this bot is developed
+        guild_ids=[238956364729155585],  # only available in the HwH server, where this bot is developed
         guild_only=True,
     )
     async def dump_database(self, ctx: ApplicationContext) -> None:
