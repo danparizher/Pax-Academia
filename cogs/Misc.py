@@ -16,12 +16,10 @@ DATABASE_FILES = [
 ]
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
-ALLOW_DUMP_DATABASE_GUILD = os.getenv("ALLOW_DUMP_DATABASE_GUILD")
-ALLOW_DUMP_DATABASE_ROLE = os.getenv("ALLOW_DUMP_DATABASE_ROLE")
+DUMP_GUILD = os.getenv("ALLOW_DUMP_DATABASE_GUILD")
+DUMP_ROLE = os.getenv("ALLOW_DUMP_DATABASE_ROLE")
 
-DUMP_GUILD_PERMISSIONS = (
-    lambda x: x if ALLOW_DUMP_DATABASE_ROLE is None else commands.has_role(ALLOW_DUMP_DATABASE_ROLE)
-)
+DUMP_PERMISSIONS = (lambda x: x) if DUMP_ROLE is None else commands.has_role(DUMP_ROLE)
 
 
 @dataclass
@@ -117,12 +115,12 @@ class Misc(commands.Cog):
             activity=discord.Activity(name="Academic Peace...", type=discord.ActivityType.watching)
         )
 
-    @DUMP_GUILD_PERMISSIONS
+    @DUMP_PERMISSIONS
     @commands.slash_command(
         name="dump_database",
         description="Download all database tables as CSV files.",
-        guild_ids=None if ALLOW_DUMP_DATABASE_GUILD is None else [ALLOW_DUMP_DATABASE_GUILD],
-        guild_only=ALLOW_DUMP_DATABASE_GUILD is not None,
+        guild_ids=None if DUMP_GUILD is None else [DUMP_GUILD],
+        guild_only=DUMP_GUILD is not None,
     )
     async def dump_database(self, ctx: ApplicationContext) -> None:
         message = await ctx.respond(f"{LOADING_EMOJI} Gathering table information...")
