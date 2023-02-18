@@ -91,8 +91,12 @@ class Misc(commands.Cog):
         :type ctx: commands.Context
         """
         message = await ctx.respond("Pinging...")
+        content = f"Pong! {round(self.bot.latency * 1000)}ms"
+
         if isinstance(message, Interaction):
-            await message.edit_original_response(content=f"Pong! {round(self.bot.latency * 1000)}ms")
+            await message.edit_original_response(content=content)
+        else:
+            await message.edit(content=content)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
