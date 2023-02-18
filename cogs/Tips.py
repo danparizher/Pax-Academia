@@ -18,8 +18,8 @@ TIPS = {
     "Format Your Code": (
         "It's much easier to read specially formatted code. "
         "You can format code on discord by using 3 backticks `` ``` `` (**not** quotes `'''`) "
-        "followed by the name of the computer language (so for Python code: `` ```python``).\n\n"
-        "Lets use Java as an example.\n\n"
+        "followed by the name of the computer language. So to format Python code, it would be `` ```python``.\n\n"
+        "Here's a complete example of how to format Java code.\n\n"
         "This message:\n"
         "**\\`\\`\\`java\n"
         'System.out.println("Code formatting is neat!");\n'
