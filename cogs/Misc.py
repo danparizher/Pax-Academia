@@ -3,6 +3,7 @@ import io
 import sqlite3
 from dataclasses import dataclass
 from typing import Iterable
+import os
 
 import discord
 from discord.commands.context import ApplicationContext
@@ -15,6 +16,12 @@ DATABASE_FILES = [
 ]
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
+ALLOW_DUMP_DATABASE_GUILD = os.getenv("ALLOW_DUMP_DATABASE_GUILD")
+ALLOW_DUMP_DATABASE_ROLE = os.getenv("ALLOW_DUMP_DATABASE_ROLE")
+
+DUMP_GUILD_PERMISSIONS = (
+    lambda x: x if ALLOW_DUMP_DATABASE_ROLE is None else commands.has_role(ALLOW_DUMP_DATABASE_ROLE)
+)
 
 
 @dataclass
@@ -29,7 +36,7 @@ def grep_tables() -> list[Table]:
     tables: list[Table] = []
 
     for database_file in DATABASE_FILES:
-        database_name = database_file.rsplit("/", maxsplit=1)[-1][-1].split(".")[0]
+        database_name = database_file.rsplit("/", maxsplit=1)[-1].split(".")[0]
 
         with sqlite3.connect(database_file) as conn:
             cursor = conn.cursor()
@@ -107,21 +114,15 @@ class Misc(commands.Cog):
         print(f"{self.bot.user.name} has connected to Discord!")
 
         await self.bot.change_presence(
-            activity=discord.Activity(
-                name="Academic Peace...", type=discord.ActivityType.watching
-            )
+            activity=discord.Activity(name="Academic Peace...", type=discord.ActivityType.watching)
         )
 
-    @commands.has_role(
-        "Administrator"
-    )  # since this command is very costly and may display sensitive data
+    @DUMP_GUILD_PERMISSIONS
     @commands.slash_command(
         name="dump_database",
         description="Download all database tables as CSV files.",
-        guild_ids=[
-            238956364729155585
-        ],  # only available in the HwH server, where this bot is developed
-        guild_only=True,
+        guild_ids=None if ALLOW_DUMP_DATABASE_GUILD is None else [ALLOW_DUMP_DATABASE_GUILD],
+        guild_only=ALLOW_DUMP_DATABASE_GUILD is not None,
     )
     async def dump_database(self, ctx: ApplicationContext) -> None:
         message = await ctx.respond(f"{LOADING_EMOJI} Gathering table information...")
