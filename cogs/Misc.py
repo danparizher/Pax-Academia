@@ -112,7 +112,9 @@ class Misc(commands.Cog):
         print(f"{self.bot.user.name} has connected to Discord!")
 
         await self.bot.change_presence(
-            activity=discord.Activity(name="Academic Peace...", type=discord.ActivityType.watching)
+            activity=discord.Activity(
+                name="Academic Peace...", type=discord.ActivityType.watching
+            )
         )
 
     @DUMP_PERMISSIONS
