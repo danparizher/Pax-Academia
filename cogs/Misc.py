@@ -1,9 +1,9 @@
 import csv
 import io
+import os
 import sqlite3
 from dataclasses import dataclass
 from typing import Iterable
-import os
 
 import discord
 from discord.commands.context import ApplicationContext
