@@ -9,7 +9,7 @@ from util.EmbedBuilder import EmbedBuilder
 
 TIPS = {
     "Ask Your Question": (
-        "You can be helped sooner if you simply ask your question, instead of "
+        "You can be helped sooner if you simply ask your question instead of "
         "asking if you can ask a question or if anyone is available to help you.\n\n"
         "Instead of asking "
         '"Does anyone know X?", "Can someone help me with Y?", or "Are there any experts in Z?" '
