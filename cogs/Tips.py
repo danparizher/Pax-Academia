@@ -31,6 +31,19 @@ TIPS = {
         "Please show and describe the steps you've already completed so that we may assist you further.\n"
         "This way, we can start helping you right where you left off and can save everyone's time."
     ),
+    "Use the Mention System": (
+        "If some time has passed and nobody is responding to your question, then you can use "
+        " the `/mention create [role]` command to mention everyone with the relevant role, such as @Math or @Biology.\n\n"
+        "You can select a certain message to mention for by right clicking on a message and selecting Apps -> mention.\n\n"
+        "After waiting 10 minutes, you can use the `/mention send` which will ping the role with your message.\n\n"
+        "If you decide to cancel your request, you can use `/mention cancel`, or if you want to create a different "
+        "mention you can use `/mention overwrite [role]` which works similarly to `/mention create [role]`."
+    ),
+    "Try Googling It": (
+        "There are many resources available online, so googling your problem should be the first course of action.\n"
+        "Very frequently, you can get an answer more quickly and with more detail.\n"
+        "If you've already tried googling the problem, then let us know what you found and why it wasn't sufficient!"
+    ),
 }
 
 
