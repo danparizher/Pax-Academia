@@ -1,6 +1,6 @@
-from discord import option, Member
-from discord.ext import commands
+from discord import Member, option
 from discord.commands.context import ApplicationContext
+from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 
@@ -72,7 +72,13 @@ class Tips(commands.Cog):
         choices=["Yes", "No"],
         required=False,
     )
-    async def tip(self, ctx: ApplicationContext, tip: str, ping: Member | None = None, anonymous: str = "No") -> None:
+    async def tip(
+        self,
+        ctx: ApplicationContext,
+        tip: str,
+        ping: Member | None = None,
+        anonymous: str = "No",
+    ) -> None:
         message_content = None if ping is None else ping.mention
         embed = EmbedBuilder(
             title=f"Tip: {tip.capitalize()}.",
@@ -82,7 +88,11 @@ class Tips(commands.Cog):
 
         if anonymous.casefold() == "yes":
             await ctx.send(message_content, embed=embed)
-            await ctx.respond("Thanks for the tip! It was sent anonymously.", ephemeral=True, delete_after=5)
+            await ctx.respond(
+                "Thanks for the tip! It was sent anonymously.",
+                ephemeral=True,
+                delete_after=5,
+            )
         else:
             await ctx.respond(message_content, embed=embed)
 
