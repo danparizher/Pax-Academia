@@ -58,11 +58,12 @@ class Tips(commands.Cog):
     @option(
         name="anonymous",
         description="Should the tip be sent anonymously?",
-        type=bool,
+        type=str,
+        choices=["Yes", "No"],
         required=False,
     )
     async def tip(
-        self, ctx: ApplicationContext, tip_enum_value: Enum, ping: Member | None = None, anonymous: bool = False
+        self, ctx: ApplicationContext, tip_enum_value: Enum, ping: Member | None = None, anonymous: str = "No"
     ) -> None:
         tip_title = tip_enum_value.name
         tip_description: str = TIPS[tip_title]
@@ -74,7 +75,7 @@ class Tips(commands.Cog):
             color=0x32DC64,  # a nice pastel green
         ).build()
 
-        if anonymous:
+        if anonymous.casefold() == "yes":
             await ctx.send(message_content, embed=embed)
             await ctx.respond("Thanks for the tip! It was sent anonymously.", ephemeral=True, delete_after=5)
         else:
