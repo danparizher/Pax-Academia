@@ -156,10 +156,7 @@ class Alerts(commands.Cog):
         c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
-        alert_list = ""
-        for alert in alerts:
-            alert_list += f"`{deb64ify(alert[0])}`\n"
-
+        alert_list = "".join(f"`{deb64ify(alert[0])}`\n" for alert in alerts)
         embed = EmbedBuilder(
             title="Alerts",
             description=alert_list,

@@ -18,14 +18,12 @@ def get_wiki_without_logging(query) -> dict[str, str]:
     :return: A dictionary with the title, summary, url, and image of the wikipedia page.
     """
     page = wikipedia.page(query, auto_suggest=False)
-    response = {
+    return {
         "title": page.title,
         "summary": page.summary.split("\n")[0],
         "url": page.url,
         "image": page.images[0],
     }
-
-    return response
 
 
 async def get_wiki(query) -> dict[str, str]:

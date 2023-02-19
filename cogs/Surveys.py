@@ -5,14 +5,13 @@ from util.EmbedBuilder import EmbedBuilder
 
 
 def survey_list() -> list[str]:
-    surveys = [
+    return [
         "https://forms.gle/",
         "https://docs.google.com/forms/",
         "https://www.surveymonkey.com/",
         "https://www.qualtrics.com/",
         "https://forms.office.com/",
     ]
-    return surveys
 
 
 class Surveys(commands.Cog):

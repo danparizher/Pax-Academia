@@ -48,9 +48,8 @@ async def get_word_info(word: str) -> dict:
     :type word: str
     :return: A dictionary with the word, definition, phonetic, synonyms, antonyms, usage, and etymology.
     """
-    word_data = {}
     soup = await request(word.lower())
-    word_data["word"] = word
+    word_data = {"word": word}
     try:
         word_data["Definition"] = soup.find("span", {"class": "dtText"}).text.split(
             ":"
@@ -133,32 +132,31 @@ class Dictionary(commands.Cog):
             if word_data["Definition"] == "No definition found":
                 old_word = word
                 word_data = await get_word_info(await spellcheck(word))
-                if word_data["Definition"] == "No definition found":
-                    await ctx.edit(
-                        content=f"No results found for **{old_word.capitalize()}**."
-                    )
-                    return
+            if word_data["Definition"] == "No definition found":
+                await ctx.edit(
+                    content=f"No results found for **{old_word.capitalize()}**."
+                )
+                return
 
-            fields = []
-
-            for key, value in word_data.items():
+            fields = [
+                [key.title(), value, False]
+                for key, value in word_data.items()
                 if (
                     value != f"No {key.lower()} found"
                     and key != "word"
                     and key != "Definition"
-                ):
-                    fields.append([key.title(), value, False])
-
+                )
+            ]
             embed = EmbedBuilder(
                 title=f"Definition of __{word_data['word'].capitalize()}__",
                 description=word_data["Definition"],
-                fields=fields if fields else None,
+                fields=fields or None,
             ).build()
 
             content = (
-                None
-                if old_word == ""
-                else f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+                f"No results found for **{old_word.capitalize()}**. Did you mean **{word_data['word'].capitalize()}**?"
+                if old_word
+                else None
             )
             await ctx.edit(content=content, embed=embed)
 
