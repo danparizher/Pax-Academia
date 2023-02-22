@@ -15,12 +15,13 @@ def load() -> None:
     cogs = [
         "Alerts",
         "DeepL",
-        "DetectAI",
+        # "DetectAI", Depcrecated until we find a more reliable detection service
         "Information",
         "MerriamWebster",
         "MessageCounter",
         "Misc",
         "Moderation",
+        # "Profanity", In development
         "PubChem",
         "Rules",
         "StaffRequirements",
