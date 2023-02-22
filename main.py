@@ -16,7 +16,6 @@ def load() -> None:
         "Alerts",
         "DeepL",
         # "DetectAI", Depcrecated until we find a more reliable detection service
-        "Information",
         "MerriamWebster",
         "MessageCounter",
         "Misc",
@@ -26,6 +25,7 @@ def load() -> None:
         "Rules",
         "StaffRequirements",
         "Surveys",
+        "Tips",
         "Wikipedia",
     ]
     for cog in cogs:
