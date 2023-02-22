@@ -2,7 +2,6 @@ import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 
-from discord import Member
 import discord.ui
 from discord import Member
 from discord.ext import commands
