@@ -10,9 +10,11 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 from discord.interactions import Interaction
 
+from util.Logging import Log
+
 DATABASE_FILES = [
     "util/database.sqlite",
-    "bandwidth.db",
+    "log.txt",
 ]
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
@@ -31,10 +33,24 @@ class Table:
 
 
 def grep_tables() -> list[Table]:
+    """
+    It returns a list of Table objects, each of which contains the path to a database file, the name of
+    the database, the name of a table in the database, and a list of the column names in the table
+    :return: A list of Table objects.
+    """
     tables: list[Table] = []
-
     for database_file in DATABASE_FILES:
-        database_name = database_file.rsplit("/", maxsplit=1)[-1].split(".")[0]
+        database_name = os.path.basename(database_file)
+        if database_file.endswith(".txt"):
+            tables.append(
+                Table(
+                    database_file_path=database_file,
+                    database_name=database_name,
+                    name=database_name,
+                    column_names=["log"],
+                )
+            )
+            continue
 
         with sqlite3.connect(database_file) as conn:
             cursor = conn.cursor()
@@ -61,26 +77,36 @@ def grep_tables() -> list[Table]:
                         column_names=[x[1] for x in cursor.fetchall()],
                     )
                 )
-
     return tables
 
 
 def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
+    """
+    It takes a list of Table objects, and returns an iterable of discord.File objects
+
+    :param tables: list[Table]
+    :type tables: list[Table]
+    """
     for table in tables:
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
-        writer.writerow(table.column_names)
+        if table.database_file_path.endswith(".txt"):
+            with open(table.database_file_path, encoding="utf-8") as f:
+                yield discord.File(
+                    io.StringIO(f.read()), filename=f"{table.database_name}.txt"
+                )
+            continue
 
         with sqlite3.connect(table.database_file_path) as conn:
             cursor = conn.cursor()
             cursor.execute(f"SELECT * FROM {table.name}")
-            writer.writerows(cursor)
 
-        buffer.seek(0)
-        yield discord.File(
-            buffer,  # type: ignore (py-cord actually does accept io.StringIO, their typing just sucks)
-            filename=f"{table.database_name}_{table.name}.csv",
-        )
+            with io.StringIO() as f:
+                writer = csv.writer(f)
+                writer.writerow(table.column_names)
+                writer.writerows(cursor.fetchall())
+                f.seek(0)
+                yield discord.File(
+                    f, filename=f"{table.database_name}.{table.name}.csv"
+                )
 
 
 class Misc(commands.Cog):
@@ -125,13 +151,27 @@ class Misc(commands.Cog):
         guild_only=DUMP_GUILD is not None,
     )
     async def dump_database(self, ctx: ApplicationContext) -> None:
+        """
+        It dumps the database to a csv file and sends it to the user
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
         message = await ctx.respond(f"{LOADING_EMOJI} Gathering table information...")
 
         async def edit(text: str) -> None:
+            """
+            It edits the message that the user is interacting with
+
+            :param text: The text to send
+            :type text: str
+            """
             if isinstance(message, Interaction):
                 await message.edit_original_response(content=text)
             else:
                 await message.edit(content=text)
+
+        Log(f"{ctx.author} dumped the database in {ctx.channel}, {ctx.guild}.")
 
         tables = grep_tables()
         await edit(f"{LOADING_EMOJI} Dumped 0/{len(tables)} table(s).")
