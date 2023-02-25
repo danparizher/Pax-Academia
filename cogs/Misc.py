@@ -89,10 +89,7 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
     """
     for table in tables:
         if table.database_file_path.endswith(".txt"):
-            with open(table.database_file_path, encoding="utf-8") as f:
-                yield discord.File(
-                    io.StringIO(f.read()), filename=f"{table.database_name}.txt"
-                )
+            yield discord.File(table.database_file_path)
             continue
 
         with sqlite3.connect(table.database_file_path) as conn:
