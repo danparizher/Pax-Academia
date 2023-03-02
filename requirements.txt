@@ -3,7 +3,7 @@ alt-profanity-check==1.2.1
 beautifulsoup4==4.11.2
 deepl_translate==1.2.0
 humanize==4.6.0
-playwright==1.31.0
+playwright==1.31.1
 pubchempy==1.0.4
 py-cord==2.4.0
 python-dotenv==1.0.0
