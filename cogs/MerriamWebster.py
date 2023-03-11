@@ -17,7 +17,7 @@ async def request(word: str) -> bs4.BeautifulSoup:
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"https://www.merriam-webster.com/dictionary/{word}"
+            f"https://www.oxfordlearnersdictionaries.com/definition/english/{word}"
         ) as response:
             return bs4.BeautifulSoup(await response.text(), "html.parser")
 
