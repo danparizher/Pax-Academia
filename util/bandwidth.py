@@ -12,12 +12,16 @@ database.cursor().execute(
 )
 database.commit()
 
+
 # logs bandwidth that gets used
 def log(
     bytes_used: int | float,  # how many bytes were used?
-    direction: Literal["inbound"] | Literal["outbound"],  # inbound = download, outbound = upload
-    category: str | None = None,  # very general description of the type of usage (i.e. "download_attachment")
-    detail: str | None = None,  # specific description of the usage (i.e. "HTTP GET http://url.com")
+    direction: Literal["inbound"]
+    | Literal["outbound"],  # inbound = download, outbound = upload
+    category: str
+    | None = None,  # very general description of the type of usage (i.e. "download_attachment")
+    detail: str
+    | None = None,  # specific description of the usage (i.e. "HTTP GET http://url.com")
 ) -> None:
     cursor = database.cursor()
 
@@ -34,7 +38,7 @@ def summary(after: datetime) -> dict[str, dict[str, int | float]]:
     """
     It returns a dictionary of dictionaries, where the keys of the outer dictionary are categories, and
     the keys of the inner dictionaries are "inbound_bytes", "outbound_bytes", and "usages"
-    
+
     :param after: datetime
     :type after: datetime
     :return: A dictionary of dictionaries.
@@ -55,7 +59,11 @@ def summary(after: datetime) -> dict[str, dict[str, int | float]]:
     cursor.execute(query, (after,))
 
     return {
-        category: {"inbound_bytes": inbound_bytes or 0, "outbound_bytes": outbound_bytes or 0, "usages": usages or 0}
+        category: {
+            "inbound_bytes": inbound_bytes or 0,
+            "outbound_bytes": outbound_bytes or 0,
+            "usages": usages or 0,
+        }
         for category, inbound_bytes, outbound_bytes, usages in cursor.fetchall()
     }
 
@@ -64,7 +72,7 @@ def summary(after: datetime) -> dict[str, dict[str, int | float]]:
 def print_summary(after: datetime) -> None:
     """
     It prints a summary of the bandwidth usage since the given time
-    
+
     :param after: The datetime object to start the summary from
     :type after: datetime
     """
@@ -72,8 +80,12 @@ def print_summary(after: datetime) -> None:
     for category, info in summary(after).items():
         print(f"* Within the {category!r} category")
         print(f"    Recorded Usages: {info['usages']}")
-        print(f"       Inbound Data: {humanize.naturalsize(info['inbound_bytes'], binary=True)}")
-        print(f"      Outbound Data: {humanize.naturalsize(info['outbound_bytes'], binary=True)}")
+        print(
+            f"       Inbound Data: {humanize.naturalsize(info['inbound_bytes'], binary=True)}"
+        )
+        print(
+            f"      Outbound Data: {humanize.naturalsize(info['outbound_bytes'], binary=True)}"
+        )
         print()
 
 
