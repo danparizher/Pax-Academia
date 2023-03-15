@@ -168,3 +168,6 @@ log.txt
 *.sqlit*
 .vscode/
 *.csv
+
+# ERD
+*.mdj
