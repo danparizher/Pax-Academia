@@ -1,4 +1,3 @@
-import base64
 import contextlib
 import re
 import sqlite3
@@ -38,10 +37,6 @@ class Alerts(commands.Cog):
         self.bot = bot
         self.db = sqlite3.connect("util/database.sqlite")
         c = self.db.cursor()
-        c.execute(
-            "CREATE TABLE IF NOT EXISTS alerts (keyword TEXT, user_id INTEGER, author_name TEXT)"
-        )
-        self.db.commit()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -49,8 +44,8 @@ class Alerts(commands.Cog):
     )
     async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
         """
-        It checks if the keyword is already in the database, if it is, it sends an error message, if it
-        isn't, it adds the keyword to the database and sends a success message.
+        Checks if the keyword is already in the database, if it is, sends an error message, if it
+        isn't, adds the keyword to the database and sends a success message.
 
         :param ctx: commands.Context
         :type ctx: commands.Context
@@ -61,7 +56,7 @@ class Alerts(commands.Cog):
 
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            "SELECT * FROM alert WHERE message = ? AND uid = ?",
             (keyword, ctx.author.id),
         )
         if c.fetchone():
@@ -73,8 +68,8 @@ class Alerts(commands.Cog):
             return
 
         c.execute(
-            "INSERT INTO alerts VALUES (?, ?, ?)",
-            (keyword, ctx.author.id, ctx.author.name),
+            "INSERT INTO alert(uid, message) VALUES (?, ?)",
+            (ctx.author.id, keyword),
         )
         self.db.commit()
 

@@ -12,9 +12,9 @@ c = db.cursor()
 c.execute(
     """
     CREATE TABLE IF NOT EXISTS user (
-    uid INT PRIMARY KEY,
-    messagesSent INT Nna,
-    markedSpam BOOLEAN Nna,
+    uid INTEGER PRIMARY KEY,
+    messagesSent INTEGER NOT NULL,
+    markedSpam BOOLEAN NOT NULL,
     cooldown varchar(100)
     );
     """
@@ -23,8 +23,8 @@ c.execute(
 c.execute(
     """
     CREATE TABLE IF NOT EXISTS status (
-    statusId INT PRIMARY KEY,
-    description VARCHAR(100)
+    statusId INTEGER PRIMARY KEY,
+    description VARCHAR(100) NOT NULL
     );
     """
 )
@@ -33,9 +33,9 @@ c.execute(
 c.execute(
     """
     CREATE TABLE IF NOT EXISTS alert (
-    alertId INT PRIMARY KEY,
-    uid INT,
-    message VARCHAR(2000),
+    alertId INTEGER PRIMARY KEY,
+    uid INTEGER NOT NULL,
+    message VARCHAR(2000) NOT NULL,
     CONSTRAINT FK3_alert_user
 		FOREIGN KEY (uid)
         REFERENCES user(uid)
@@ -46,9 +46,9 @@ c.execute(
 c.execute(
     """
     CREATE TABLE IF NOT EXISTS application (
-    appId INT PRIMARY KEY,
-    uid INT,
-    status INT,
+    appId INTEGER PRIMARY KEY,
+    uid INTEGER,
+    status INTEGER,
     discordName VARCHAR(33),
     firstName VARCHAR(100),
     nda BOOLEAN,
@@ -70,9 +70,9 @@ c.execute(
 c.execute(
     """
     CREATE TABLE IF NOT EXISTS like (
-    likeId INT PRIMARY KEY,
-    appId INT,
-    uid INT Nna,
+    likeId INTEGER PRIMARY KEY,
+    appId INTEGER,
+    uid INTEGER Nna,
     name VARCHAR(33),
     likes BOOLEAN Nna,
     CONSTRAINT FK2_like_application
