@@ -29,7 +29,9 @@ class MessageCounter(commands.Cog):
             self.update_user(message.author.id, amount[0] + 1)
 
     def add_user(self, uid: int) -> None:
-        self.cursor.execute("INSERT INTO user VALUES (?, ?, ?, ?)", (uid, 1, False, None)) # See ERD.mdj
+        self.cursor.execute(
+            "INSERT INTO user VALUES (?, ?, ?, ?)", (uid, 1, False, None)
+        )  # See ERD.mdj
         self.db.commit()
 
     def update_user(self, uid: int, amount: int) -> None:

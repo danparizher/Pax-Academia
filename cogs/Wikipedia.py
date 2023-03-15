@@ -26,8 +26,7 @@ def get_wiki_without_logging(query) -> dict[str, str]:
 
 
 async def get_wiki(query) -> dict[str, str]:
-    response = await asyncio.to_thread(get_wiki_without_logging, query)
-    return response
+    return await asyncio.to_thread(get_wiki_without_logging, query)
 
 
 class Wikipedia(commands.Cog):

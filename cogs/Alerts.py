@@ -24,10 +24,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
     data = [
         keyword[0]
         for keyword in conn.cursor()
-        .execute(
-            "SELECT message FROM alert WHERE uid = ?",
-            (ctx.interaction.user.id,)
-        )
+        .execute("SELECT message FROM alert WHERE uid = ?", (ctx.interaction.user.id,))
         .fetchall()
     ]
     conn.close()
