@@ -18,13 +18,15 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
     :type ctx: discord.AutocompleteContext
     :return: A list of keywords that the user has set up for alerts.
     """
+
+    # We no longer keep track of the name because this can change, breaking the alert.
     conn = sqlite3.connect("util/database.sqlite")
     data = [
         keyword[0]
         for keyword in conn.cursor()
         .execute(
-            "SELECT keyword FROM alerts WHERE user_id = ? AND author_name = ?",
-            (ctx.interaction.user.id, ctx.interaction.user.name),
+            "SELECT message FROM alert WHERE uid = ?",
+            (ctx.interaction.user.id,)
         )
         .fetchall()
     ]
@@ -98,12 +100,11 @@ class Alerts(commands.Cog):
         :type ctx: commands.Context
         :param keyword: str
         :type keyword: str
-        :return: The return value is a list of tuples.
         """
 
         c = self.db.cursor()
         c.execute(
-            "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
+            "SELECT * FROM alert WHERE message = ? AND uid = ?",
             (keyword, ctx.author.id),
         )
         if not c.fetchone():
@@ -115,7 +116,7 @@ class Alerts(commands.Cog):
             return
 
         c.execute(
-            "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
+            "DELETE FROM alert WHERE message = ? AND uid = ?",
             (keyword, ctx.author.id),
         )
         self.db.commit()
