@@ -4,7 +4,6 @@ import json
 import wikipedia
 from discord.ext import commands
 
-from util import bandwidth
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log
 
@@ -27,16 +26,7 @@ def get_wiki_without_logging(query) -> dict[str, str]:
 
 
 async def get_wiki(query) -> dict[str, str]:
-    response = await asyncio.to_thread(get_wiki_without_logging, query)
-
-    bandwidth.log(
-        len(json.dumps(response)),  # very rough estimate
-        "inbound",
-        "wikipedia_search",
-        f"Searched wikipedia for {query!r}",
-    )
-
-    return response
+    return await asyncio.to_thread(get_wiki_without_logging, query)
 
 
 class Wikipedia(commands.Cog):
