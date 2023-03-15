@@ -10,16 +10,6 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log
 
-# used to encode/ decode user input to protect against SQLi
-
-
-def b64ify(x: str) -> str:
-    return base64.b64encode(x.encode()).decode()
-
-
-def deb64ify(y: str) -> str:
-    return base64.b64decode(y.encode()).decode()
-
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list:
     """
@@ -40,7 +30,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
         .fetchall()
     ]
     conn.close()
-    return [deb64ify(item) for item in data]
+    return data
 
 
 class Alerts(commands.Cog):
@@ -68,12 +58,11 @@ class Alerts(commands.Cog):
         :type keyword: str
         :return: The return type is None.
         """
-        b64_keyword = b64ify(keyword)
 
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
-            (b64_keyword, ctx.author.id),
+            (keyword, ctx.author.id),
         )
         if c.fetchone():
             embed = EmbedBuilder(
@@ -85,7 +74,7 @@ class Alerts(commands.Cog):
 
         c.execute(
             "INSERT INTO alerts VALUES (?, ?, ?)",
-            (b64_keyword, ctx.author.id, ctx.author.name),
+            (keyword, ctx.author.id, ctx.author.name),
         )
         self.db.commit()
 
@@ -116,12 +105,11 @@ class Alerts(commands.Cog):
         :type keyword: str
         :return: The return value is a list of tuples.
         """
-        b64_keyword = b64ify(keyword)
 
         c = self.db.cursor()
         c.execute(
             "SELECT * FROM alerts WHERE keyword = ? AND user_id = ?",
-            (b64_keyword, ctx.author.id),
+            (keyword, ctx.author.id),
         )
         if not c.fetchone():
             embed = EmbedBuilder(
@@ -133,7 +121,7 @@ class Alerts(commands.Cog):
 
         c.execute(
             "DELETE FROM alerts WHERE keyword = ? AND user_id = ?",
-            (b64_keyword, ctx.author.id),
+            (keyword, ctx.author.id),
         )
         self.db.commit()
 
@@ -157,7 +145,7 @@ class Alerts(commands.Cog):
         c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
-        alert_list = "".join(f"`{deb64ify(alert[0])}`\n" for alert in alerts)
+        alert_list = "".join(f"`{alert[0]}`\n" for alert in alerts)
         embed = EmbedBuilder(
             title="Alerts",
             description=alert_list,
@@ -183,14 +171,14 @@ class Alerts(commands.Cog):
             c.execute("SELECT * FROM alerts")
             keywords = c.fetchall()
             if not any(
-                re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE)
+                re.search(keyword[0], message.content, re.IGNORECASE)
                 for keyword in keywords
             ):
                 return
 
             # Send a DM to the user who added the alert.
             for keyword in keywords:
-                if re.search(deb64ify(keyword[0]), message.content, re.IGNORECASE):
+                if re.search(keyword[0], message.content, re.IGNORECASE):
                     try:
                         member = await message.channel.guild.fetch_member(keyword[1])
                     except discord.NotFound:
@@ -199,7 +187,7 @@ class Alerts(commands.Cog):
                         return
                     embed = EmbedBuilder(
                         title="Alert",
-                        description=f"Your keyword `{deb64ify(keyword[0])}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                        description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
                         fields=[
                             ("Message", message.content[:1024], False),
                             (
