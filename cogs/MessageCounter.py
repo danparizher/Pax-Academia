@@ -8,13 +8,6 @@ class MessageCounter(commands.Cog):
         self.bot = bot
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
-        # if table does not exist, create it
-        self.cursor.execute(
-            """CREATE TABLE IF NOT EXISTS messagecount (
-                uid INTEGER PRIMARY KEY, 
-                amount INTEGER
-                )"""
-        )
 
     @commands.Cog.listener()
     async def on_message(self, message) -> None:
@@ -28,7 +21,7 @@ class MessageCounter(commands.Cog):
             return
 
         amount = self.cursor.execute(
-            "SELECT amount FROM messagecount WHERE uid = ?", (message.author.id,)
+            "SELECT messagesSent FROM user WHERE uid = ?", (message.author.id,)
         ).fetchone()
         if amount is None:
             self.add_user(message.author.id)
@@ -36,12 +29,12 @@ class MessageCounter(commands.Cog):
             self.update_user(message.author.id, amount[0] + 1)
 
     def add_user(self, uid: int) -> None:
-        self.cursor.execute("INSERT INTO messagecount VALUES (?, ?)", (uid, 1))
+        self.cursor.execute("INSERT INTO user VALUES (?, ?, ?, ?)", (uid, 1, False, None)) # See ERD.mdj
         self.db.commit()
 
     def update_user(self, uid: int, amount: int) -> None:
         self.cursor.execute(
-            "UPDATE messagecount SET amount = ? WHERE uid = ?", (amount, uid)
+            "UPDATE user SET messagesSent = ? WHERE uid = ?", (amount, uid)
         )
         self.db.commit()
 
