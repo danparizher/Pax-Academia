@@ -29,10 +29,16 @@ class MessageFingerprint:
     message_id: int
     jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
-    attachment_urls: list[str]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: set[Hash] | None = None  # populated on the first call to `get_attachment_hashes`
+    attachment_urls: list[
+        str
+    ]  # the discord content URLs for each of the message's uploaded attachments
+    cached_attachment_hashes: set[
+        Hash
+    ] | None = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Hash | None = None  # hash of the message body, after being passed through `filter_content`
+    content_hash: Hash | None = (
+        None  # hash of the message body, after being passed through `filter_content`
+    )
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -47,7 +53,9 @@ class MessageFingerprint:
             message_id=message.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(filtered_content) if filtered_content is not None else None,
+            content_hash=cls.hash(filtered_content)
+            if filtered_content is not None
+            else None,
         )
 
     # performs a SHA256 hash
@@ -71,7 +79,9 @@ class MessageFingerprint:
             str.maketrans(
                 {
                     unwanted_character: ""
-                    for unwanted_character in (string.whitespace + string.punctuation + string.digits)
+                    for unwanted_character in (
+                        string.whitespace + string.punctuation + string.digits
+                    )
                 }
             )
         )
@@ -86,18 +96,21 @@ class MessageFingerprint:
             self.cached_attachment_hashes = set()
 
             async with aiohttp.ClientSession() as session:
-                for attachment_url in self.attachment_urls[:5]:  # only load first 5 attachments to prevent abuse
+                for attachment_url in self.attachment_urls[
+                    :5
+                ]:  # only load first 5 attachments to prevent abuse
                     try:
                         # from
                         # "https://media.discordapp.net/attachments/123/456/filename.png"
                         # to
                         # "https://media.discordapp.net/attachments/[REDACTED]/[REDACTED]/[REDACTED].png"
-                        redacted_url = re.sub(r"/[^/]*?\.([^\.]*)$", r"/[REDACTED].\1", attachment_url)
+                        redacted_url = re.sub(
+                            r"/[^/]*?\.([^\.]*)$", r"/[REDACTED].\1", attachment_url
+                        )
                         redacted_url = re.sub(r"\d+", r"[REDACTED]", redacted_url)
 
                         async with session.get(attachment_url) as resp:
                             attachment_data = await resp.read()
-
                     except Exception as e:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
@@ -120,7 +133,9 @@ class MessageFingerprint:
             return True
 
         # otherwise, at least one of the attachments must match
-        matching_attachments = await self.get_attachment_hashes() & await other.get_attachment_hashes()
+        matching_attachments = (
+            await self.get_attachment_hashes() & await other.get_attachment_hashes()
+        )
         return len(matching_attachments) > 0
 
     # a message is a multipost of another message if both messages:
@@ -146,7 +161,9 @@ class Moderation(commands.Cog):
         self.bot = bot
         self.fingerprints: list[
             MessageFingerprint
-        ] = []  # stores all user messages sent in the last minute (recent messages near the end)
+        ] = (
+            []
+        )  # stores all user messages sent in the last minute (recent messages near the end)
         self.multipost_warnings: dict[
             Annotated[int, "Multiposted Message ID"],
             tuple[
@@ -155,16 +172,20 @@ class Moderation(commands.Cog):
             ],
         ] = {}
         self.clear_old_cached_data.start()
-    
 
     # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
-    async def record_fingerprint(self, message: discord.Message) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
+    async def record_fingerprint(
+        self, message: discord.Message
+    ) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
         multipost_of: list[MessageFingerprint] = []
         for other_fingerprint in self.fingerprints:
-            if fingerprint is not other_fingerprint and await fingerprint.is_multipost_of(other_fingerprint):
+            if (
+                fingerprint is not other_fingerprint
+                and await fingerprint.is_multipost_of(other_fingerprint)
+            ):
                 multipost_of.append(other_fingerprint)
 
         return fingerprint, multipost_of
@@ -197,7 +218,9 @@ class Moderation(commands.Cog):
         for message_id in multipost_warnings_to_delete:
             del self.multipost_warnings[message_id]
 
-    async def delete_previous_multipost_warnings(self, channel_id: int, author_id: int) -> None:
+    async def delete_previous_multipost_warnings(
+        self, channel_id: int, author_id: int
+    ) -> None:
         to_delete = [
             warning_message_id
             for warning_message_id, (
@@ -208,7 +231,9 @@ class Moderation(commands.Cog):
             and offenders_fingerprint.author_id == author_id
         ]
         for warning_message_id in to_delete:
-            multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(warning_message_id)
+            multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(
+                warning_message_id
+            )
             await multipost_warning.delete()
 
     # this function should be called after every on_message
@@ -230,14 +255,18 @@ class Moderation(commands.Cog):
         if (
             isinstance(message.author, discord.Member)
             and ALLOW_MULTIPOST_FOR_ROLE is not None
-            and ALLOW_MULTIPOST_FOR_ROLE.casefold() in (role.name.casefold() for role in message.author.roles)
+            and ALLOW_MULTIPOST_FOR_ROLE.casefold()
+            in (role.name.casefold() for role in message.author.roles)
         ):
             return
 
         # textchannel in category ending with "HELP"
         if not isinstance(message.channel, discord.TextChannel):
             return
-        if not message.channel.category or not message.channel.category.name.lower().endswith("help"):
+        if (
+            not message.channel.category
+            or not message.channel.category.name.lower().endswith("help")
+        ):
             return
 
         fingerprint, previous_messages = await self.record_fingerprint(message)
@@ -248,7 +277,7 @@ class Moderation(commands.Cog):
             return
 
         # First Multipost - React to the original message with a custom multipost emoji, and reply with a warning to the multipost
-        elif n_previous_messages == 1:
+        if n_previous_messages == 1:
             original_message = previous_messages[0]
 
             embed = EmbedBuilder(
@@ -265,12 +294,16 @@ class Moderation(commands.Cog):
 
             try:
                 await self.bot.http.add_reaction(
-                    original_message.channel_id, original_message.message_id, MULTIPOST_EMOJI
+                    original_message.channel_id,
+                    original_message.message_id,
+                    MULTIPOST_EMOJI,
                 )
                 await message.add_reaction(MULTIPOST_EMOJI)
 
                 warning = await message.reply(embed=embed)
-                await self.delete_previous_multipost_warnings(fingerprint.channel_id, fingerprint.author_id)
+                await self.delete_previous_multipost_warnings(
+                    fingerprint.channel_id, fingerprint.author_id
+                )
                 self.multipost_warnings[message.id] = (warning, fingerprint)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
@@ -302,7 +335,9 @@ class Moderation(commands.Cog):
             ).build()
 
             try:
-                await message.reply(message.author.mention, embed=embed, delete_after=15)
+                await message.reply(
+                    message.author.mention, embed=embed, delete_after=15
+                )
                 await message.delete()
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
@@ -317,11 +352,15 @@ class Moderation(commands.Cog):
         await self.check_multipost(message)
 
     @commands.Cog.listener()
-    async def on_raw_message_delete(self, payload: discord.RawMessageDeleteEvent) -> None:
+    async def on_raw_message_delete(
+        self, payload: discord.RawMessageDeleteEvent
+    ) -> None:
         if payload.message_id in self.multipost_warnings:
             # The person deleted their message after seeing out multipost warning
             # so we can delete the warning message
-            warning_message, _fingerprint = self.multipost_warnings.pop(payload.message_id)
+            warning_message, _fingerprint = self.multipost_warnings.pop(
+                payload.message_id
+            )
             try:
                 await warning_message.delete()
             except discord.errors.HTTPException as e:
