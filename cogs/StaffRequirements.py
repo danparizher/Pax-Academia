@@ -33,7 +33,7 @@ class StaffRequirement(commands.Cog):
         """
         try:
             self.conn.cursor().execute(
-                "SELECT amount FROM messagecount WHERE uid = ?", (uid,)
+                "SELECT messagesSent FROM user WHERE uid = ?", (uid,)
             )
             return self.conn.cursor().fetchone()[0]
         except TypeError:
@@ -68,7 +68,7 @@ class StaffRequirement(commands.Cog):
 
         msg_amount = (
             self.conn.cursor()
-            .execute("SELECT amount FROM messagecount WHERE uid = ?", (account.id,))
+            .execute("SELECT messagesSent FROM user WHERE uid = ?", (account.id,))
             .fetchone()[0]
         )
         time_since_creation = (
