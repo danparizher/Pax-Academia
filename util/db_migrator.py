@@ -6,12 +6,14 @@ new state. This file should only be used once.
 import base64
 import sqlite3
 
+
 def b64ify(x: str) -> str:
     return base64.b64encode(x.encode()).decode()
 
 
 def deb64ify(y: str) -> str:
     return base64.b64decode(y.encode()).decode()
+
 
 """
 Data that needs to be migrated:
@@ -47,7 +49,7 @@ data = c_old.fetchall()
 c_new.executemany(
     """
     INSERT INTO alert(uid, message) VALUES (?, ?)""",
-    [(x[1], deb64ify(x[0])) for x in data], 
+    [(x[1], deb64ify(x[0])) for x in data],
 )
 db_new.commit()
 
