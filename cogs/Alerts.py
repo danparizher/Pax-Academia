@@ -137,10 +137,10 @@ class Alerts(commands.Cog):
         :type ctx: commands.Context
         """
         c = self.db.cursor()
-        c.execute("SELECT * FROM alerts WHERE user_id = ?", (ctx.author.id,))
+        c.execute("SELECT * FROM alert WHERE uid = ?", (ctx.author.id,))
         alerts = c.fetchall()
 
-        alert_list = "".join(f"`{alert[0]}`\n" for alert in alerts)
+        alert_list = "".join(f"`{alert[2]}`\n" for alert in alerts)
         embed = EmbedBuilder(
             title="Alerts",
             description=alert_list,
@@ -163,17 +163,17 @@ class Alerts(commands.Cog):
 
             # Ignore messages that do not contain a keyword.
             c = self.db.cursor()
-            c.execute("SELECT * FROM alerts")
+            c.execute("SELECT * FROM alert")
             keywords = c.fetchall()
             if not any(
-                re.search(keyword[0], message.content, re.IGNORECASE)
+                re.search(keyword[2], message.content, re.IGNORECASE)
                 for keyword in keywords
             ):
                 return
 
             # Send a DM to the user who added the alert.
             for keyword in keywords:
-                if re.search(keyword[0], message.content, re.IGNORECASE):
+                if re.search(keyword[2], message.content, re.IGNORECASE):
                     try:
                         member = await message.channel.guild.fetch_member(keyword[1])
                     except discord.NotFound:
@@ -182,7 +182,7 @@ class Alerts(commands.Cog):
                         return
                     embed = EmbedBuilder(
                         title="Alert",
-                        description=f"Your keyword `{keyword[0]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                        description=f"Your keyword `{keyword[2]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
                         fields=[
                             ("Message", message.content[:1024], False),
                             (
