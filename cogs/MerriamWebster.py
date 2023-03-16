@@ -17,7 +17,7 @@ async def request(word: str) -> bs4.BeautifulSoup:
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"https://www.merriam-webster.com/dictionary/{word}"
+            f"https://www.oxfordlearnersdictionaries.com/definition/english/{word}"
         ) as response:
             return bs4.BeautifulSoup(await response.text(), "html.parser")
 
@@ -33,7 +33,7 @@ async def spellcheck(word: str) -> str:
     """
     try:
         soup = await request(word.lower())
-        spelling = soup.find("p", {"class": "spelling-suggestions"}).text
+        spelling = soup.find("p", {"class": "spelling-suggestions"}).text.split(
         return spelling.strip().capitalize()
     except (AttributeError, IndexError):
         return "No spelling suggestions found"
@@ -51,43 +51,11 @@ async def get_word_info(word: str) -> dict:
     soup = await request(word.lower())
     word_data = {"word": word}
     try:
-        word_data["Definition"] = soup.find("span", {"class": "dtText"}).text.split(
-            ":"
-        )[1]
+        word_data["Definition"] = soup.find("span", {"class": "shcut"}).text
         word_data["Definition"] = word_data["Definition"]
     except (AttributeError, IndexError):
         word_data["Definition"] = "No definition found"
-
-    try:
-        word_data["Phonetic Pronunciation"] = soup.find(
-            "a", {"class": "play-pron-v2"}
-        ).text
-    except (AttributeError, IndexError):
-        word_data["Phonetic Pronunciation"] = "No phonetic pronunciation found"
-    # try:
-    #     word_data["Synonyms"] = soup.find("div", {"class": "synonyms"}).text
-    #     word_data["Synonyms"] = ", ".join(
-    #         [
-    #             synonym.text.replace(", ", "").capitalize()
-    #             for synonym in word_data["Synonyms"]
-    #             if "(" not in synonym.text
-    #         ]
-    #     )
-    # except (AttributeError, IndexError):
-    #     word_data["Synonyms"] = "No synonyms found"
-    # try:
-    #     word_data["Antonyms"] = soup.find_all("ul", {"class": "mw-list"})[1].find_all(
-    #         "li"
-    #     )
-    #     word_data["Antonyms"] = ", ".join(
-    #         [
-    #             antonym.text.replace(", ", "").capitalize()
-    #             for antonym in word_data["Antonyms"]
-    #             if "(" not in antonym.text
-    #         ]
-    #     )
-    # except (AttributeError, IndexError):
-    #     word_data["Antonyms"] = "No antonyms found"
+    
     try:
         word_data["First Known Usage"] = soup.find("p", {"class": "ety-sl"}).text
         word_data["First Known Usage"] = word_data["First Known Usage"].split(",")[0]
