@@ -52,7 +52,7 @@ async def get_word_info(word: str) -> dict:
     word_data = {"word": word}
     try:
         word_data["Definition"] = soup.find("span", {"class": "dtText"}).text.split(
-            ":"
+            ":",
         )[1]
         word_data["Definition"] = word_data["Definition"]
     except (AttributeError, IndexError):
@@ -60,7 +60,8 @@ async def get_word_info(word: str) -> dict:
 
     try:
         word_data["Phonetic Pronunciation"] = soup.find(
-            "a", {"class": "play-pron-v2"}
+            "a",
+            {"class": "play-pron-v2"},
         ).text
     except (AttributeError, IndexError):
         word_data["Phonetic Pronunciation"] = "No phonetic pronunciation found"
