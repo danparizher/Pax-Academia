@@ -17,7 +17,7 @@ async def request(word: str) -> bs4.BeautifulSoup:
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"https://www.merriam-webster.com/dictionary/{word}"
+            f"https://www.merriam-webster.com/dictionary/{word}",
         ) as response:
             return bs4.BeautifulSoup(await response.text(), "html.parser")
 
@@ -134,7 +134,7 @@ class Dictionary(commands.Cog):
                 word_data = await get_word_info(await spellcheck(word))
             if word_data["Definition"] == "No definition found":
                 await ctx.edit(
-                    content=f"No results found for **{old_word.capitalize()}**."
+                    content=f"No results found for **{old_word.capitalize()}**.",
                 )
                 return
 

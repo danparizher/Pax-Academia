@@ -32,7 +32,11 @@ class Rules(commands.Cog):
 
     @commands.slash_command(name="rule", description="Show server rules.")
     @option(
-        "rule", str, description="The rule to show.", required=True, choices=get_rules()
+        "rule",
+        str,
+        description="The rule to show.",
+        required=True,
+        choices=get_rules(),
     )
     @option("user", discord.User, description="The user to ping.", required=False)
     async def rule(self, ctx: commands.Context, rule: str, user: discord.User) -> None:

@@ -17,7 +17,7 @@ c.execute(
     markedSpam BOOLEAN NOT NULL,
     cooldown varchar(100)
     );
-    """
+    """,
 )
 
 c.execute(
@@ -26,7 +26,7 @@ c.execute(
     statusId INTEGER PRIMARY KEY,
     description VARCHAR(100) NOT NULL
     );
-    """
+    """,
 )
 
 # 2000 is the discord message limit (lets not care about nitro for now)
@@ -40,7 +40,7 @@ c.execute(
 		FOREIGN KEY (uid)
         REFERENCES user(uid)
     );
-    """
+    """,
 )
 
 c.execute(
@@ -64,7 +64,7 @@ c.execute(
 		FOREIGN KEY (status)
         REFERENCES status(statusId)
     );
-    """
+    """,
 )
 
 c.execute(
@@ -79,7 +79,7 @@ c.execute(
         FOREIGN KEY (appID)
         REFERENCES application(appId)
     );
-    """
+    """,
 )
 
 db.commit()
