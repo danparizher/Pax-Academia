@@ -50,5 +50,5 @@ class Surveys(commands.Cog):
         await self.bot.process_commands(message)
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Surveys(bot))

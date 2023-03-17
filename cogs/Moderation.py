@@ -309,9 +309,8 @@ class Moderation(commands.Cog):
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
                     return
-                else:
-                    # unknown error, just raise it
-                    raise
+                # unknown error, just raise it
+                raise
 
         # Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
         else:
@@ -343,9 +342,8 @@ class Moderation(commands.Cog):
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multiposted message has already been deleted, take no action
                     return
-                else:
-                    # unknown error, just raise it
-                    raise
+                # unknown error, just raise it
+                raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -367,8 +365,7 @@ class Moderation(commands.Cog):
                 if "unknown message".casefold() in repr(e).casefold():
                     # a mod probably already deleted the warning message
                     return
-                else:
-                    raise
+                raise
 
         # If you delete your message then re-send it in another channel, that's fine
         # so we can remove the original message fingerprint

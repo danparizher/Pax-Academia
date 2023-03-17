@@ -170,5 +170,5 @@ class Dictionary(commands.Cog):
             await ctx.edit(embed=embed, ephemeral=True)
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Dictionary(bot))

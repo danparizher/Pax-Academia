@@ -196,5 +196,5 @@ class Alerts(commands.Cog):
         await user_alerts()
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Alerts(bot))

@@ -163,5 +163,5 @@ class Translation(commands.Cog):
         Log(f"Translate command used by {ctx.author} in {ctx.guild}.")
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Translation(bot))
