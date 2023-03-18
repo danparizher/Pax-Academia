@@ -1,5 +1,7 @@
 import aiohttp
 import bs4
+import asyncio
+import json
 from discord import option
 from discord.ext import commands
 
@@ -8,14 +10,10 @@ from util.Logging import Log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
-    """
-    It takes a word as a string, and returns a BeautifulSoup object of the word's Merriam-Webster page
-
-    :param word: str
-    :type word: str
-    :return: A BeautifulSoup object.
-    """
-    async with aiohttp.ClientSession() as session:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+    }
+    async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
             f"https://www.oxfordlearnersdictionaries.com/definition/english/{word}"
         ) as response:
@@ -23,52 +21,56 @@ async def request(word: str) -> bs4.BeautifulSoup:
 
 
 async def spellcheck(word: str) -> str:
-    """
-    It takes a word as an argument, makes a request to the website, parses the response, and returns the
-    spelling suggestions
-
-    :param word: str - The word to be checked
-    :type word: str
-    :return: The return value is a string.
-    """
     try:
         soup = await request(word.lower())
-        spelling = soup.find("p", {"class": "spelling-suggestions"}).text.split(
+        spelling = soup.find("li", {"class": "dym-link"}).text
         return spelling.strip().capitalize()
     except (AttributeError, IndexError):
         return "No spelling suggestions found"
 
 
 async def get_word_info(word: str) -> dict:
-    """
-    It takes a word as an argument, and returns a dictionary containing the word's definition, phonetic,
-    synonyms, antonyms, usage, and etymology.
-
-    :param word: str - The word you want to get the information of
-    :type word: str
-    :return: A dictionary with the word, definition, phonetic, synonyms, antonyms, usage, and etymology.
-    """
     soup = await request(word.lower())
     word_data = {"word": word}
     try:
-        word_data["Definition"] = soup.find("span", {"class": "shcut"}).text
-        word_data["Definition"] = word_data["Definition"]
+        word_data["Definition"] = soup.find("span", {"class": "def"}).text.strip()
     except (AttributeError, IndexError):
         word_data["Definition"] = "No definition found"
-    
+
     try:
-        word_data["First Known Usage"] = soup.find("p", {"class": "ety-sl"}).text
-        word_data["First Known Usage"] = word_data["First Known Usage"].split(",")[0]
+        word_data["Grammar"] = soup.find("span", {"class": "grammar"}).text.strip()
     except (AttributeError, IndexError):
-        word_data["First Known Usage"] = "No usage found"
+        word_data["Grammar"] = "No Grammar details given"
+
     try:
-        word_data["Etymology"] = soup.find_all("p", {"class": "et"})[0].text.split("—")[
-            0
-        ]
+        word_data["Examples"] = soup.find("span", {"class": "x"}).text.strip()
     except (AttributeError, IndexError):
-        word_data["Etymology"] = "No etymology found"
+        word_data["Examples"] = "No Examples given"
+  
+    try:
+        word_data["Pronunciation"] = soup.find(
+            "span", {"class": "phon"}
+        ).text
+    except (AttributeError, IndexError):
+        word_data["Pronunciation"] = "No pronunciation found"
+
+    try:
+        word_data["Part of speech"] = soup.find("span", {"class": "pos"}).text
+    except (AttributeError, IndexError):
+        word_data["Part of speech"] = "No part of speech found"
+
+    try:
+        word_data["Synonyms"] = soup.find("span", {"class": "xh"}).text
+    except (AttributeError, IndexError):
+        word_data["Synonyms"] = "No synonyms found"
+
     return word_data
 
+async def main():
+    word_data = await get_word_info(word)
+    JSON_word_data = json.dumps(word_data)
+    return JSON_word_data
+JSON_word_data = asyncio.run(main())
 
 class Dictionary(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -136,6 +138,8 @@ class Dictionary(commands.Cog):
                 description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
             ).build()
             await ctx.edit(embed=embed, ephemeral=True)
+
+
 
 
 def setup(bot) -> None:
