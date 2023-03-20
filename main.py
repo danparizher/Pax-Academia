@@ -16,10 +16,10 @@ def load() -> None:
         "Alerts",
         "DeepL",
         # "DetectAI", Depcrecated until we find a more reliable detection service
-        "MerriamWebster",
         "MessageCounter",
         "Misc",
         "Moderation",
+        "OxfordDictionary",
         # "Profanity", In development
         "PubChem",
         "Rules",
