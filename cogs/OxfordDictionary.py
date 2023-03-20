@@ -1,7 +1,5 @@
 import aiohttp
 import bs4
-import asyncio
-import json
 from discord import option
 from discord.ext import commands
 
@@ -10,6 +8,14 @@ from util.Logging import Log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
+    
+    """
+    It takes a word as a string, and returns a BeautifulSoup object of the word's Merriam-Webster page
+    :param word: str
+    :type word: str
+    :return: A BeautifulSoup object.
+    """    
+    
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
     }
@@ -21,6 +27,15 @@ async def request(word: str) -> bs4.BeautifulSoup:
 
 
 async def spellcheck(word: str) -> str:
+    
+    """
+     It takes a word as an argument, makes a request to the website, parses the response, and returns the
+    spelling suggestions
+    :param word: str - The word to be checked
+    :type word: str
+    :return: The return value is a string.
+    """
+    
     try:
         soup = await request(word.lower())
         spelling = soup.find("li", {"class": "dym-link"}).text
@@ -30,6 +45,15 @@ async def spellcheck(word: str) -> str:
 
 
 async def get_word_info(word: str) -> dict:
+    
+    """
+    It takes a word as an argument, and returns a dictionary containing the word's definition, phonetic,
+    synonyms, antonyms, usage, and etymology.
+    :param word: str - The word you want to get the information of
+    :type word: str
+    :return: A dictionary with the word, definition, phonetic, synonyms, antonyms, usage, and etymology.
+    """
+    
     soup = await request(word.lower())
     word_data = {"word": word}
     try:
@@ -65,12 +89,6 @@ async def get_word_info(word: str) -> dict:
         word_data["Synonyms"] = "No synonyms found"
 
     return word_data
-
-async def main():
-    word_data = await get_word_info(word)
-    JSON_word_data = json.dumps(word_data)
-    return JSON_word_data
-JSON_word_data = asyncio.run(main())
 
 class Dictionary(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
