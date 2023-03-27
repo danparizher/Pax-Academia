@@ -13,7 +13,8 @@ class AI(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(
-        name="detect-ai", description="Runs text through an AI detector."
+        name="detect-ai",
+        description="Runs text through an AI detector.",
     )
     @option(
         "text",

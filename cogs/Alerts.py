@@ -35,11 +35,11 @@ class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.db = sqlite3.connect("util/database.sqlite")
-        c = self.db.cursor()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
-        name="alerts-add", description="Adds an alert for a keyword."
+        name="alerts-add",
+        description="Adds an alert for a keyword.",
     )
     async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
         """
@@ -196,5 +196,5 @@ class Alerts(commands.Cog):
         await user_alerts()
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Alerts(bot))

@@ -1,5 +1,4 @@
 import asyncio
-import json
 
 import wikipedia
 from discord.ext import commands
@@ -8,7 +7,7 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log
 
 
-def get_wiki_without_logging(query) -> dict[str, str]:
+def get_wiki_without_logging(query: str) -> dict[str, str]:
     """
     It takes a query, gets the first page from Wikipedia, and returns a dictionary with the title,
     summary, url, and image of the page
@@ -25,7 +24,7 @@ def get_wiki_without_logging(query) -> dict[str, str]:
     }
 
 
-async def get_wiki(query) -> dict[str, str]:
+async def get_wiki(query: str) -> dict[str, str]:
     return await asyncio.to_thread(get_wiki_without_logging, query)
 
 

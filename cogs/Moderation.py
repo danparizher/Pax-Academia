@@ -42,7 +42,10 @@ class MessageFingerprint:
 
     # shortcut to build a fingerprint given a message
     @classmethod
-    def build(cls, message: discord.Message) -> "MessageFingerprint":
+    def build(
+        cls: type["MessageFingerprint"],
+        message: discord.Message,
+    ) -> "MessageFingerprint":
         filtered_content = cls.filter_content(message.content)
 
         return cls(
@@ -82,8 +85,8 @@ class MessageFingerprint:
                     for unwanted_character in (
                         string.whitespace + string.punctuation + string.digits
                     )
-                }
-            )
+                },
+            ),
         )
 
         return None if len(content) < 15 else content
@@ -105,7 +108,9 @@ class MessageFingerprint:
                         # to
                         # "https://media.discordapp.net/attachments/[REDACTED]/[REDACTED]/[REDACTED].png"
                         redacted_url = re.sub(
-                            r"/[^/]*?\.([^\.]*)$", r"/[REDACTED].\1", attachment_url
+                            r"/[^/]*?\.([^\.]*)$",
+                            r"/[REDACTED].\1",
+                            attachment_url,
                         )
                         redacted_url = re.sub(r"\d+", r"[REDACTED]", redacted_url)
 
@@ -116,7 +121,7 @@ class MessageFingerprint:
                         # furthermore, it's not super important that this function is 100% perfectly accurate
                         # so it's fine to just log and ignore any errors
                         Log(
-                            f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}"
+                            f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}",
                         )
                         continue
 
@@ -175,7 +180,8 @@ class Moderation(commands.Cog):
 
     # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
     async def record_fingerprint(
-        self, message: discord.Message
+        self,
+        message: discord.Message,
     ) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
@@ -219,7 +225,9 @@ class Moderation(commands.Cog):
             del self.multipost_warnings[message_id]
 
     async def delete_previous_multipost_warnings(
-        self, channel_id: int, author_id: int
+        self,
+        channel_id: int,
+        author_id: int,
     ) -> None:
         to_delete = [
             warning_message_id
@@ -232,7 +240,7 @@ class Moderation(commands.Cog):
         ]
         for warning_message_id in to_delete:
             multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(
-                warning_message_id
+                warning_message_id,
             )
             await multipost_warning.delete()
 
@@ -288,7 +296,7 @@ class Moderation(commands.Cog):
                         "Original Message",
                         f"[link]({original_message.jump_url})",
                         True,
-                    )
+                    ),
                 ],
             ).build()
 
@@ -302,16 +310,16 @@ class Moderation(commands.Cog):
 
                 warning = await message.reply(embed=embed)
                 await self.delete_previous_multipost_warnings(
-                    fingerprint.channel_id, fingerprint.author_id
+                    fingerprint.channel_id,
+                    fingerprint.author_id,
                 )
                 self.multipost_warnings[message.id] = (warning, fingerprint)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
                     return
-                else:
-                    # unknown error, just raise it
-                    raise
+                # unknown error, just raise it
+                raise
 
         # Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
         else:
@@ -336,16 +344,17 @@ class Moderation(commands.Cog):
 
             try:
                 await message.reply(
-                    message.author.mention, embed=embed, delete_after=15
+                    message.author.mention,
+                    embed=embed,
+                    delete_after=15,
                 )
                 await message.delete()
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multiposted message has already been deleted, take no action
                     return
-                else:
-                    # unknown error, just raise it
-                    raise
+                # unknown error, just raise it
+                raise
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -353,13 +362,14 @@ class Moderation(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(
-        self, payload: discord.RawMessageDeleteEvent
+        self,
+        payload: discord.RawMessageDeleteEvent,
     ) -> None:
         if payload.message_id in self.multipost_warnings:
             # The person deleted their message after seeing out multipost warning
             # so we can delete the warning message
             warning_message, _fingerprint = self.multipost_warnings.pop(
-                payload.message_id
+                payload.message_id,
             )
             try:
                 await warning_message.delete()
@@ -367,8 +377,7 @@ class Moderation(commands.Cog):
                 if "unknown message".casefold() in repr(e).casefold():
                     # a mod probably already deleted the warning message
                     return
-                else:
-                    raise
+                raise
 
         # If you delete your message then re-send it in another channel, that's fine
         # so we can remove the original message fingerprint

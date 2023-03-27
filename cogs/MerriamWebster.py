@@ -17,7 +17,7 @@ async def request(word: str) -> bs4.BeautifulSoup:
     """
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            f"https://www.merriam-webster.com/dictionary/{word}"
+            f"https://www.merriam-webster.com/dictionary/{word}",
         ) as response:
             return bs4.BeautifulSoup(await response.text(), "html.parser")
 
@@ -52,7 +52,7 @@ async def get_word_info(word: str) -> dict:
     word_data = {"word": word}
     try:
         word_data["Definition"] = soup.find("span", {"class": "dtText"}).text.split(
-            ":"
+            ":",
         )[1]
         word_data["Definition"] = word_data["Definition"]
     except (AttributeError, IndexError):
@@ -60,7 +60,8 @@ async def get_word_info(word: str) -> dict:
 
     try:
         word_data["Phonetic Pronunciation"] = soup.find(
-            "a", {"class": "play-pron-v2"}
+            "a",
+            {"class": "play-pron-v2"},
         ).text
     except (AttributeError, IndexError):
         word_data["Phonetic Pronunciation"] = "No phonetic pronunciation found"
@@ -134,7 +135,7 @@ class Dictionary(commands.Cog):
                 word_data = await get_word_info(await spellcheck(word))
             if word_data["Definition"] == "No definition found":
                 await ctx.edit(
-                    content=f"No results found for **{old_word.capitalize()}**."
+                    content=f"No results found for **{old_word.capitalize()}**.",
                 )
                 return
 
@@ -170,5 +171,5 @@ class Dictionary(commands.Cog):
             await ctx.edit(embed=embed, ephemeral=True)
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Dictionary(bot))

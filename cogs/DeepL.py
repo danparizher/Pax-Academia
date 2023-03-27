@@ -1,5 +1,4 @@
 import asyncio
-from typing import Optional
 
 import deepl
 from discord import option
@@ -41,7 +40,7 @@ def translate(
     text: str,
     source_language: str,
     target_language: str,
-    formality_tone: Optional[str] = None,
+    formality_tone: str | None = None,
 ) -> str:
     """
     We use the `deepl.translate` function to translate the text, but we do it in a separate thread so
@@ -113,7 +112,7 @@ class Translation(commands.Cog):
         text: str,
         source_language: str,
         target_language: str,
-        formality_tone: Optional[str] = None,
+        formality_tone: str | None = None,
     ) -> None:
         """
         It translates text from one language to another
@@ -163,5 +162,5 @@ class Translation(commands.Cog):
         Log(f"Translate command used by {ctx.author} in {ctx.guild}.")
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Translation(bot))

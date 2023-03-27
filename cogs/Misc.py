@@ -2,8 +2,8 @@ import csv
 import io
 import os
 import sqlite3
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 import discord
 from discord.commands.context import ApplicationContext
@@ -48,7 +48,7 @@ def grep_tables() -> list[Table]:
                     database_name=database_name,
                     name=database_name,
                     column_names=["log"],
-                )
+                ),
             )
             continue
 
@@ -56,15 +56,15 @@ def grep_tables() -> list[Table]:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT 
+                SELECT
                     name
-                FROM 
+                FROM
                     sqlite_schema
-                WHERE 
+                WHERE
                     type ='table'
-                    AND 
+                    AND
                     name NOT LIKE 'sqlite_%'
-                """
+                """,
             )
 
             for (table_name,) in cursor.fetchall():
@@ -75,7 +75,7 @@ def grep_tables() -> list[Table]:
                         database_name=database_name,
                         name=table_name,
                         column_names=[x[1] for x in cursor.fetchall()],
-                    )
+                    ),
                 )
     return tables
 
@@ -102,7 +102,8 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
                 writer.writerows(cursor.fetchall())
                 f.seek(0)
                 yield discord.File(
-                    f, filename=f"{table.database_name}.{table.name}.csv"
+                    f,
+                    filename=f"{table.database_name}.{table.name}.csv",
                 )
 
 
@@ -136,8 +137,9 @@ class Misc(commands.Cog):
 
         await self.bot.change_presence(
             activity=discord.Activity(
-                name="Academic Peace...", type=discord.ActivityType.watching
-            )
+                name="Academic Peace...",
+                type=discord.ActivityType.watching,
+            ),
         )
 
     @DUMP_PERMISSIONS
@@ -173,7 +175,9 @@ class Misc(commands.Cog):
         tables = grep_tables()
         await edit(f"{LOADING_EMOJI} Dumped 0/{len(tables)} table(s).")
 
-        for i, (table, file) in enumerate(zip(tables, dump_tables_to_csv(tables))):
+        for i, (table, file) in enumerate(
+            zip(tables, dump_tables_to_csv(tables), strict=False),
+        ):
             await ctx.send_followup(
                 (f"Database: `{table.database_file_path}`\nTable: `{table.name}`"),
                 file=file,

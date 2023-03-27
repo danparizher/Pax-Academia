@@ -15,7 +15,7 @@ class StaffAppView(discord.ui.View):
     def __init__(self) -> None:
         super().__init__(timeout=None)
         self.add_item(
-            discord.ui.Button(label="Apply Now", url=getenv("staff_google_form"))
+            discord.ui.Button(label="Apply Now", url=getenv("staff_google_form")),
         )
 
 
@@ -33,7 +33,8 @@ class StaffRequirement(commands.Cog):
         """
         try:
             self.conn.cursor().execute(
-                "SELECT messagesSent FROM user WHERE uid = ?", (uid,)
+                "SELECT messagesSent FROM user WHERE uid = ?",
+                (uid,),
             )
             return self.conn.cursor().fetchone()[0]
         except TypeError:
@@ -74,7 +75,7 @@ class StaffRequirement(commands.Cog):
         time_since_creation = (
             datetime.now(tz=account.created_at.tzinfo) - account.created_at
         )
-        joined_at = account.joined_at or datetime.now()
+        joined_at = account.joined_at or datetime.now(tz=account.created_at.tzinfo)
         time_since_join = datetime.now(tz=joined_at.tzinfo) - joined_at
 
         fields = [

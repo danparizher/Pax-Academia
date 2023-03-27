@@ -46,7 +46,8 @@ class PubChem(commands.Cog):
         return str(number).translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
 
     @commands.slash_command(
-        name="chemsearch", description="Searches the database for a compound."
+        name="chemsearch",
+        description="Searches the database for a compound.",
     )
     @option(
         name="name",

@@ -45,10 +45,11 @@ class Surveys(commands.Cog):
                         ).build()
                         with contextlib.suppress(discord.errors.Forbidden):
                             await message.channel.send(
-                                content=f"<@{message.author.id}>", embed=embed
+                                content=f"<@{message.author.id}>",
+                                embed=embed,
                             )
         await self.bot.process_commands(message)
 
 
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Surveys(bot))
