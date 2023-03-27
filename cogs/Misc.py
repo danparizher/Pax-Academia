@@ -56,13 +56,13 @@ def grep_tables() -> list[Table]:
             cursor = conn.cursor()
             cursor.execute(
                 """
-                SELECT 
+                SELECT
                     name
-                FROM 
+                FROM
                     sqlite_schema
-                WHERE 
+                WHERE
                     type ='table'
-                    AND 
+                    AND
                     name NOT LIKE 'sqlite_%'
                 """,
             )
