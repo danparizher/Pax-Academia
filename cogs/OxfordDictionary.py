@@ -1,3 +1,5 @@
+import contextlib
+
 import aiohttp
 import bs4
 from discord import option
@@ -8,87 +10,89 @@ from util.Logging import Log
 
 
 async def request(word: str) -> bs4.BeautifulSoup:
-    
     """
     It takes a word as a string, and returns a BeautifulSoup object of the word's Merriam-Webster page
     :param word: str
     :type word: str
     :return: A BeautifulSoup object.
-    """    
-    
+    """
+
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
     }
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(
-            f"https://www.oxfordlearnersdictionaries.com/definition/english/{word}"
+            f"https://www.oxfordlearnersdictionaries.com/definition/english/{word}",
         ) as response:
             return bs4.BeautifulSoup(await response.text(), "html.parser")
 
 
 async def spellcheck(word: str) -> str:
-    
     """
-     It takes a word as an argument, makes a request to the website, parses the response, and returns the
-    spelling suggestions
-    :param word: str - The word to be checked
+    It takes a word, makes a request to the website, and returns the first suggested spelling
+
+    :param word: str - The word to be spellchecked
     :type word: str
-    :return: The return value is a string.
+    :return: The spelling of the word.
     """
-    
-    try:
+    with contextlib.suppress(AttributeError, IndexError):
         soup = await request(word.lower())
-        spelling = soup.find("li", {"class": "dym-link"}).text
+        spelling = soup.find("a", {"class": "dym-link"}).text
         return spelling.strip().capitalize()
-    except (AttributeError, IndexError):
-        return "No spelling suggestions found"
 
 
 async def get_word_info(word: str) -> dict:
-    
     """
-    It takes a word as an argument, and returns a dictionary containing the word's definition, phonetic,
-    synonyms, antonyms, usage, and etymology.
-    :param word: str - The word you want to get the information of
+    It takes a word as input, and returns a dictionary containing the word's definition, grammar,
+    examples, pronunciation, part of speech, and synonyms
+
+    :param word: str - The word you want to look up
     :type word: str
-    :return: A dictionary with the word, definition, phonetic, synonyms, antonyms, usage, and etymology.
+    :return: A dictionary with the word and its information.
     """
-    
     soup = await request(word.lower())
     word_data = {"word": word}
     try:
         word_data["Definition"] = soup.find("span", {"class": "def"}).text.strip()
+        if word_data["Definition"][-1] != ".":
+            word_data["Definition"] += "."
     except (AttributeError, IndexError):
         word_data["Definition"] = "No definition found"
 
     try:
         word_data["Grammar"] = soup.find("span", {"class": "grammar"}).text.strip()
+        word_data["Grammar"] = word_data["Grammar"].replace("[", "").replace("]", "")
+        word_data["Grammar"] = word_data["Grammar"].capitalize()
     except (AttributeError, IndexError):
-        word_data["Grammar"] = "No Grammar details given"
+        word_data["Grammar"] = "No grammar found"
 
     try:
-        word_data["Examples"] = soup.find("span", {"class": "x"}).text.strip()
+        word_data["Example"] = (
+            soup.find("span", {"class": "x"}).text.strip().capitalize()
+        )
     except (AttributeError, IndexError):
-        word_data["Examples"] = "No Examples given"
-  
-    try:
-        word_data["Pronunciation"] = soup.find(
-            "span", {"class": "phon"}
-        ).text
-    except (AttributeError, IndexError):
-        word_data["Pronunciation"] = "No pronunciation found"
+        word_data["Example"] = "No examples found"
 
     try:
-        word_data["Part of speech"] = soup.find("span", {"class": "pos"}).text
+        word_data["Phonetic Pronunciation"] = soup.find("span", {"class": "phon"}).text
     except (AttributeError, IndexError):
-        word_data["Part of speech"] = "No part of speech found"
+        word_data["Phonetic Pronunciation"] = "No pronunciation found"
 
     try:
-        word_data["Synonyms"] = soup.find("span", {"class": "xh"}).text
+        word_data["Part of speech"] = soup.find(
+            "span",
+            {"class": "pos"},
+        ).text.capitalize()
+    except (AttributeError, IndexError):
+        word_data["Part of speech"] = "No PoS found"
+
+    try:
+        word_data["Synonyms"] = soup.find("span", {"class": "xh"}).text.capitalize()
     except (AttributeError, IndexError):
         word_data["Synonyms"] = "No synonyms found"
 
     return word_data
+
 
 class Dictionary(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -122,7 +126,7 @@ class Dictionary(commands.Cog):
                 word_data = await get_word_info(await spellcheck(word))
             if word_data["Definition"] == "No definition found":
                 await ctx.edit(
-                    content=f"No results found for **{old_word.capitalize()}**."
+                    content=f"No results found for **{old_word.capitalize()}**. Did you spell it correctly?",
                 )
                 return
 
@@ -137,7 +141,7 @@ class Dictionary(commands.Cog):
             ]
             embed = EmbedBuilder(
                 title=f"Definition of __{word_data['word'].capitalize()}__",
-                description=word_data["Definition"],
+                description=word_data["Definition"].capitalize(),
                 fields=fields or None,
             ).build()
 
@@ -155,10 +159,8 @@ class Dictionary(commands.Cog):
                 title=f"Definition of __{word.capitalize()}__",
                 description=f"An error occurred while trying to define {word.capitalize()}:\n\n{e}",
             ).build()
-            await ctx.edit(embed=embed, ephemeral=True)
+            await ctx.edit(embed=embed)
 
 
-
-
-def setup(bot) -> None:
+def setup(bot: commands.Bot) -> None:
     bot.add_cog(Dictionary(bot))
