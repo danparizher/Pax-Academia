@@ -467,14 +467,9 @@ def ChooseSimilarWordView(ctx: ApplicationContext, word_info: WordInformation):
                 ),
             )
 
-            if new_word_info.similar_words:
-                view = ChooseSimilarWordView(ctx, new_word_info)
-            else:
-                view = None
-
             await ctx.edit(
                 embed=new_word_info.build_embed(),
-                view=view,
+                view=ChooseSimilarWordView(ctx, new_word_info),
             )
 
             await interaction.response.defer()
