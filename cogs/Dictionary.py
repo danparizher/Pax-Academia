@@ -138,7 +138,7 @@ class WordInformation:
         SimilarWord
     ]  # may include words with identical spellings, but differing parts of speech
 
-    def build_embed(self):
+    def build_embed(self) -> discord.Embed:
         """
         Builds an embed that contains all the relevant information.
         Will only include the first 5 definitions with max 3 examples each, or 5 examples if there is only one definition.
