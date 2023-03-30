@@ -487,11 +487,9 @@ class Dictionary(commands.Cog):
         """
         It takes a word as an argument, and returns the definition of that word
 
-        :param ctx: commands.Context
-        :type ctx: commands.Context
-        :param word: str
-        :type word: str
-        :return: The word_data variable is being returned.
+        :param ctx: the current ApplicationContext
+        :param word: the word to define
+        :return: None. Replies to the Discord interaction with information about the word.
         """
         await ctx.defer()
         word_info = await search(word)
