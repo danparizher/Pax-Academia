@@ -2,11 +2,11 @@ import asyncio
 import re
 import urllib.parse
 from dataclasses import dataclass
-from functools import lru_cache
 
 import aiohttp
 import bs4
-from discord import Embed, option
+import discord
+from discord import option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
@@ -115,7 +115,7 @@ class SimilarWord:
         assert (
             status_code == 200
         ), "Got a non-200 response while fetching a URL that was provided directly from Oxford."
-        return parse_oxford_definition_page(soup)
+        return parse_oxford_definition_page(self.url, soup)
 
 
 @dataclass
@@ -128,6 +128,7 @@ class WordInformation:
     )
     SPEAKING_HEAD_EMOJI = "\N{SPEAKING HEAD IN SILHOUETTE}\N{VARIATION SELECTOR-16}"
 
+    url: str
     word: str
     part_of_speech: str | None
     us_pronunciation: Pronunciation | None
@@ -149,14 +150,14 @@ class WordInformation:
 
         header = ""
 
+        if self.part_of_speech:
+            header += f"**{self.part_of_speech}**\n"
+
         if self.us_pronunciation and self.gb_pronunciation:
             header += f"{WordInformation.US_FLAG_EMOJI} **{self.us_pronunciation}**\n"
             header += f"{WordInformation.GB_FLAG_EMOJI} **{self.gb_pronunciation}**\n"
         elif self.us_pronunciation or self.gb_pronunciation:
             header += f"{WordInformation.SPEAKING_HEAD_EMOJI} **{self.us_pronunciation or self.gb_pronunciation}**\n"
-
-        if self.part_of_speech:
-            header += f"**{self.part_of_speech}**\n"
 
         header = header.strip()
 
@@ -210,7 +211,6 @@ class WordInformation:
         ).build()
 
 
-@lru_cache(maxsize=16)
 async def fetch_page_cached(url: str) -> tuple[int, bs4.BeautifulSoup]:
     """
     Simple utility function to HTTP GET the page.
@@ -232,17 +232,16 @@ async def fetch_page_cached(url: str) -> tuple[int, bs4.BeautifulSoup]:
             return response.status, soup
 
 
-async def search_oxford_dictionary(word: str) -> tuple[int, bs4.BeautifulSoup]:
+async def search_oxford_dictionary(word: str) -> tuple[str, int, bs4.BeautifulSoup]:
     """
     Fetches the Oxford Learner's Dictionary page for the provided word.
 
     :param word: the word whose page should be fetched
-    :return: the http status code and the parsed page content (using BeautifulSoup)
+    :return: the url, the http status code, and the parsed page content (using BeautifulSoup)
     """
     path = re.sub(r"\s+", r"-", word.lower().strip())
-    return await fetch_page_cached(
-        f"https://www.oxfordlearnersdictionaries.com/definition/english/{urllib.parse.quote(path)}"
-    )
+    url = f"https://www.oxfordlearnersdictionaries.com/definition/english/{urllib.parse.quote(path)}"
+    return url, *await fetch_page_cached(url)
 
 
 def parse_oxford_suggestions_page(soup: bs4.BeautifulSoup) -> list[str]:
@@ -255,12 +254,13 @@ def parse_oxford_suggestions_page(soup: bs4.BeautifulSoup) -> list[str]:
     return [result.text for result in soup.select(".result-list > li")]
 
 
-def parse_oxford_definition_page(soup: bs4.BeautifulSoup) -> WordInformation:
+def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInformation:
     """
     Parses the provided oxford definition page.
     Should only call this method after receiving a 200 status code.
     Raises a ValueError if the page format is unfamiliar.
 
+    :param url: the url of the definition page
     :param soup: the BeautifulSoup-parsed page
     :return: a WordInformation
     """
@@ -287,9 +287,7 @@ def parse_oxford_definition_page(soup: bs4.BeautifulSoup) -> WordInformation:
     if part_of_speech_element := soup.select_one(".webtop > .pos"):
         part_of_speech = part_of_speech_element.text.strip()
     else:
-        raise ValueError(
-            "Failed to determine part of speech via selector `.webtop > .pos`"
-        )
+        part_of_speech = None
 
     similar_words: list[SimilarWord] = []
     if related_entries_list := soup.select_one("#relatedentries ul"):
@@ -299,18 +297,24 @@ def parse_oxford_definition_page(soup: bs4.BeautifulSoup) -> WordInformation:
                     continue
             else:
                 continue
-            url = anchor_element["href"]
-            assert isinstance(url, str)
+            similar_word_page = anchor_element["href"]
+            assert isinstance(similar_word_page, str)
 
             similar_word = similar_word_element.text
             if pos_element := similar_word_element.select_one("pos"):
-                part_of_speech = pos_element.text.strip()
-                similar_word = similar_word.strip().removesuffix(part_of_speech).strip()
+                similar_part_of_speech = pos_element.text.strip()
+                similar_word = (
+                    similar_word.strip().removesuffix(similar_part_of_speech).strip()
+                )
             else:
-                part_of_speech = None
+                similar_part_of_speech = None
 
             similar_words.append(
-                SimilarWord(word=similar_word, part_of_speech=part_of_speech, url=url)
+                SimilarWord(
+                    word=similar_word,
+                    part_of_speech=similar_part_of_speech,
+                    url=similar_word_page,
+                )
             )
 
     senses: list[Sense] = []
@@ -359,12 +363,12 @@ def parse_oxford_definition_page(soup: bs4.BeautifulSoup) -> WordInformation:
         )
 
     if not senses:
-        print(similar_words)
         raise ValueError(
             "Failed to find a single definition on the page via selector `.sense`"
         )
 
     return WordInformation(
+        url=url,
         word=word,
         us_pronunciation=us_pronunciation,
         gb_pronunciation=gb_pronunciation,
@@ -383,16 +387,80 @@ async def search(word) -> WordInformation | list[str]:
     :param result_index: which version of the word you would like to select
     :return: a WordInformation if the word was found in the dictionary, and a list of suggested words otherwise.
     """
-    status_code, soup = await search_oxford_dictionary(word)
+    url, status_code, soup = await search_oxford_dictionary(word)
 
     if status_code == 404:
         return parse_oxford_suggestions_page(soup)
     elif status_code == 200:
-        return parse_oxford_definition_page(soup)
+        return parse_oxford_definition_page(url, soup)
 
     raise Exception(
         f"Unexpected status code {status_code} while searching for word {word!r}"
     )
+
+
+def ChooseSimilarWordView(ctx: ApplicationContext, word_info: WordInformation):
+    class View(discord.ui.View):
+        @discord.ui.select(
+            placeholder=f"{word_info.word} - {word_info.part_of_speech}",
+            options=[
+                discord.SelectOption(
+                    label=word_info.word,
+                    description=word_info.part_of_speech,
+                    value="current_word",
+                    default=True,
+                )
+            ]
+            + [
+                discord.SelectOption(
+                    label=similar_word.word,
+                    description=similar_word.part_of_speech,
+                    value=f"similar_word_{index}",
+                )
+                for index, similar_word in enumerate(word_info.similar_words)
+            ],
+        )
+        async def select_callback(
+            self, select: discord.ui.Select, interaction: discord.Interaction
+        ):  # the function called when the user is done selecting options
+            value = select.values[0]
+            if value == "current_value":
+                # do nothing
+                await interaction.response.defer()
+                return
+
+            assert isinstance(value, str)
+            index = int(value.removeprefix("similar_word_"))
+
+            similar_word = word_info.similar_words[index]
+            new_word_info = await similar_word.fetch()
+
+            # It is annoying to have the dropdown list change after selecting a new word,
+            # so copy over the existing similar words.
+            new_word_info.similar_words = word_info.similar_words.copy()
+            del new_word_info.similar_words[index]
+            new_word_info.similar_words.insert(
+                0,
+                SimilarWord(
+                    url=word_info.url,
+                    word=word_info.word,
+                    part_of_speech=word_info.part_of_speech,
+                ),
+            )
+
+            if new_word_info.similar_words:
+                view = ChooseSimilarWordView(ctx, new_word_info)
+            else:
+                view = None
+
+            await ctx.edit(
+                embed=new_word_info.build_embed(),
+                view=view,
+            )
+
+            await interaction.response.defer()
+
+    return View()
 
 
 class Dictionary(commands.Cog):
@@ -426,7 +494,12 @@ class Dictionary(commands.Cog):
             await ctx.respond(embed=embed)
             return
 
-        await ctx.edit(embed=word_info.build_embed())
+        if word_info.similar_words:
+            view = ChooseSimilarWordView(ctx, word_info)
+        else:
+            view = None
+
+        await ctx.edit(embed=word_info.build_embed(), view=view)
 
 
 def setup(bot: commands.Bot) -> None:
