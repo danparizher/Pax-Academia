@@ -149,25 +149,20 @@ class WordInformation:
 
         header = ""
 
-        if self.part_of_speech:
-            header += f"**{self.part_of_speech}**\n"
-
         if self.us_pronunciation and self.gb_pronunciation:
             header += f"{WordInformation.US_FLAG_EMOJI} **{self.us_pronunciation}**\n"
             header += f"{WordInformation.GB_FLAG_EMOJI} **{self.gb_pronunciation}**\n"
         elif self.us_pronunciation or self.gb_pronunciation:
             header += f"{WordInformation.SPEAKING_HEAD_EMOJI} **{self.us_pronunciation or self.gb_pronunciation}**\n"
 
+        if self.part_of_speech:
+            header += f"**{self.part_of_speech}**\n"
+
         header = header.strip()
 
         if len(self.senses) == 1:
             sense = self.senses[0]
             description = f"{header}\n\n{sense}".strip()
-
-            if self.part_of_speech:
-                description = f"**{self.part_of_speech}**"
-            else:
-                description = str(sense)
 
             if sense.examples:
                 fields = [
