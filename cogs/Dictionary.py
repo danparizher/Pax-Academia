@@ -417,7 +417,8 @@ async def search(word: str) -> WordInformation | list[str]:
 
 
 def ChooseSimilarWordView(
-    ctx: ApplicationContext, word_info: WordInformation
+    ctx: ApplicationContext,
+    word_info: WordInformation,
 ) -> discord.ui.View:
     """
     Generates a dropdown menu View that allows you to select a similar word to define.
