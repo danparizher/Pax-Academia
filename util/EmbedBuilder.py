@@ -8,16 +8,18 @@ class EmbedBuilder:
         description: str | None = None,
         color: int = 0xFF7900,
         image: str | None = None,
-        fields: list | None = None,
+        fields: list[tuple[str, str, bool]] | None = None,
         thumbnail: str | None = None,
+        footer: str = "Powered by Homework Help",
+        icon_url: str = "https://pbs.twimg.com/profile_images/988662835180797952/9fWyq5hr_400x400.jpg",
         url: str | None = None,
     ) -> None:
         self.title = title
         self.description = description
         self.color = color
         self.thumbnail = thumbnail
-        self.footer = "Powered by Homework Help"
-        self.icon_url = "https://pbs.twimg.com/profile_images/988662835180797952/9fWyq5hr_400x400.jpg"
+        self.footer = footer
+        self.icon_url = icon_url
         self.image = image
         self.fields = fields
         self.url = url
@@ -33,8 +35,8 @@ class EmbedBuilder:
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         if self.fields:
-            for field in self.fields:
-                embed.add_field(name=field[0], value=field[1], inline=field[2])
+            for name, value, inline in self.fields:
+                embed.add_field(name=name, value=value, inline=inline)
         if self.url:
             embed.url = self.url
         embed.set_footer(text=self.footer, icon_url=self.icon_url)
