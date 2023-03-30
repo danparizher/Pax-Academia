@@ -416,7 +416,17 @@ async def search(word: str) -> WordInformation | list[str]:
     )
 
 
-def ChooseSimilarWordView(ctx: ApplicationContext, word_info: WordInformation):
+def ChooseSimilarWordView(
+    ctx: ApplicationContext, word_info: WordInformation
+) -> discord.ui.View:
+    """
+    Generates a dropdown menu View that allows you to select a similar word to define.
+
+    :param ctx: the current ApplicationContext
+    :param word_info: a WordInformation pertaining to the current interaction
+    :return: an instance of a subclass of `discord.ui.View`
+    """
+
     class View(discord.ui.View):
         @discord.ui.select(
             placeholder=f"{word_info.word} - {word_info.part_of_speech}",
