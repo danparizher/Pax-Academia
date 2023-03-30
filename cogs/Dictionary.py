@@ -11,7 +11,6 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
 
 
 @dataclass
@@ -19,7 +18,7 @@ class Pronunciation:
     phonetic: str
     audio_url: str | None = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """
         Formats a hyperlink for Discord markdown.
 
@@ -32,7 +31,8 @@ class Pronunciation:
 
     @classmethod
     def parse_from_oxford_phonetic_element(
-        cls, element: bs4.Tag
+        cls: type["Pronunciation"],
+        element: bs4.Tag,
     ) -> "Pronunciation | None":
         """
         Tries to parse a pronunciation element on an Oxford dictionary page.
@@ -70,10 +70,7 @@ class Example:
         :return: a string like "*(ironic)* Oh great, they left without us."
         """
 
-        if self.labels:
-            return f"*{self.labels}* {self.sentence}"
-
-        return self.sentence
+        return f"*{self.labels}* {self.sentence}" if self.labels else self.sentence
 
 
 @dataclass
@@ -89,14 +86,11 @@ class Sense:
 
         :return: a string like "*[only before noun] (informal)* used to emphasize an adjective of size or quality"
         """
-        if self.grammar and self.labels:
-            return f"*{self.grammar} {self.labels}* {self.definition}"
-        elif self.grammar:
+        if self.grammar:
+            if self.labels:
+                return f"*{self.grammar} {self.labels}* {self.definition}"
             return f"*{self.grammar}* {self.definition}"
-        elif self.labels:
-            return f"*{self.labels}* {self.definition}"
-
-        return self.definition
+        return f"*{self.labels}* {self.definition}" if self.labels else self.definition
 
 
 @dataclass
@@ -146,7 +140,7 @@ class WordInformation:
         :return: a discord.Embed
         """
         title = f"*{self.word.title()}*"
-        footer = f"Retrieved from Oxford Learner's Dictionary by Homework Help"
+        footer = "Retrieved from Oxford Learner's Dictionary by Homework Help"
 
         header = ""
 
@@ -174,7 +168,7 @@ class WordInformation:
                             for example in sense.examples[:5]
                         ),
                         True,
-                    )
+                    ),
                 ]
             else:
                 fields = None
@@ -220,14 +214,16 @@ async def fetch_page_cached(url: str) -> tuple[int, bs4.BeautifulSoup]:
     :return: the status code and the BeautifulSoup-parsed page
     """
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
     }
     async with aiohttp.ClientSession(headers=headers) as session:
         async with session.get(url) as response:
             # BeautifulSoup parsing is somewhat resource intensive,
             # so we pass that to another thread to avoid blocking the rest of the asyncio events
             soup = await asyncio.to_thread(
-                bs4.BeautifulSoup, await response.text(), "html.parser"
+                bs4.BeautifulSoup,
+                await response.text(),
+                "html.parser",
             )
             return response.status, soup
 
@@ -272,14 +268,14 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
 
     if us_pronunciation_element := soup.select_one(".webtop > .phonetics .phons_n_am"):
         us_pronunciation = Pronunciation.parse_from_oxford_phonetic_element(
-            us_pronunciation_element
+            us_pronunciation_element,
         )
     else:
         us_pronunciation = None
 
     if gb_pronunciation_element := soup.select_one(".webtop > .phonetics .phons_n_am"):
         gb_pronunciation = Pronunciation.parse_from_oxford_phonetic_element(
-            gb_pronunciation_element
+            gb_pronunciation_element,
         )
     else:
         gb_pronunciation = None
@@ -292,10 +288,9 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
     similar_words: list[SimilarWord] = []
     if related_entries_list := soup.select_one("#relatedentries ul"):
         for similar_word_element in related_entries_list.select("li:not(.more)"):
-            if anchor_element := similar_word_element.select_one("a"):
-                if not anchor_element.has_attr("href"):
-                    continue
-            else:
+            if not (anchor_element := similar_word_element.select_one("a")):
+                continue
+            if not anchor_element.has_attr("href"):
                 continue
             similar_word_page = anchor_element["href"]
             assert isinstance(similar_word_page, str)
@@ -314,7 +309,7 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
                     word=similar_word,
                     part_of_speech=similar_part_of_speech,
                     url=similar_word_page,
-                )
+                ),
             )
 
     senses: list[Sense] = []
@@ -350,7 +345,7 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
                 Example(
                     labels=labels,
                     sentence=sentence,
-                )
+                ),
             )
 
         senses.append(
@@ -359,12 +354,12 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
                 grammar=grammar,
                 labels=labels,
                 examples=examples,
-            )
+            ),
         )
 
     if not senses:
         raise ValueError(
-            "Failed to find a single definition on the page via selector `.sense`"
+            "Failed to find a single definition on the page via selector `.sense`",
         )
 
     return WordInformation(
@@ -378,7 +373,7 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
     )
 
 
-async def search(word) -> WordInformation | list[str]:
+async def search(word: str) -> WordInformation | list[str]:
     """
     Searches for a certain word in the Oxford Learner's Dictionary, and parses the result into a WordInformation.
     If the word was not found, returns a list of valid suggestions.
@@ -391,11 +386,11 @@ async def search(word) -> WordInformation | list[str]:
 
     if status_code == 404:
         return parse_oxford_suggestions_page(soup)
-    elif status_code == 200:
+    if status_code == 200:
         return parse_oxford_definition_page(url, soup)
 
     raise Exception(
-        f"Unexpected status code {status_code} while searching for word {word!r}"
+        f"Unexpected status code {status_code} while searching for word {word!r}",
     )
 
 
@@ -409,7 +404,7 @@ def ChooseSimilarWordView(ctx: ApplicationContext, word_info: WordInformation):
                     description=word_info.part_of_speech,
                     value="current_word",
                     default=True,
-                )
+                ),
             ]
             + [
                 discord.SelectOption(
@@ -421,8 +416,10 @@ def ChooseSimilarWordView(ctx: ApplicationContext, word_info: WordInformation):
             ],
         )
         async def select_callback(
-            self, select: discord.ui.Select, interaction: discord.Interaction
-        ):  # the function called when the user is done selecting options
+            self,
+            select: discord.ui.Select,
+            interaction: discord.Interaction,
+        ) -> None:  # the function called when the user is done selecting options
             value = select.values[0]
             if value == "current_value":
                 # do nothing
