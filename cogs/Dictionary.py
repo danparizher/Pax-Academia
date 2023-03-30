@@ -205,14 +205,29 @@ class WordInformation:
         ).build()
 
 
+# a FILO stack of (URL, Page) elements
+# - new entries are at the beginning
+# - after a cache hit, the page is moved back to the beginning
+page_cache: list[tuple[str, bs4.BeautifulSoup]] = []
+PAGE_CACHE_SIZE = 16
+
+
 async def fetch_page_cached(url: str) -> tuple[int, bs4.BeautifulSoup]:
     """
     Simple utility function to HTTP GET the page.
-    Caches the most recent 16 URLs.
+    Caches the most recent 16 URLs (only for 200 status codes).
 
     :param url: the URL to fetch
     :return: the status code and the BeautifulSoup-parsed page
     """
+
+    # check if already cached
+    for index, (cached_url, cached_page) in enumerate(page_cache):
+        if cached_url == url:
+            # move to the front of the array, so it won't be deleted soon
+            page_cache.insert(0, page_cache.pop(index))
+            return 200, cached_page  # only 200 responses are cached
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36",
     }
@@ -225,6 +240,13 @@ async def fetch_page_cached(url: str) -> tuple[int, bs4.BeautifulSoup]:
                 await response.text(),
                 "html.parser",
             )
+
+            # add to cache
+            if response.status == 200:
+                page_cache.insert(0, (url, soup))
+                while len(page_cache) > PAGE_CACHE_SIZE:
+                    page_cache.pop()
+
             return response.status, soup
 
 
