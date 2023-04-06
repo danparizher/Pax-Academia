@@ -23,7 +23,10 @@ class embeds:
         pass
 
     def min_reqs(
-        self, msg_count: int, join_time: datetime, created_at: datetime
+        self,
+        msg_count: int,
+        join_time: datetime,
+        created_at: datetime,
     ) -> discord.Embed:
         """
         User does not meet the minimum requirements to apply for staff.
@@ -51,7 +54,7 @@ class embeds:
             timedelta(weeks=52) - time_since_creation,
             timedelta(days=30) - time_since_join,
         )
-        desc = f"""Unfortunately, you do not meet the basic requirements in order to apply for staff.
+        desc = """Unfortunately, you do not meet the basic requirements in order to apply for staff.
             Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
         if wait_time > timedelta(0):
             desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
@@ -114,22 +117,26 @@ class user:
         self.created_at = user.created_at
         # get user data from database
         self.messages_sent = cursor.execute(
-            "SELECT messagesSent FROM user WHERE uid = ?", (self.uid,)
+            "SELECT messagesSent FROM user WHERE uid = ?",
+            (self.uid,),
         ).fetchone()[0]
         self.marked_spam = cursor.execute(
-            "SELECT markedSpam FROM user WHERE uid = ?", (self.uid,)
+            "SELECT markedSpam FROM user WHERE uid = ?",
+            (self.uid,),
         ).fetchone()[0]
         self.cooldown = float(
             cursor.execute(
-                "SELECT cooldown FROM user WHERE uid = ?", (self.uid,)
+                "SELECT cooldown FROM user WHERE uid = ?",
+                (self.uid,),
             ).fetchone()[0]
-            or 0
+            or 0,
         )
         # get all statuses
         self.status = [
             x[0]
             for x in cursor.execute(
-                "SELECT status FROM application WHERE uid = ?", (self.uid,)
+                "SELECT status FROM application WHERE uid = ?",
+                (self.uid,),
             ).fetchall()
         ]
         # close database connection
@@ -168,7 +175,7 @@ class user:
 
 
 class StaffAppView(discord.ui.View):
-    def __init__(self, author: user, bot: commands.Bot):
+    def __init__(self, author: user, bot: commands.Bot) -> None:
         """
         A discord view for the staff application.
         Includes a select menu for:
@@ -225,56 +232,70 @@ class StaffAppView(discord.ui.View):
         disabled=True,
         options=[
             discord.SelectOption(
-                label="UTC-12:00", description="International Date Line West"
+                label="UTC-12:00",
+                description="International Date Line West",
             ),
             discord.SelectOption(label="UTC-11:00", description="Midway Island, Samoa"),
             discord.SelectOption(label="UTC-10:00", description="Hawaii"),
             discord.SelectOption(label="UTC-09:00", description="Alaska"),
             discord.SelectOption(
-                label="UTC-08:00", description="Pacific Time (US & Canada)"
+                label="UTC-08:00",
+                description="Pacific Time (US & Canada)",
             ),
             discord.SelectOption(
-                label="UTC-07:00", description="Mountain Time (US & Canada)"
+                label="UTC-07:00",
+                description="Mountain Time (US & Canada)",
             ),
             discord.SelectOption(
-                label="UTC-06:00", description="Central Time (US & Canada)"
+                label="UTC-06:00",
+                description="Central Time (US & Canada)",
             ),
             discord.SelectOption(
-                label="UTC-05:00", description="Eastern Time (US & Canada)"
+                label="UTC-05:00",
+                description="Eastern Time (US & Canada)",
             ),
             discord.SelectOption(
-                label="UTC-04:00", description="Atlantic Time (Canada)"
+                label="UTC-04:00",
+                description="Atlantic Time (Canada)",
             ),
             discord.SelectOption(label="UTC-03:00", description="Brasilia"),
             discord.SelectOption(label="UTC-02:00", description="Mid-Atlantic"),
             discord.SelectOption(label="UTC-01:00", description="Cape Verde Is."),
             discord.SelectOption(label="UTC+00:00", description="Casablanca, Monrovia"),
             discord.SelectOption(
-                label="UTC+01:00", description="Amsterdam, Berlin, Rome"
+                label="UTC+01:00",
+                description="Amsterdam, Berlin, Rome",
             ),
             discord.SelectOption(
-                label="UTC+02:00", description="Cairo, Helsinki, Kaliningrad"
+                label="UTC+02:00",
+                description="Cairo, Helsinki, Kaliningrad",
             ),
             discord.SelectOption(
-                label="UTC+03:00", description="Moscow, Nairobi, Baghdad"
+                label="UTC+03:00",
+                description="Moscow, Nairobi, Baghdad",
             ),
             discord.SelectOption(label="UTC+04:00", description="Abu Dhabi, Muscat"),
             discord.SelectOption(
-                label="UTC+05:00", description="Islamabad, Karachi, Tashkent"
+                label="UTC+05:00",
+                description="Islamabad, Karachi, Tashkent",
             ),
             discord.SelectOption(label="UTC+06:00", description="Almaty, Dhaka"),
             discord.SelectOption(
-                label="UTC+07:00", description="Bangkok, Hanoi, Jakarta"
+                label="UTC+07:00",
+                description="Bangkok, Hanoi, Jakarta",
             ),
             discord.SelectOption(
-                label="UTC+08:00", description="Beijing, Perth, Singapore"
+                label="UTC+08:00",
+                description="Beijing, Perth, Singapore",
             ),
             discord.SelectOption(label="UTC+09:00", description="Tokyo, Seoul, Osaka"),
             discord.SelectOption(
-                label="UTC+10:00", description="Brisbane, Canberra, Melbourne"
+                label="UTC+10:00",
+                description="Brisbane, Canberra, Melbourne",
             ),
             discord.SelectOption(
-                label="UTC+11:00", description="Magadan, Solomon Is., New Caledonia"
+                label="UTC+11:00",
+                description="Magadan, Solomon Is., New Caledonia",
             ),
             discord.SelectOption(label="UTC+12:00", description="Auckland, Wellington"),
             # Thank god for Copilot xoxo
@@ -326,7 +347,10 @@ class StaffAppView(discord.ui.View):
         await interaction.response.edit_message(view=self)
 
     @discord.ui.button(
-        label="Next Questions", style=discord.ButtonStyle.primary, row=3, disabled=True
+        label="Next Questions",
+        style=discord.ButtonStyle.primary,
+        row=3,
+        disabled=True,
     )
     async def button_callback(self, button, interaction):
         """
@@ -341,13 +365,20 @@ class StaffAppView(discord.ui.View):
                 self.time_per_wk,
                 self.bot,
                 title="Input answers",
-            )
+            ),
         )
 
 
 class StaffAppModal(discord.ui.Modal):
     def __init__(
-        self, author, nda, timezone, hours_per_wk, bot, *args, **kwargs
+        self,
+        author,
+        nda,
+        timezone,
+        hours_per_wk,
+        bot,
+        *args,
+        **kwargs,
     ) -> None:
         """
         A discord modal that asks the user for their answers to the questions.
@@ -365,20 +396,21 @@ class StaffAppModal(discord.ui.Modal):
 
         self.add_item(
             discord.ui.InputText(
-                label="First Name (Eg. John)", style=discord.InputTextStyle.short
-            )
+                label="First Name (Eg. John)",
+                style=discord.InputTextStyle.short,
+            ),
         )
         self.add_item(
             discord.ui.InputText(
                 label="Why do you want to become a staff member",
                 style=discord.InputTextStyle.long,
-            )
+            ),
         )
         self.add_item(
             discord.ui.InputText(
                 label="How can you contribute if you are given staff",
                 style=discord.InputTextStyle.long,
-            )
+            ),
         )
 
     async def callback(self, interaction: discord.Interaction):
@@ -458,19 +490,20 @@ class StaffAppsUser(commands.Cog):
         # check cooldown
         if applicant.is_on_cooldown():
             await ctx.respond(
-                embed=embeds().cooldown(applicant.cooldown), ephemeral=True
+                embed=embeds().cooldown(applicant.cooldown),
+                ephemeral=True,
             )
             Log(f"{logname} tried to apply for staff but is on cooldown")
             return
 
         # check app status
         status = any(
-            [x in [1, 3, 4, 5, 6, 7, 8] for x in applicant.status]
+            x in [1, 3, 4, 5, 6, 7, 8] for x in applicant.status
         )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)
             Log(
-                f"{logname} tried to apply for staff but already has an ongoing application"
+                f"{logname} tried to apply for staff but already has an ongoing application",
             )
             return
 
@@ -478,12 +511,14 @@ class StaffAppsUser(commands.Cog):
         if not applicant.min_reqs()[0]:
             await ctx.respond(
                 embed=embeds().min_reqs(
-                    applicant.min_reqs()[1], applicant.joined_at, applicant.created_at
+                    applicant.min_reqs()[1],
+                    applicant.joined_at,
+                    applicant.created_at,
                 ),
                 ephemeral=True,
             )
             Log(
-                f"{logname} tried to apply for staff but does not meet the minimum requirements"
+                f"{logname} tried to apply for staff but does not meet the minimum requirements",
             )
             return
 
@@ -491,23 +526,25 @@ class StaffAppsUser(commands.Cog):
         # user meets all requirements, send application form
         embed = EmbedBuilder(
             title="Congratulations!",
-            description="""You meet the basic requirements for staff. You may apply for staff below.\nPlease make sure you read the following requirements, 
-        If you do not fulfill the requirements, please contact us via ModMail if you feel you have a special circumstance before submitting the application. 
-        If not, do not continue, and please apply once you have fulfilled them. 
+            description="""You meet the basic requirements for staff. You may apply for staff below.\nPlease make sure you read the following requirements,
+        If you do not fulfill the requirements, please contact us via ModMail if you feel you have a special circumstance before submitting the application.
+        If not, do not continue, and please apply once you have fulfilled them.
         You will not receive a response if you have not received a waiver or if you obviously do not meet the requirements\n\n
                     I am at least 18 years old.
                     I am mature and unbiased.
                     I am willing to partake in an interview.
                     I did not receive any infractions in the past three (3) months.
-                    
-                    
+
+
         **Non-disclosure agreement**
         You agree not to disclose any information within the staff channels and/or any confidential Homework Help assets without explicit leave.\n""",
             fields=None,
             color=0x39FF14,  # GREEN
         ).build()
         await ctx.respond(
-            embed=embed, ephemeral=True, view=StaffAppView(ctx.author, self.bot)
+            embed=embed,
+            ephemeral=True,
+            view=StaffAppView(ctx.author, self.bot),
         )
 
 

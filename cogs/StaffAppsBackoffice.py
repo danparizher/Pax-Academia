@@ -18,7 +18,7 @@ class staffAppsSeeAll(discord.ui.View):
     A discord view for the staffAppsSeeAll command
     """
 
-    def __init__(self, author: discord.Member, data):
+    def __init__(self, author: discord.Member, data) -> None:
         super().__init__()
         self.author = author
         self.data = data
@@ -38,12 +38,18 @@ class staffAppsSeeAll(discord.ui.View):
             )
         fields = [[field_title, field_content, False]]
         embed = EmbedBuilder(
-            title=title, description="", fields=fields, color=0x24AAE1
+            title=title,
+            description="",
+            fields=fields,
+            color=0x24AAE1,
         )  # hwh blue
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="⬅️", disabled=True
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="⬅️",
+        disabled=True,
     )
     async def button_callback(self, button, interaction):
         self.children[1].disabled = False
@@ -53,7 +59,10 @@ class staffAppsSeeAll(discord.ui.View):
         await self.repopulate(interaction)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="➡️", disabled=False
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="➡️",
+        disabled=False,
     )
     async def button2_callback(self, button, interaction):
         self.children[0].disabled = False
@@ -68,7 +77,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
     A discord view for the denied and accepted commands
     """
 
-    def __init__(self, author: discord.Member, data, da):
+    def __init__(self, author: discord.Member, data, da) -> None:
         super().__init__()
         self.author = author
         self.data = data
@@ -97,7 +106,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="⬅️", disabled=True
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="⬅️",
+        disabled=True,
     )
     async def button_callback(self, button, interaction):
         self.children[1].disabled = False
@@ -107,7 +119,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         await self.repopulate(interaction)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="➡️", disabled=False
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="➡️",
+        disabled=False,
     )
     async def button2_callback(self, button, interaction):
         self.children[0].disabled = False
@@ -118,7 +133,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
 
 
 class staffAppsSeeSpam(discord.ui.View):
-    def __init__(self, author: discord.Member, data):
+    def __init__(self, author: discord.Member, data) -> None:
         """
         A discord view for the spam command
         """
@@ -139,19 +154,26 @@ class staffAppsSeeSpam(discord.ui.View):
         count = len(first_user_data)
         name = first_user_data[0][3]
         most_recent = datetime.fromtimestamp(
-            max([int(data[10]) for data in first_user_data])
+            max([int(data[10]) for data in first_user_data]),
         )
 
         title = f"Banned users / Marked as spam page {self.cur_page}/{len(self.data)}"
         field_content = f"Application count: **{count}**\nMost recent application: **{most_recent}**\n"
         fields = [[name, field_content, False]]
         embed = EmbedBuilder(
-            title=title, description="", fields=fields, color=0xDD4C35
+            title=title,
+            description="",
+            fields=fields,
+            color=0xDD4C35,
         )  # red
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="⬅️", disabled=True, row=0
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="⬅️",
+        disabled=True,
+        row=0,
     )
     async def button_callback(self, button, interaction):
         self.children[1].disabled = False
@@ -161,7 +183,11 @@ class staffAppsSeeSpam(discord.ui.View):
         await self.repopulate(interaction)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="➡️", disabled=False, row=0
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="➡️",
+        disabled=False,
+        row=0,
     )
     async def button2_callback(self, button, interaction):
         self.children[0].disabled = False
@@ -171,7 +197,10 @@ class staffAppsSeeSpam(discord.ui.View):
         await self.repopulate(interaction)
 
     @discord.ui.button(
-        label="Unban", style=discord.ButtonStyle.danger, emoji="❗", row=1
+        label="Unban",
+        style=discord.ButtonStyle.danger,
+        emoji="❗",
+        row=1,
     )
     async def button3_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
@@ -188,26 +217,32 @@ class staffAppsSeeSpam(discord.ui.View):
             color=0x80C545,
         )  # hwh green
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
         Log(
-            f"{self.author} unbanned user {self.data[self.cur_page-1][0]} from applying for staff."
+            f"{self.author} unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
         )
 
 
 class staffAppsSeeSpamSimple(discord.ui.View):
-    def __init__(self, author: int):
+    def __init__(self, author: int) -> None:
         super().__init__()
         self.author = author
 
     @discord.ui.button(
-        label="Unban", style=discord.ButtonStyle.danger, emoji="❗", row=1
+        label="Unban",
+        style=discord.ButtonStyle.danger,
+        emoji="❗",
+        row=1,
     )
     async def button3_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
-            "update user set markedSpam = 0 where uid = ?", (self.author,)
+            "update user set markedSpam = 0 where uid = ?",
+            (self.author,),
         )
         self.db.commit()
         self.db.close()
@@ -218,12 +253,14 @@ class staffAppsSeeSpamSimple(discord.ui.View):
             color=0x80C545,
         )  # hwh green
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
 
 class staffAppsMain(discord.ui.View):
-    def __init__(self, author: discord.Member, data):
+    def __init__(self, author: discord.Member, data) -> None:
         """
         The main view for the staff applications command
         """
@@ -281,7 +318,7 @@ class staffAppsMain(discord.ui.View):
             self.cursor.execute(
                 "select likes from like where uid = ? and appId = ?;",
                 (self.author.id, self.data[self.cur_page - 1][0]),
-            ).fetchall()
+            ).fetchall(),
         )
         like_list = [
             x[0]
@@ -324,7 +361,11 @@ class staffAppsMain(discord.ui.View):
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="⬅️", disabled=True, row=0
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="⬅️",
+        disabled=True,
+        row=0,
     )
     async def button0_callback(self, button, interaction):
         self.children[1].disabled = False
@@ -334,7 +375,11 @@ class staffAppsMain(discord.ui.View):
         await self.repopulate(interaction)
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.primary, emoji="➡️", disabled=False, row=0
+        label="",
+        style=discord.ButtonStyle.primary,
+        emoji="➡️",
+        disabled=False,
+        row=0,
     )
     async def button1_callback(self, button, interaction):
         self.cur_page += 1
@@ -369,11 +414,17 @@ class staffAppsMain(discord.ui.View):
             color=0xF8312F,
         )  # red
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
-        label="Deny", style=discord.ButtonStyle.danger, emoji="❗", disabled=True, row=1
+        label="Deny",
+        style=discord.ButtonStyle.danger,
+        emoji="❗",
+        disabled=True,
+        row=1,
     )
     async def button3_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
@@ -396,7 +447,9 @@ class staffAppsMain(discord.ui.View):
             color=0xF8312F,
         )  # red
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
@@ -434,23 +487,31 @@ class staffAppsMain(discord.ui.View):
                 "update application set status = ? where appId = ?",
                 (current_status + 1, self.data[self.cur_page - 1][0]),
             )
-        title = f"Application status updated."
+        title = "Application status updated."
         description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n \
             Status changed from **{status_name[0]}** -> **{status_name[1]}**."
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by {self.author}"
+            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by {self.author}",
         )
         embed = EmbedBuilder(
-            title=title, description=description, color=0x00FF00
+            title=title,
+            description=description,
+            color=0x00FF00,
         )  # green
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.secondary, emoji="2️⃣", disabled=True, row=2
+        label="",
+        style=discord.ButtonStyle.secondary,
+        emoji="2️⃣",
+        disabled=True,
+        row=2,
     )
     async def button5_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
@@ -459,23 +520,31 @@ class staffAppsMain(discord.ui.View):
             "update application set status = 3 where appId = ?",
             (self.data[self.cur_page - 1][0],),
         )
-        title = f"Application status updated."
+        title = "Application status updated."
         description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n \
             Status changed from **Application submitted** -> **Second Opinion required**."
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by {self.author}"
+            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by {self.author}",
         )
         embed = EmbedBuilder(
-            title=title, description=description, color=0x00FF00
+            title=title,
+            description=description,
+            color=0x00FF00,
         )  # green
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.secondary, emoji="👍", disabled=True, row=3
+        label="",
+        style=discord.ButtonStyle.secondary,
+        emoji="👍",
+        disabled=True,
+        row=3,
     )
     async def button6_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
@@ -492,7 +561,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} liked by {interaction.user} ({interaction.user.id})"
+            f"Application {self.data[self.cur_page-1][0]} liked by {interaction.user} ({interaction.user.id})",
         )
         embed = EmbedBuilder(
             title="Like added.",
@@ -500,11 +569,17 @@ class staffAppsMain(discord.ui.View):
             color=0x00FF00,
         )  # green
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.secondary, emoji="👎", disabled=True, row=3
+        label="",
+        style=discord.ButtonStyle.secondary,
+        emoji="👎",
+        disabled=True,
+        row=3,
     )
     async def button7_callback(self, button, interaction):
         self.db = sqlite3.connect("util/database.sqlite")
@@ -521,7 +596,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} disliked by {interaction.user} ({interaction.user.id})"
+            f"Application {self.data[self.cur_page-1][0]} disliked by {interaction.user} ({interaction.user.id})",
         )
         embed = EmbedBuilder(
             title="Dislike added.",
@@ -529,17 +604,25 @@ class staffAppsMain(discord.ui.View):
             color=0xF8312F,
         )  # red
         await interaction.response.edit_message(
-            content="", embed=embed.build(), view=None
+            content="",
+            embed=embed.build(),
+            view=None,
         )
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.secondary, emoji="📝", disabled=True, row=3
+        label="",
+        style=discord.ButtonStyle.secondary,
+        emoji="📝",
+        disabled=True,
+        row=3,
     )
     async def button8_callback(self, button, interaction):
         why_reason = self.data[self.cur_page - 1][8]
         contribute_reason = self.data[self.cur_page - 1][9]
         embed1 = EmbedBuilder(
-            title="Why do you want to join?", description=why_reason, color=0x00FF00
+            title="Why do you want to join?",
+            description=why_reason,
+            color=0x00FF00,
         )  # green
         embed2 = EmbedBuilder(
             title="What can you contribute to the server?",
@@ -555,18 +638,23 @@ class staffAppsMain(discord.ui.View):
 
 
 class fullViewApplication(discord.ui.View):
-    def __init__(self, embed1, embed2):
+    def __init__(self, embed1, embed2) -> None:
         super().__init__()
         self.embeds = [embed1, embed2]
         self.cur_state = 0
 
     @discord.ui.button(
-        label="", style=discord.ButtonStyle.secondary, emoji="🔄", disabled=False, row=0
+        label="",
+        style=discord.ButtonStyle.secondary,
+        emoji="🔄",
+        disabled=False,
+        row=0,
     )
     async def button0_callback(self, button, interaction):
         self.cur_state = not self.cur_state
         await interaction.response.edit_message(
-            embed=self.embeds[self.cur_state].build(), view=self
+            embed=self.embeds[self.cur_state].build(),
+            view=self,
         )
 
 
@@ -603,7 +691,10 @@ class StaffAppsBackoffice(commands.Cog):
         required=False,
     )
     async def see_apps(
-        self, ctx: commands.Context, subcommand: str, specific_id: int
+        self,
+        ctx: commands.Context,
+        subcommand: str,
+        specific_id: int,
     ) -> None:
         username = f"{ctx.author.name}#{ctx.author.discriminator}"
         Log(f"see-apps command used by {username}:({ctx.author.id})")
@@ -618,12 +709,13 @@ class StaffAppsBackoffice(commands.Cog):
             like_list = [
                 x[0]
                 for x in self.cursor.execute(
-                    "select likes from like where appId = ?;", (specific_id,)
+                    "select likes from like where appId = ?;",
+                    (specific_id,),
                 ).fetchall()
             ]
             likes = like_list.count(1)
             dislikes = like_list.count(0)
-            title = f"Staff application"
+            title = "Staff application"
             description = f"Application ID: **{data[0]}**\nApplicant name: **{data[2]}**\nApplicant ID: **{data[1]}**\n"
             fields = [
                 ["Status", data[9], False],
@@ -636,7 +728,10 @@ class StaffAppsBackoffice(commands.Cog):
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
             ]
             embed = EmbedBuilder(
-                title=title, description=description, fields=fields, color=0x30FFF1
+                title=title,
+                description=description,
+                fields=fields,
+                color=0x30FFF1,
             )  # hwh green
             await ctx.respond(embed=embed.build(), ephemeral=True)
             Log(f"{username} viewed a specific application: {specific_id}")
@@ -644,7 +739,7 @@ class StaffAppsBackoffice(commands.Cog):
         if subcommand == "all":
             # gather first page of applications
             data = self.cursor.execute(
-                "select appId, discordName, description, submissionTime from application a join status s on a.status = s.statusId order by appId ASC"
+                "select appId, discordName, description, submissionTime from application a join status s on a.status = s.statusId order by appId ASC",
             ).fetchall()
             title = f"Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Status, Submission Time"
@@ -653,7 +748,10 @@ class StaffAppsBackoffice(commands.Cog):
                 field_content += f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
-                title=title, description="", fields=fields, color=0x24AAE1
+                title=title,
+                description="",
+                fields=fields,
+                color=0x24AAE1,
             )  # hwh blue
             if len(data) > 10:
                 await ctx.respond(
@@ -668,7 +766,7 @@ class StaffAppsBackoffice(commands.Cog):
 
         elif subcommand == "denied":
             data = self.cursor.execute(
-                "select appId, discordName, submissionTime from application where status = 2"
+                "select appId, discordName, submissionTime from application where status = 2",
             ).fetchall()
             title = f"Denied Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
@@ -679,7 +777,10 @@ class StaffAppsBackoffice(commands.Cog):
                 )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
-                title=title, description="", fields=fields, color=0x9D0006
+                title=title,
+                description="",
+                fields=fields,
+                color=0x9D0006,
             )  # soft red
             if len(data) > 10:
                 await ctx.respond(
@@ -694,7 +795,7 @@ class StaffAppsBackoffice(commands.Cog):
 
         elif subcommand == "accepted":
             data = self.cursor.execute(
-                "select appId, discordName, submissionTime from application where status = 9"
+                "select appId, discordName, submissionTime from application where status = 9",
             ).fetchall()
             title = f"Accepted Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
@@ -705,7 +806,10 @@ class StaffAppsBackoffice(commands.Cog):
                 )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
-                title=title, description="", fields=fields, color=0x80C545
+                title=title,
+                description="",
+                fields=fields,
+                color=0x80C545,
             )  # hwh green
             if len(data) > 10:
                 await ctx.respond(
@@ -720,29 +824,34 @@ class StaffAppsBackoffice(commands.Cog):
 
         elif subcommand == "spam":
             data = self.cursor.execute(
-                "select * from user where markedSpam = 1"
+                "select * from user where markedSpam = 1",
             ).fetchall()
 
             if len(data) == 0:
                 await ctx.respond(
-                    "No users are currently marked as spam.", ephemeral=True
+                    "No users are currently marked as spam.",
+                    ephemeral=True,
                 )
                 return
 
             first_user_data = self.cursor.execute(
-                "select * from application where uid = ?", (data[0][0],)
+                "select * from application where uid = ?",
+                (data[0][0],),
             ).fetchall()
             count = len(first_user_data)
             name = first_user_data[0][3]
             most_recent = datetime.fromtimestamp(
-                max([int(data[10]) for data in first_user_data])
+                max([int(data[10]) for data in first_user_data]),
             )
 
             title = f"Banned users / Marked as spam page 1/{len(data)}"
             field_content = f"Application count: **{count}**\nMost recent application: **{most_recent}**\n"
             fields = [[name, field_content, False]]
             embed = EmbedBuilder(
-                title=title, description="", fields=fields, color=0xDD4C35
+                title=title,
+                description="",
+                fields=fields,
+                color=0xDD4C35,
             )  # red
 
             if len(data) > 1:
@@ -763,12 +872,14 @@ class StaffAppsBackoffice(commands.Cog):
         else:  # main command, no subcommand
             # gather all active applications
             data = self.cursor.execute(
-                "select * from application where status not in (2,9)"
+                "select * from application where status not in (2,9)",
             ).fetchall()
             title = "All current active applications"
             description = "In this embed, you can view all active applications and their status.\nYou can use the buttons below to change the status of an application."
             embed = EmbedBuilder(
-                title=title, description=description, color=0xED75FF
+                title=title,
+                description=description,
+                color=0xED75FF,
             )  # pink
             await ctx.respond(
                 embed=embed.build(),

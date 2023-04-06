@@ -3,7 +3,6 @@ This file should be used to migrate the db from its current state to the
 new state. This file should only be used once.
 """
 
-import base64
 import sqlite3
 
 db = sqlite3.connect("util/database.sqlite")
