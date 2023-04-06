@@ -31,11 +31,10 @@ class staffAppsSeeAll(discord.ui.View):
         """
         title = f"Applications page {self.cur_page}/{self.max_page}"
         field_title = "Application ID, Discord Name, Status, Submission Time"
-        field_content = ""
-        for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]:
-            field_content += (
-                f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
-            )
+        field_content = "".join(
+            f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+            for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
+        )
         fields = [[field_title, field_content, False]]
         embed = EmbedBuilder(
             title=title,
@@ -99,11 +98,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         """
         title = f"{'Denied' if self.da == 'd' else 'Accepted'} Applications page {self.cur_page}/{self.max_page}"
         field_title = "Application ID, Discord Name, Original Submission Time"
-        field_content = ""
-        for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]:
-            field_content += (
-                f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
-            )
+        field_content = "".join(
+            f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
+            for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
+        )
         fields = [[field_title, field_content, False]]
         embed = EmbedBuilder(
             title=title,
@@ -158,10 +156,10 @@ class staffAppsSeeSpam(discord.ui.View):
         self.data = data
         self.cur_page = 1
         self.max_page = len(data)
-
-    async def repopulate(self, interaction: discord.Interaction) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
+
+    async def repopulate(self, interaction: discord.Interaction) -> None:
         first_user_data = self.cursor.execute(
             "select * from application where uid = ?",
             (self.data[self.cur_page - 1][0],),
@@ -170,7 +168,7 @@ class staffAppsSeeSpam(discord.ui.View):
         count = len(first_user_data)
         name = first_user_data[0][3]
         most_recent = datetime.fromtimestamp(
-            max([int(data[10]) for data in first_user_data]),
+            max(int(data[10]) for data in first_user_data),
         )
 
         title = f"Banned users / Marked as spam page {self.cur_page}/{len(self.data)}"
@@ -258,6 +256,8 @@ class staffAppsSeeSpamSimple(discord.ui.View):
     def __init__(self, author: int) -> None:
         super().__init__()
         self.author = author
+        self.db = sqlite3.connect("util/database.sqlite")
+        self.cursor = self.db.cursor()
 
     @discord.ui.button(
         label="Unban",
@@ -270,8 +270,6 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
-        self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 0 where uid = ?",
             (self.author,),
@@ -312,6 +310,8 @@ class staffAppsMain(discord.ui.View):
             8: 0x00FF00,
             9: 0x38761D,
         }  # colours taken from @czar's infographic
+        self.db = sqlite3.connect("util/database.sqlite")
+        self.cursor = self.db.cursor()
 
     async def repopulate(self, interaction: discord.Interaction) -> None:
         """
@@ -324,22 +324,12 @@ class staffAppsMain(discord.ui.View):
         if self.cur_page != 1:
             self.children[0].disabled = False
         # second opinion check
-        if self.data[self.cur_page - 1][2] == 1:
-            self.children[5].disabled = False
-        else:
-            self.children[5].disabled = True
-
+        self.children[5].disabled = self.data[self.cur_page - 1][2] != 1
         # long application check
-        if (
-            len(self.data[self.cur_page - 1][8]) > 1024
-            or len(self.data[self.cur_page - 1][9]) > 1024
-        ):
-            self.children[8].disabled = False
-        else:
-            self.children[8].disabled = True
-
-        self.db = sqlite3.connect("util/database.sqlite")
-        self.cursor = self.db.cursor()
+        self.children[8].disabled = (
+            len(self.data[self.cur_page - 1][8]) <= 1024
+            and len(self.data[self.cur_page - 1][9]) <= 1024
+        )
         statusname = self.cursor.execute(
             "select s.description from application a join status s on a.status = s.statusID where appId = ?;",
             (self.data[self.cur_page - 1][0],),
@@ -815,9 +805,10 @@ class StaffAppsBackoffice(commands.Cog):
             ).fetchall()
             title = f"Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Status, Submission Time"
-            field_content = ""
-            for row in data[:10]:
-                field_content += f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+            field_content = "".join(
+                f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+                for row in data[:10]
+            )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
                 title=title,
@@ -836,17 +827,16 @@ class StaffAppsBackoffice(commands.Cog):
             Log(f"{username} viewed all applications")
             return
 
-        elif subcommand == "denied":
+        if subcommand == "denied":
             data = self.cursor.execute(
                 "select appId, discordName, submissionTime from application where status = 2",
             ).fetchall()
             title = f"Denied Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
-            field_content = ""
-            for row in data[:10]:
-                field_content += (
-                    f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
-                )
+            field_content = "".join(
+                f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
+                for row in data[:10]
+            )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
                 title=title,
@@ -865,17 +855,16 @@ class StaffAppsBackoffice(commands.Cog):
             Log(f"{username} viewed denied applications")
             return
 
-        elif subcommand == "accepted":
+        if subcommand == "accepted":
             data = self.cursor.execute(
                 "select appId, discordName, submissionTime from application where status = 9",
             ).fetchall()
             title = f"Accepted Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
-            field_content = ""
-            for row in data[:10]:
-                field_content += (
-                    f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
-                )
+            field_content = "".join(
+                f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
+                for row in data[:10]
+            )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
                 title=title,
@@ -894,7 +883,7 @@ class StaffAppsBackoffice(commands.Cog):
             Log(f"{username} viewed accepted applications")
             return
 
-        elif subcommand == "spam":
+        if subcommand == "spam":
             data = self.cursor.execute(
                 "select * from user where markedSpam = 1",
             ).fetchall()
@@ -913,7 +902,7 @@ class StaffAppsBackoffice(commands.Cog):
             count = len(first_user_data)
             name = first_user_data[0][3]
             most_recent = datetime.fromtimestamp(
-                max([int(data[10]) for data in first_user_data]),
+                max(int(data[10]) for data in first_user_data),
             )
 
             title = f"Banned users / Marked as spam page 1/{len(data)}"
@@ -939,8 +928,6 @@ class StaffAppsBackoffice(commands.Cog):
                     ephemeral=True,
                 )
             Log(f"{username} viewed banned users")
-            return
-
         else:  # main command, no subcommand
             # gather all active applications
             data = self.cursor.execute(
@@ -959,7 +946,8 @@ class StaffAppsBackoffice(commands.Cog):
                 ephemeral=True,
             )
             Log(f"{username} viewed all active applications")
-            return
+
+        return
 
 
 def setup(bot: commands.Bot) -> None:
