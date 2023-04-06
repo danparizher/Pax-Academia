@@ -18,14 +18,14 @@ class staffAppsSeeAll(discord.ui.View):
     A discord view for the staffAppsSeeAll command
     """
 
-    def __init__(self, author: discord.Member, data) -> None:
+    def __init__(self, author: discord.Member, data: list) -> None:
         super().__init__()
         self.author = author
         self.data = data
         self.cur_page = 1
         self.max_page = len(data) // 10 + 1
 
-    async def repopulate(self, interaction: discord.Interaction):
+    async def repopulate(self, interaction: discord.Interaction) -> None:
         """
         Repopulates the view with the next page of data after a button press.
         """
@@ -51,7 +51,11 @@ class staffAppsSeeAll(discord.ui.View):
         emoji="⬅️",
         disabled=True,
     )
-    async def button_callback(self, button, interaction):
+    async def button_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[1].disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
@@ -64,7 +68,11 @@ class staffAppsSeeAll(discord.ui.View):
         emoji="➡️",
         disabled=False,
     )
-    async def button2_callback(self, button, interaction):
+    async def button2_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[0].disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
@@ -77,7 +85,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
     A discord view for the denied and accepted commands
     """
 
-    def __init__(self, author: discord.Member, data, da) -> None:
+    def __init__(self, author: discord.Member, data: list, da: str) -> None:
         super().__init__()
         self.author = author
         self.data = data
@@ -85,7 +93,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         self.max_page = len(data) // 10 + 1
         self.da = da  # d for denied, a for accepted
 
-    async def repopulate(self, interaction: discord.Interaction):
+    async def repopulate(self, interaction: discord.Interaction) -> None:
         """
         Repopulates the view with the next page of data after a button press.
         """
@@ -111,7 +119,11 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         emoji="⬅️",
         disabled=True,
     )
-    async def button_callback(self, button, interaction):
+    async def button_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[1].disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
@@ -124,7 +136,11 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         emoji="➡️",
         disabled=False,
     )
-    async def button2_callback(self, button, interaction):
+    async def button2_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[0].disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
@@ -133,7 +149,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
 
 
 class staffAppsSeeSpam(discord.ui.View):
-    def __init__(self, author: discord.Member, data) -> None:
+    def __init__(self, author: discord.Member, data: list) -> None:
         """
         A discord view for the spam command
         """
@@ -143,7 +159,7 @@ class staffAppsSeeSpam(discord.ui.View):
         self.cur_page = 1
         self.max_page = len(data)
 
-    async def repopulate(self, interaction: discord.Interaction):
+    async def repopulate(self, interaction: discord.Interaction) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         first_user_data = self.cursor.execute(
@@ -175,7 +191,11 @@ class staffAppsSeeSpam(discord.ui.View):
         disabled=True,
         row=0,
     )
-    async def button_callback(self, button, interaction):
+    async def button_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[1].disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
@@ -189,7 +209,11 @@ class staffAppsSeeSpam(discord.ui.View):
         disabled=False,
         row=0,
     )
-    async def button2_callback(self, button, interaction):
+    async def button2_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[0].disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
@@ -202,7 +226,11 @@ class staffAppsSeeSpam(discord.ui.View):
         emoji="❗",
         row=1,
     )
-    async def button3_callback(self, button, interaction):
+    async def button3_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -237,7 +265,11 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         emoji="❗",
         row=1,
     )
-    async def button3_callback(self, button, interaction):
+    async def button3_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -260,7 +292,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
 
 
 class staffAppsMain(discord.ui.View):
-    def __init__(self, author: discord.Member, data) -> None:
+    def __init__(self, author: discord.Member, data: list) -> None:
         """
         The main view for the staff applications command
         """
@@ -281,7 +313,7 @@ class staffAppsMain(discord.ui.View):
             9: 0x38761D,
         }  # colours taken from @czar's infographic
 
-    async def repopulate(self, interaction: discord.Interaction):
+    async def repopulate(self, interaction: discord.Interaction) -> None:
         """
         Repopulates the view with the next page of data, enables and disables buttons as needed
         """
@@ -367,7 +399,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=0,
     )
-    async def button0_callback(self, button, interaction):
+    async def button0_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.children[1].disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
@@ -381,7 +417,11 @@ class staffAppsMain(discord.ui.View):
         disabled=False,
         row=0,
     )
-    async def button1_callback(self, button, interaction):
+    async def button1_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.cur_page += 1
         if self.cur_page == self.max_page:
             button.disabled = True
@@ -394,7 +434,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=1,
     )
-    async def button2_callback(self, button, interaction):
+    async def button2_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -426,7 +470,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=1,
     )
-    async def button3_callback(self, button, interaction):
+    async def button3_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -459,7 +507,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=2,
     )
-    async def button4_callback(self, button, interaction):
+    async def button4_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         current_status = self.data[self.cur_page - 1][2]
@@ -513,7 +565,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=2,
     )
-    async def button5_callback(self, button, interaction):
+    async def button5_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -546,7 +602,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button6_callback(self, button, interaction):
+    async def button6_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -581,7 +641,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button7_callback(self, button, interaction):
+    async def button7_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.db = sqlite3.connect("util/database.sqlite")
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -616,7 +680,11 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button8_callback(self, button, interaction):
+    async def button8_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         why_reason = self.data[self.cur_page - 1][8]
         contribute_reason = self.data[self.cur_page - 1][9]
         embed1 = EmbedBuilder(
@@ -638,7 +706,7 @@ class staffAppsMain(discord.ui.View):
 
 
 class fullViewApplication(discord.ui.View):
-    def __init__(self, embed1, embed2) -> None:
+    def __init__(self, embed1: EmbedBuilder, embed2: EmbedBuilder) -> None:
         super().__init__()
         self.embeds = [embed1, embed2]
         self.cur_state = 0
@@ -650,7 +718,11 @@ class fullViewApplication(discord.ui.View):
         disabled=False,
         row=0,
     )
-    async def button0_callback(self, button, interaction):
+    async def button0_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         self.cur_state = not self.cur_state
         await interaction.response.edit_message(
             embed=self.embeds[self.cur_state].build(),
