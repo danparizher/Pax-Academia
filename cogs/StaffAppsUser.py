@@ -67,7 +67,7 @@ class embeds:
             color=0xFF0000,  # RED
         ).build()
 
-    def marked_spam(self):
+    def marked_spam(self) -> discord.Embed:
         """
         User is marked spam by staff for a previous offence.
         """
@@ -77,7 +77,7 @@ class embeds:
             color=0xFF0000,  # RED
         ).build()
 
-    def cooldown(self, cooldown: int):
+    def cooldown(self, cooldown: int) -> discord.Embed:
         """
         User has recently applied for staff and was denied.
         A cooldown is in place to prevent a user from immediatly re-applying.
@@ -91,7 +91,7 @@ class embeds:
             color=0xFF0000,  # RED
         ).build()
 
-    def ongoing(self):
+    def ongoing(self) -> discord.Embed:
         """
         User still has an ongoing application.
         """
@@ -205,7 +205,11 @@ class StaffAppView(discord.ui.View):
             ),
         ],
     )
-    async def nda_callback(self, select, interaction):
+    async def nda_callback(
+        self,
+        select: discord.ui.Select,
+        interaction: discord.Interaction,
+    ) -> None:
         """
         If the user does not agree to the NDA, the application is cancelled.
         """
@@ -218,11 +222,10 @@ class StaffAppView(discord.ui.View):
             )
             await interaction.response.edit_message(embed=embed, view=None)
             return
-        else:
-            self.nda = True
-            self.children[1].disabled = False
-            select.disabled = True
-            await interaction.response.edit_message(view=self)
+        self.nda = True
+        self.children[1].disabled = False
+        select.disabled = True
+        await interaction.response.edit_message(view=self)
 
     @discord.ui.select(
         placeholder="What is your timezone?",
@@ -301,7 +304,11 @@ class StaffAppView(discord.ui.View):
             # Thank god for Copilot xoxo
         ],
     )
-    async def timezone_callback(self, select, interaction):
+    async def timezone_callback(
+        self,
+        select: discord.ui.Select,
+        interaction: discord.Interaction,
+    ) -> None:
         self.timezone = select.values[0]
         select.disabled = True
         self.children[2].disabled = False
@@ -340,7 +347,11 @@ class StaffAppView(discord.ui.View):
             ),
         ],
     )
-    async def time_callback(self, select, interaction):
+    async def time_callback(
+        self,
+        select: discord.ui.Select,
+        interaction: discord.Interaction,
+    ) -> None:
         self.time_per_wk = select.values[0]
         self.children[3].disabled = False
         select.disabled = True
@@ -352,7 +363,11 @@ class StaffAppView(discord.ui.View):
         row=3,
         disabled=True,
     )
-    async def button_callback(self, button, interaction):
+    async def button_callback(
+        self,
+        button: discord.ui.Button,
+        interaction: discord.Interaction,
+    ) -> None:
         """
         Sends a modal with the next questions
         """
@@ -372,11 +387,11 @@ class StaffAppView(discord.ui.View):
 class StaffAppModal(discord.ui.Modal):
     def __init__(
         self,
-        author,
-        nda,
-        timezone,
-        hours_per_wk,
-        bot,
+        author: discord.Member,
+        nda: bool,
+        timezone: str,
+        hours_per_wk: str,
+        bot: commands.Bot,
         *args,
         **kwargs,
     ) -> None:
@@ -413,7 +428,7 @@ class StaffAppModal(discord.ui.Modal):
             ),
         )
 
-    async def callback(self, interaction: discord.Interaction):
+    async def callback(self, interaction: discord.Interaction) -> None:
         self.cursor.execute(
             """
         INSERT INTO application (
