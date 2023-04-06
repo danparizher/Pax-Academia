@@ -31,11 +31,10 @@ class staffAppsSeeAll(discord.ui.View):
         """
         title = f"Applications page {self.cur_page}/{self.max_page}"
         field_title = "Application ID, Discord Name, Status, Submission Time"
-        field_content = ""
-        for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]:
-            field_content += (
-                f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
-            )
+        field_content = "".join(
+            f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+            for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
+        )
         fields = [[field_title, field_content, False]]
         embed = EmbedBuilder(
             title=title,
@@ -99,11 +98,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         """
         title = f"{'Denied' if self.da == 'd' else 'Accepted'} Applications page {self.cur_page}/{self.max_page}"
         field_title = "Application ID, Discord Name, Original Submission Time"
-        field_content = ""
-        for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]:
-            field_content += (
-                f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
-            )
+        field_content = "".join(
+            f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
+            for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
+        )
         fields = [[field_title, field_content, False]]
         embed = EmbedBuilder(
             title=title,
@@ -170,7 +168,7 @@ class staffAppsSeeSpam(discord.ui.View):
         count = len(first_user_data)
         name = first_user_data[0][3]
         most_recent = datetime.fromtimestamp(
-            max([int(data[10]) for data in first_user_data]),
+            max(int(data[10]) for data in first_user_data),
         )
 
         title = f"Banned users / Marked as spam page {self.cur_page}/{len(self.data)}"
@@ -815,9 +813,10 @@ class StaffAppsBackoffice(commands.Cog):
             ).fetchall()
             title = f"Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Status, Submission Time"
-            field_content = ""
-            for row in data[:10]:
-                field_content += f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+            field_content = "".join(
+                f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
+                for row in data[:10]
+            )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
                 title=title,
@@ -842,11 +841,10 @@ class StaffAppsBackoffice(commands.Cog):
             ).fetchall()
             title = f"Denied Applications page 1/{len(data)//10+1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
-            field_content = ""
-            for row in data[:10]:
-                field_content += (
-                    f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
-                )
+            field_content = "".join(
+                f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
+                for row in data[:10]
+            )
             fields = [[field_title, field_content, False]]
             embed = EmbedBuilder(
                 title=title,
@@ -913,7 +911,7 @@ class StaffAppsBackoffice(commands.Cog):
             count = len(first_user_data)
             name = first_user_data[0][3]
             most_recent = datetime.fromtimestamp(
-                max([int(data[10]) for data in first_user_data]),
+                max(int(data[10]) for data in first_user_data),
             )
 
             title = f"Banned users / Marked as spam page 1/{len(data)}"
