@@ -23,8 +23,8 @@ def load() -> None:
         # "Profanity", In development
         "PubChem",
         "Rules",
-        "StaffAppsUser", # v2 for users
-        "StaffAppsBackoffice", # v2 for staff
+        "StaffAppsUser",  # v2 for users
+        "StaffAppsBackoffice",  # v2 for staff
         "Surveys",
         "Tips",
         "Wikipedia",

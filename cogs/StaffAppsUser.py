@@ -1,31 +1,34 @@
 # imports
+import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
-import discord.ui
+from time import time
+
 import discord
+import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
 
-import sqlite3
-from time import time
-
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log
-class embeds():
+
+
+class embeds:
     """
     This class creates embeds when a user is DENIED for an application.
     See docstrings below for reasons a user can be DENIED.
     """
+
     def __init__(self) -> None:
         pass
 
-    def min_reqs(self, msg_count: int, join_time: datetime, created_at: datetime) -> discord.Embed:
+    def min_reqs(
+        self, msg_count: int, join_time: datetime, created_at: datetime
+    ) -> discord.Embed:
         """
         User does not meet the minimum requirements to apply for staff.
         """
-        time_since_creation = (
-            datetime.now(tz=created_at.tzinfo) - created_at
-        )
+        time_since_creation = datetime.now(tz=created_at.tzinfo) - created_at
         time_since_join = datetime.now(tz=join_time.tzinfo) - join_time
 
         fields = [
@@ -41,17 +44,13 @@ class embeds():
                 {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
                 True,
             ],
-            [
-                "Messages",
-                f"{msg_count} messages",
-                True
-            ]
+            ["Messages", f"{msg_count} messages", True],
         ]
 
         wait_time = max(
-                    timedelta(weeks=52) - time_since_creation,
-                    timedelta(days=30) - time_since_join,
-                )
+            timedelta(weeks=52) - time_since_creation,
+            timedelta(days=30) - time_since_join,
+        )
         desc = f"""Unfortunately, you do not meet the basic requirements in order to apply for staff.
             Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
         if wait_time > timedelta(0):
@@ -96,29 +95,43 @@ class embeds():
         return EmbedBuilder(
             title="You have already applied for staff!",
             description="Your application has already been submitted. We will review it and get back to you as soon as possible.",
-            color=0xFFD700,  #GOLD
+            color=0xFFD700,  # GOLD
         ).build()
 
 
-class user():
+class user:
     def __init__(self, user: discord.Member) -> None:
         """
         This class represents a read-only user who is applying for staff.
         Data is accurate at the time of object creation.
         """
         # connect to database
-        db = sqlite3.connect('util/database.sqlite')
+        db = sqlite3.connect("util/database.sqlite")
         cursor = db.cursor()
         # get user data from discord
         self.uid = user.id
         self.joined_at = user.joined_at
         self.created_at = user.created_at
         # get user data from database
-        self.messages_sent = cursor.execute('SELECT messagesSent FROM user WHERE uid = ?' , (self.uid,)).fetchone()[0]
-        self.marked_spam = cursor.execute('SELECT markedSpam FROM user WHERE uid = ?' , (self.uid,)).fetchone()[0]
-        self.cooldown = float(cursor.execute('SELECT cooldown FROM user WHERE uid = ?' , (self.uid,)).fetchone()[0] or 0)
+        self.messages_sent = cursor.execute(
+            "SELECT messagesSent FROM user WHERE uid = ?", (self.uid,)
+        ).fetchone()[0]
+        self.marked_spam = cursor.execute(
+            "SELECT markedSpam FROM user WHERE uid = ?", (self.uid,)
+        ).fetchone()[0]
+        self.cooldown = float(
+            cursor.execute(
+                "SELECT cooldown FROM user WHERE uid = ?", (self.uid,)
+            ).fetchone()[0]
+            or 0
+        )
         # get all statuses
-        self.status = [x[0] for x in cursor.execute('SELECT status FROM application WHERE uid = ?' , (self.uid,)).fetchall()]
+        self.status = [
+            x[0]
+            for x in cursor.execute(
+                "SELECT status FROM application WHERE uid = ?", (self.uid,)
+            ).fetchall()
+        ]
         # close database connection
         db.close()
 
@@ -139,7 +152,11 @@ class user():
         Returns a tuple of (bool, int, datetime) where bool is True if the user meets the minimum requirements to apply for staff.
         """
         time_since_join = datetime.now(tz=self.joined_at.tzinfo) - self.joined_at
-        if self.joined_at <= (datetime.now(tz=self.joined_at.tzinfo) - timedelta(days=30)) and self.messages_sent >= 500:
+        if (
+            self.joined_at
+            <= (datetime.now(tz=self.joined_at.tzinfo) - timedelta(days=30))
+            and self.messages_sent >= 500
+        ):
             return (True, self.messages_sent, time_since_join)
         return (False, self.messages_sent, time_since_join)
 
@@ -147,7 +164,7 @@ class user():
         """
         Returns True if the user is on cooldown.
         """
-        return (self.cooldown- time() // 1) > 0
+        return (self.cooldown - time() // 1) > 0
 
 
 class StaffAppView(discord.ui.View):
@@ -163,24 +180,23 @@ class StaffAppView(discord.ui.View):
         self.author = author
         self.bot = bot
 
-
-    @discord.ui.select( 
-        placeholder = "Do you agree to the Non-Disclosure Agreement?",
+    @discord.ui.select(
+        placeholder="Do you agree to the Non-Disclosure Agreement?",
         row=0,
-        min_values = 1,
-        max_values = 1,
-        options = [
+        min_values=1,
+        max_values=1,
+        options=[
             discord.SelectOption(
                 label="I Agree",
                 description="I agree to the Non-Disclosure Agreement.",
-                emoji="✅"
+                emoji="✅",
             ),
             discord.SelectOption(
                 label="I do NOT Agree",
                 description="I do not agree to the Non-Disclosure Agreement.",
-                emoji="❌"
-            )
-        ]
+                emoji="❌",
+            ),
+        ],
     )
     async def nda_callback(self, select, interaction):
         """
@@ -191,7 +207,7 @@ class StaffAppView(discord.ui.View):
             embed = discord.Embed(
                 title="Staff Application",
                 description="You have not agreed to the Non-Disclosure Agreement.\n Unfortunately, we cannot complete your staff application without your agreement. Please re-apply when you are ready to agree to the Non-Disclosure Agreement.\n *(You can re-apply by running this command again)*",
-                color=0xFF0000
+                color=0xFF0000,
             )
             await interaction.response.edit_message(embed=embed, view=None)
             return
@@ -201,116 +217,68 @@ class StaffAppView(discord.ui.View):
             select.disabled = True
             await interaction.response.edit_message(view=self)
 
-
     @discord.ui.select(
-        placeholder = "What is your timezone?",
+        placeholder="What is your timezone?",
         row=1,
-        min_values = 1,
-        max_values = 1,
+        min_values=1,
+        max_values=1,
         disabled=True,
-        options = [
+        options=[
             discord.SelectOption(
-                label="UTC-12:00",
-                description="International Date Line West"
+                label="UTC-12:00", description="International Date Line West"
+            ),
+            discord.SelectOption(label="UTC-11:00", description="Midway Island, Samoa"),
+            discord.SelectOption(label="UTC-10:00", description="Hawaii"),
+            discord.SelectOption(label="UTC-09:00", description="Alaska"),
+            discord.SelectOption(
+                label="UTC-08:00", description="Pacific Time (US & Canada)"
             ),
             discord.SelectOption(
-                label="UTC-11:00",
-                description="Midway Island, Samoa"
+                label="UTC-07:00", description="Mountain Time (US & Canada)"
             ),
             discord.SelectOption(
-                label="UTC-10:00",
-                description="Hawaii"
+                label="UTC-06:00", description="Central Time (US & Canada)"
             ),
             discord.SelectOption(
-                label="UTC-09:00",
-                description="Alaska"
+                label="UTC-05:00", description="Eastern Time (US & Canada)"
             ),
             discord.SelectOption(
-                label="UTC-08:00",
-                description="Pacific Time (US & Canada)"
+                label="UTC-04:00", description="Atlantic Time (Canada)"
+            ),
+            discord.SelectOption(label="UTC-03:00", description="Brasilia"),
+            discord.SelectOption(label="UTC-02:00", description="Mid-Atlantic"),
+            discord.SelectOption(label="UTC-01:00", description="Cape Verde Is."),
+            discord.SelectOption(label="UTC+00:00", description="Casablanca, Monrovia"),
+            discord.SelectOption(
+                label="UTC+01:00", description="Amsterdam, Berlin, Rome"
             ),
             discord.SelectOption(
-                label="UTC-07:00",
-                description="Mountain Time (US & Canada)"
+                label="UTC+02:00", description="Cairo, Helsinki, Kaliningrad"
             ),
             discord.SelectOption(
-                label="UTC-06:00",
-                description="Central Time (US & Canada)"
+                label="UTC+03:00", description="Moscow, Nairobi, Baghdad"
+            ),
+            discord.SelectOption(label="UTC+04:00", description="Abu Dhabi, Muscat"),
+            discord.SelectOption(
+                label="UTC+05:00", description="Islamabad, Karachi, Tashkent"
+            ),
+            discord.SelectOption(label="UTC+06:00", description="Almaty, Dhaka"),
+            discord.SelectOption(
+                label="UTC+07:00", description="Bangkok, Hanoi, Jakarta"
             ),
             discord.SelectOption(
-                label="UTC-05:00",
-                description="Eastern Time (US & Canada)"
+                label="UTC+08:00", description="Beijing, Perth, Singapore"
+            ),
+            discord.SelectOption(label="UTC+09:00", description="Tokyo, Seoul, Osaka"),
+            discord.SelectOption(
+                label="UTC+10:00", description="Brisbane, Canberra, Melbourne"
             ),
             discord.SelectOption(
-                label="UTC-04:00",
-                description="Atlantic Time (Canada)"
+                label="UTC+11:00", description="Magadan, Solomon Is., New Caledonia"
             ),
-            discord.SelectOption(
-                label="UTC-03:00",
-                description="Brasilia"
-            ),
-            discord.SelectOption(
-                label="UTC-02:00",
-                description="Mid-Atlantic"
-            ),
-            discord.SelectOption(
-                label="UTC-01:00",
-                description="Cape Verde Is."
-            ),
-            discord.SelectOption(
-                label="UTC+00:00",
-                description="Casablanca, Monrovia"
-            ),
-            discord.SelectOption(
-                label="UTC+01:00",
-                description="Amsterdam, Berlin, Rome"
-            ),
-            discord.SelectOption(
-                label="UTC+02:00",
-                description="Cairo, Helsinki, Kaliningrad"
-            ),
-            discord.SelectOption(
-                label="UTC+03:00",
-                description="Moscow, Nairobi, Baghdad"
-            ),
-            discord.SelectOption(
-                label="UTC+04:00",
-                description="Abu Dhabi, Muscat"
-            ),
-            discord.SelectOption(
-                label="UTC+05:00",
-                description="Islamabad, Karachi, Tashkent"
-            ),
-            discord.SelectOption(
-                label="UTC+06:00",
-                description="Almaty, Dhaka"
-            ),
-            discord.SelectOption(
-                label="UTC+07:00",
-                description="Bangkok, Hanoi, Jakarta"
-            ),
-            discord.SelectOption(
-                label="UTC+08:00",
-                description="Beijing, Perth, Singapore"
-            ),
-            discord.SelectOption(
-                label="UTC+09:00",
-                description="Tokyo, Seoul, Osaka"
-            ),
-            discord.SelectOption(
-                label="UTC+10:00",
-                description="Brisbane, Canberra, Melbourne"
-            ),
-            discord.SelectOption(
-                label="UTC+11:00",
-                description="Magadan, Solomon Is., New Caledonia"
-            ),
-            discord.SelectOption(
-                label="UTC+12:00",
-                description="Auckland, Wellington"
-            ),
+            discord.SelectOption(label="UTC+12:00", description="Auckland, Wellington"),
             # Thank god for Copilot xoxo
-        ]
+        ],
     )
     async def timezone_callback(self, select, interaction):
         self.timezone = select.values[0]
@@ -318,13 +286,13 @@ class StaffAppView(discord.ui.View):
         self.children[2].disabled = False
         await interaction.response.edit_message(view=self)
 
-    @discord.ui.select( 
-        placeholder = "How many hours a week can you commit to the server?",
+    @discord.ui.select(
+        placeholder="How many hours a week can you commit to the server?",
         row=2,
-        min_values = 1,
-        max_values = 1,
+        min_values=1,
+        max_values=1,
         disabled=True,
-        options = [
+        options=[
             discord.SelectOption(
                 label="1 - 2 Hours",
             ),
@@ -349,7 +317,7 @@ class StaffAppView(discord.ui.View):
             discord.SelectOption(
                 label="20+ Hours",
             ),
-        ]
+        ],
     )
     async def time_callback(self, select, interaction):
         self.time_per_wk = select.values[0]
@@ -357,17 +325,30 @@ class StaffAppView(discord.ui.View):
         select.disabled = True
         await interaction.response.edit_message(view=self)
 
-    @discord.ui.button(label="Next Questions", style=discord.ButtonStyle.primary, row=3, disabled=True)
+    @discord.ui.button(
+        label="Next Questions", style=discord.ButtonStyle.primary, row=3, disabled=True
+    )
     async def button_callback(self, button, interaction):
         """
         Sends a modal with the next questions
         """
         Log(f"{self.author} has completed the Staff Application")
-        await interaction.response.send_modal(StaffAppModal(self.author, self.nda, self.timezone, self.time_per_wk, self.bot, title="Input answers"))
+        await interaction.response.send_modal(
+            StaffAppModal(
+                self.author,
+                self.nda,
+                self.timezone,
+                self.time_per_wk,
+                self.bot,
+                title="Input answers",
+            )
+        )
 
 
 class StaffAppModal(discord.ui.Modal):
-    def __init__(self, author, nda, timezone ,hours_per_wk, bot, *args, **kwargs) -> None:
+    def __init__(
+        self, author, nda, timezone, hours_per_wk, bot, *args, **kwargs
+    ) -> None:
         """
         A discord modal that asks the user for their answers to the questions.
         After all answers are given, insert the answers (also from staffAppView) into the database.
@@ -382,13 +363,27 @@ class StaffAppModal(discord.ui.Modal):
         self.timezone = timezone
         self.hours_per_wk = hours_per_wk
 
-        self.add_item(discord.ui.InputText(label="First Name (Eg. John)", style=discord.InputTextStyle.short))
-        self.add_item(discord.ui.InputText(label="Why do you want to become a staff member", style=discord.InputTextStyle.long))
-        self.add_item(discord.ui.InputText(label="How can you contribute if you are given staff", style=discord.InputTextStyle.long))
-
+        self.add_item(
+            discord.ui.InputText(
+                label="First Name (Eg. John)", style=discord.InputTextStyle.short
+            )
+        )
+        self.add_item(
+            discord.ui.InputText(
+                label="Why do you want to become a staff member",
+                style=discord.InputTextStyle.long,
+            )
+        )
+        self.add_item(
+            discord.ui.InputText(
+                label="How can you contribute if you are given staff",
+                style=discord.InputTextStyle.long,
+            )
+        )
 
     async def callback(self, interaction: discord.Interaction):
-        self.cursor.execute("""
+        self.cursor.execute(
+            """
         INSERT INTO application (
             uid,
             status,
@@ -404,30 +399,32 @@ class StaffAppModal(discord.ui.Modal):
         VALUES (
             ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
         )
-        """, (
-            self.author.id,
-            1,
-            f"{self.author.name}#{self.author.discriminator}",
-            self.children[0].value,
-            self.nda,
-            self.timezone,
-            self.hours_per_wk,
-            self.children[1].value,
-            self.children[2].value,
-            str(int(time() // 1)),
-        ))
+        """,
+            (
+                self.author.id,
+                1,
+                f"{self.author.name}#{self.author.discriminator}",
+                self.children[0].value,
+                self.nda,
+                self.timezone,
+                self.hours_per_wk,
+                self.children[1].value,
+                self.children[2].value,
+                str(int(time() // 1)),
+            ),
+        )
         self.db.commit()
         self.db.close()
-        #Send message to staff channel
+        # Send message to staff channel
         staff_channel = self.bot.get_channel(int(getenv("STAFF_CHANNEL")))
         text = f"{self.author.mention} has submitted a new staff application!"
         await staff_channel.send(text)
         # Send message to user
         embed = discord.Embed(
-                title="Staff Application successfully submitted",
-                description="Thank you for your application! If your application gets accepted, you will be contacted by a staff member.",
-                color=0xFFD700
-            )
+            title="Staff Application successfully submitted",
+            description="Thank you for your application! If your application gets accepted, you will be contacted by a staff member.",
+            color=0xFFD700,
+        )
         await interaction.response.edit_message(embed=embed, content="", view=None)
 
 
@@ -435,6 +432,7 @@ class StaffAppsUser(commands.Cog):
     """
     Main cog for the staff application system (end-user commands)
     """
+
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
@@ -459,28 +457,41 @@ class StaffAppsUser(commands.Cog):
 
         # check cooldown
         if applicant.is_on_cooldown():
-            await ctx.respond(embed=embeds().cooldown(applicant.cooldown), ephemeral=True)
+            await ctx.respond(
+                embed=embeds().cooldown(applicant.cooldown), ephemeral=True
+            )
             Log(f"{logname} tried to apply for staff but is on cooldown")
             return
 
         # check app status
-        status = any([x in [1,3,4,5,6,7,8] for x in applicant.status]) #2 and 8 are closed applications, others are open
+        status = any(
+            [x in [1, 3, 4, 5, 6, 7, 8] for x in applicant.status]
+        )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)
-            Log(f"{logname} tried to apply for staff but already has an ongoing application")
+            Log(
+                f"{logname} tried to apply for staff but already has an ongoing application"
+            )
             return
 
         # check minimum requirements
         if not applicant.min_reqs()[0]:
-            await ctx.respond(embed=embeds().min_reqs(applicant.min_reqs()[1], applicant.joined_at, applicant.created_at), ephemeral=True)
-            Log(f"{logname} tried to apply for staff but does not meet the minimum requirements")
+            await ctx.respond(
+                embed=embeds().min_reqs(
+                    applicant.min_reqs()[1], applicant.joined_at, applicant.created_at
+                ),
+                ephemeral=True,
+            )
+            Log(
+                f"{logname} tried to apply for staff but does not meet the minimum requirements"
+            )
             return
 
         Log(f"{logname} is applying for staff")
         # user meets all requirements, send application form
         embed = EmbedBuilder(
-        title="Congratulations!",
-        description="""You meet the basic requirements for staff. You may apply for staff below.\nPlease make sure you read the following requirements, 
+            title="Congratulations!",
+            description="""You meet the basic requirements for staff. You may apply for staff below.\nPlease make sure you read the following requirements, 
         If you do not fulfill the requirements, please contact us via ModMail if you feel you have a special circumstance before submitting the application. 
         If not, do not continue, and please apply once you have fulfilled them. 
         You will not receive a response if you have not received a waiver or if you obviously do not meet the requirements\n\n
@@ -492,12 +503,13 @@ class StaffAppsUser(commands.Cog):
                     
         **Non-disclosure agreement**
         You agree not to disclose any information within the staff channels and/or any confidential Homework Help assets without explicit leave.\n""",
-        fields=None,
-        color=0x39FF14,  # GREEN
+            fields=None,
+            color=0x39FF14,  # GREEN
         ).build()
-        await ctx.respond(embed=embed, ephemeral=True, view=StaffAppView(ctx.author, self.bot))
+        await ctx.respond(
+            embed=embed, ephemeral=True, view=StaffAppView(ctx.author, self.bot)
+        )
 
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(StaffAppsUser(bot))
-    
