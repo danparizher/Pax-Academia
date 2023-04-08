@@ -50,13 +50,26 @@ class AI(commands.Cog):
                 context = await browser.new_context()
                 page = await context.new_page()
                 await page.goto("https://copyleaks.com/ai-content-detector")
-                # await page.fill("textarea", text)
-                # await page.click("button")
-                # await page.wait_for_selector("text=top k count")
-                # screenshot = await page.locator("#all_result").screenshot()
-                # file_ = io.BytesIO(screenshot)
-                # await browser.close()
-                # await ctx.respond(file=discord.File(file_, filename="result.png"))
+                # <textarea _ngcontent-ng-universal-copyleaks-c280="" class="ng-tns-c280-0 scan-text-editor ng-pristine ng-valid ng-star-inserted ng-touched" spellcheck="false" placeholder="Enter text here..."></textarea>
+                # click
+                await page.click("textarea.scan-text-editor")
+                await page.fill("textarea.scan-text-editor", text)
+                # <div _ngcontent-ng-universal-copyleaks-c280="" ds-text-font="">Check</div>
+                await page.click("div.ds-text-font")
+                # <div _ngcontent-ng-universal-copyleaks-c280="" class="scan-text-editor scan-text-editor-result ng-tns-c280-0 ng-star-inserted"><span cl-ai-match-100="" cl-scan-words="271" cl-scan-probability="0.9714061" cl-scan-classification="2">
+                # screenshot just this element
+                screenshot = await page.locator(
+                    "div.scan-text-editor-result",
+                ).screenshot()
+                await browser.close()
+                await ctx.respond(
+                    embed=EmbedBuilder(
+                        title="AI Detector",
+                        description=f"Here is the result of running the text through the AI detector:\n\n{text}",
+                    ).build(),
+                    file=discord.File(io.BytesIO(screenshot), filename="ai.png"),
+                    ephemeral=ephemeral,
+                )
         except Exception as e:
             await ctx.respond(
                 embed=EmbedBuilder(
