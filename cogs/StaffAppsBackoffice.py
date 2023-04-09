@@ -805,7 +805,7 @@ class StaffAppsBackoffice(commands.Cog):
             )  # hwh green
             await ctx.respond(embed=embed.build(), ephemeral=True)
             Log(f"{username} viewed a specific application: {specific_id}")
-            return
+
         if subcommand == "all":
             # gather first page of applications
             data = self.cursor.execute(
@@ -833,7 +833,6 @@ class StaffAppsBackoffice(commands.Cog):
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
             Log(f"{username} viewed all applications")
-            return
 
         elif subcommand == "denied":
             data = self.cursor.execute(
@@ -861,7 +860,6 @@ class StaffAppsBackoffice(commands.Cog):
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
             Log(f"{username} viewed denied applications")
-            return
 
         elif subcommand == "accepted":
             data = self.cursor.execute(
@@ -890,7 +888,6 @@ class StaffAppsBackoffice(commands.Cog):
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
             Log(f"{username} viewed accepted applications")
-            return
 
         elif subcommand == "spam":
             data = self.cursor.execute(
@@ -937,7 +934,6 @@ class StaffAppsBackoffice(commands.Cog):
                     ephemeral=True,
                 )
             Log(f"{username} viewed banned users")
-            return
 
         else:  # main command, no subcommand
             # gather all active applications
@@ -957,7 +953,6 @@ class StaffAppsBackoffice(commands.Cog):
                 ephemeral=True,
             )
             Log(f"{username} viewed all active applications")
-            return
 
 
 def setup(bot: commands.Bot) -> None:
