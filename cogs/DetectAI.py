@@ -1,3 +1,4 @@
+import asyncio
 import io
 
 import discord
@@ -60,12 +61,23 @@ class AI(commands.Cog):
                 await page.goto("https://app.copyleaks.com/v1/scan/ai/embedded")
                 await page.fill("textarea", text)
                 await page.click("button")
+                # Pass the cloudflare challenge by clicking the checkbox
+                # <iframe src="https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/if/ov2/av0/ltitq/0x4AAAAAAADZUXiboAFN3tU8/light/normal" allow="cross-origin-isolated" id="cf-chl-widget-ltitq" tabindex="0" title="Widget containing a Cloudflare security challenge" style="border: none; overflow: hidden; width: 300px; height: 65px;"></iframe>
+                try:
+                    await page.click("input#cf-chl-accept")
+                except Exception:
+                    await asyncio.sleep(999)
+                # Wait for page to finish changing after clicking the button
+                # <div _ngcontent-ng-universal-copyleaks-c280 class="scan-text-editor scan-text-editor-result ng-tns-c280-0 ng-star-inserted">
+                await page.wait_for_selector(
+                    "div.scan-text-editor.scan-text-editor-result"
+                )
                 screenshot = await page.locator("textarea").screenshot()
                 await browser.close()
                 await ctx.respond(
                     embed=EmbedBuilder(
                         title="AI Detector",
-                        description=f"Here is the result of running the text through the AI detector:\n\n{text}",
+                        description="Here is the result of running the text through the AI detector:",
                     ).build(),
                     file=discord.File(io.BytesIO(screenshot), filename="result.png"),
                     ephemeral=ephemeral,
