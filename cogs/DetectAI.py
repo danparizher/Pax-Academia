@@ -49,25 +49,25 @@ class AI(commands.Cog):
                 browser = await p.chromium.launch(headless=False)
                 context = await browser.new_context()
                 page = await context.new_page()
-                await page.goto("https://copyleaks.com/ai-content-detector")
-                # <textarea _ngcontent-ng-universal-copyleaks-c280="" class="ng-tns-c280-0 scan-text-editor ng-pristine ng-valid ng-star-inserted ng-touched" spellcheck="false" placeholder="Enter text here..."></textarea>
-                # click
-                await page.click("textarea.scan-text-editor")
-                await page.fill("textarea.scan-text-editor", text)
-                # <div _ngcontent-ng-universal-copyleaks-c280="" ds-text-font="">Check</div>
-                await page.click("div.ds-text-font")
-                # <div _ngcontent-ng-universal-copyleaks-c280="" class="scan-text-editor scan-text-editor-result ng-tns-c280-0 ng-star-inserted"><span cl-ai-match-100="" cl-scan-words="271" cl-scan-probability="0.9714061" cl-scan-classification="2">
-                # screenshot just this element
-                screenshot = await page.locator(
-                    "div.scan-text-editor-result",
-                ).screenshot()
+                await page.set_extra_http_headers(
+                    {
+                        "Accept-Language": "en-US,en;q=0.9",
+                        "Accept-Encoding": "gzip, deflate, br",
+                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.3987.149 Safari/537.36",
+                    },
+                )
+                await page.goto("https://app.copyleaks.com/v1/scan/ai/embedded")
+                await page.fill("textarea", text)
+                await page.click("button")
+                screenshot = await page.locator("textarea").screenshot()
                 await browser.close()
                 await ctx.respond(
                     embed=EmbedBuilder(
                         title="AI Detector",
                         description=f"Here is the result of running the text through the AI detector:\n\n{text}",
                     ).build(),
-                    file=discord.File(io.BytesIO(screenshot), filename="ai.png"),
+                    file=discord.File(io.BytesIO(screenshot), filename="result.png"),
                     ephemeral=ephemeral,
                 )
         except Exception as e:
