@@ -164,7 +164,7 @@ class Alerts(commands.Cog):
             c.execute("SELECT * FROM alert")
             keywords = c.fetchall()
             if not any(
-                re.search(keyword[2], message.content, re.IGNORECASE)
+                re.search(re.escape(keyword[2]), message.content, re.IGNORECASE)
                 for keyword in keywords
             ):
                 return
