@@ -43,7 +43,15 @@ class AI(commands.Cog):
         :param text: str
         :type text: str
         """
-        if "Staff" not in [role.name for role in ctx.author.roles]:
+        if not isinstance(ctx.channel, discord.TextChannel):
+            return
+        if not ctx.channel.category or not ctx.channel.category.name.lower().endswith(
+            "help",  # right now, it'll just say "The application did not respond" if you try to run it in a non-help channel
+        ):
+            return
+        if "Staff" not in [
+            role.name for role in ctx.author.roles
+        ] and not ctx.channel.category.name.lower().endswith("help"):
             ephemeral = True
         await ctx.defer(ephemeral=ephemeral)
 
@@ -59,7 +67,6 @@ class AI(commands.Cog):
                     (By.CSS_SELECTOR, "div.scan-text-editor-result"),
                 ),
             )
-            print("Done")
             screenshot = driver.get_screenshot_as_png()
             driver.quit()
             await ctx.respond(
@@ -71,14 +78,13 @@ class AI(commands.Cog):
                 ephemeral=ephemeral,
             )
         except Exception as e:
-            raise e
-            # await ctx.respond(
-            #     embed=EmbedBuilder(
-            #         title="Error",
-            #         description=f"An error occurred while running the command:\n\n{e}",
-            #     ).build(),
-            #     ephemeral=True,
-            # )
+            await ctx.respond(
+                embed=EmbedBuilder(
+                    title="Error",
+                    description=f"An error occurred while running the command:\n\n{e}",
+                ).build(),
+                ephemeral=True,
+            )
 
 
 def setup(bot: commands.Bot) -> None:
