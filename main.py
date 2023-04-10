@@ -20,7 +20,6 @@ def load() -> None:
         "MessageCounter",
         "Misc",
         "Moderation",
-        # "Profanity", In development
         "PubChem",
         "Rules",
         "StaffRequirements",
