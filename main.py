@@ -22,7 +22,8 @@ def load() -> None:
         "Moderation",
         "PubChem",
         "Rules",
-        "StaffRequirements",
+        "StaffAppsUser",  # v2 for users
+        "StaffAppsBackoffice",  # v2 for staff
         "Surveys",
         "Tips",
         "Wikipedia",
