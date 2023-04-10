@@ -4,8 +4,9 @@ black==23.3.0
 deepl_translate==1.2.0
 humanize==4.6.0
 isort==5.12.0
-playwright==1.32.1
 pubchempy==1.0.4
 py-cord==2.4.1
 python-dotenv==1.0.0
+selenium==4.8.3
+undetected-chromedriver==3.4.6
 wikipedia==1.4.0
