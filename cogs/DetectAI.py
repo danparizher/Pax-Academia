@@ -1,3 +1,4 @@
+import contextlib
 import io
 
 import discord
@@ -46,14 +47,28 @@ class AI(commands.Cog):
         if not isinstance(ctx.channel, discord.TextChannel):
             return
         if not ctx.channel.category or not ctx.channel.category.name.lower().endswith(
-            "help",  # right now, it'll just say "The application did not respond" if you try to run it in a non-help channel
+            "help",
         ):
+            await ctx.respond(
+                embed=EmbedBuilder(
+                    title="Error",
+                    description="This command can only be run in a help channel.",
+                ).build(),
+                ephemeral=True,
+            )
             return
-        if "Staff" not in [
-            role.name for role in ctx.author.roles
-        ] and not ctx.channel.category.name.lower().endswith("help"):
-            ephemeral = True
-        await ctx.defer(ephemeral=ephemeral)
+
+        if len(text) < 150:
+            await ctx.respond(
+                embed=EmbedBuilder(
+                    title="Error",
+                    description="You must enter at least 150 characters.",
+                ).build(),
+                ephemeral=True,
+            )
+            return
+
+        await ctx.defer(ephemeral=True)
 
         try:
             options = uc.ChromeOptions()
@@ -62,6 +77,24 @@ class AI(commands.Cog):
             driver.get("https://app.copyleaks.com/v1/scan/ai/embedded")
             driver.find_element(By.CSS_SELECTOR, "textarea").send_keys(text)
             driver.find_element(By.CSS_SELECTOR, "button").click()
+            with contextlib.suppress(Exception):
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located(
+                        (
+                            By.XPATH,
+                            "/html/body/app-root/div/app-scan-inline-widget-layout/app-error-page/div/div/span/div/b",
+                        ),
+                    ),
+                )
+                driver.quit()
+                await ctx.respond(
+                    embed=EmbedBuilder(
+                        title="Error",
+                        description="You have reached your limit for the day. Please try again tomorrow.",
+                    ).build(),
+                    ephemeral=True,
+                )
+                return
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located(
                     (By.CSS_SELECTOR, "div.scan-text-editor-result"),
@@ -69,6 +102,7 @@ class AI(commands.Cog):
             )
             screenshot = driver.get_screenshot_as_png()
             driver.quit()
+
             await ctx.respond(
                 embed=EmbedBuilder(
                     title="AI Detector",
