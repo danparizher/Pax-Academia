@@ -1,5 +1,4 @@
 aiohttp==3.8.4
-alt-profanity-check==1.2.2
 beautifulsoup4==4.12.0
 black==23.3.0
 deepl_translate==1.2.0
