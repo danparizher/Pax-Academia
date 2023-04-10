@@ -1,10 +1,12 @@
-import asyncio
 import io
 
 import discord
+import undetected_chromedriver as uc
 from discord import option
 from discord.ext import commands
-from playwright.async_api import async_playwright
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 from util.EmbedBuilder import EmbedBuilder
 
@@ -46,50 +48,37 @@ class AI(commands.Cog):
         await ctx.defer(ephemeral=ephemeral)
 
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=False)
-                context = await browser.new_context()
-                page = await context.new_page()
-                await page.set_extra_http_headers(
-                    {
-                        "Accept-Language": "en-US,en;q=0.9",
-                        "Accept-Encoding": "gzip, deflate, br",
-                        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-                        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.3987.149 Safari/537.36",
-                    },
-                )
-                await page.goto("https://app.copyleaks.com/v1/scan/ai/embedded")
-                await page.fill("textarea", text)
-                await page.click("button")
-                # Pass the cloudflare challenge by clicking the checkbox
-                # <iframe src="https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/if/ov2/av0/ltitq/0x4AAAAAAADZUXiboAFN3tU8/light/normal" allow="cross-origin-isolated" id="cf-chl-widget-ltitq" tabindex="0" title="Widget containing a Cloudflare security challenge" style="border: none; overflow: hidden; width: 300px; height: 65px;"></iframe>
-                try:
-                    await page.click("input#cf-chl-accept")
-                except Exception:
-                    await asyncio.sleep(999)
-                # Wait for page to finish changing after clicking the button
-                # <div _ngcontent-ng-universal-copyleaks-c280 class="scan-text-editor scan-text-editor-result ng-tns-c280-0 ng-star-inserted">
-                await page.wait_for_selector(
-                    "div.scan-text-editor.scan-text-editor-result"
-                )
-                screenshot = await page.locator("textarea").screenshot()
-                await browser.close()
-                await ctx.respond(
-                    embed=EmbedBuilder(
-                        title="AI Detector",
-                        description="Here is the result of running the text through the AI detector:",
-                    ).build(),
-                    file=discord.File(io.BytesIO(screenshot), filename="result.png"),
-                    ephemeral=ephemeral,
-                )
-        except Exception as e:
+            options = uc.ChromeOptions()
+            options.add_argument("--headless")
+            driver = uc.Chrome(options=options)
+            driver.get("https://app.copyleaks.com/v1/scan/ai/embedded")
+            driver.find_element(By.CSS_SELECTOR, "textarea").send_keys(text)
+            driver.find_element(By.CSS_SELECTOR, "button").click()
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located(
+                    (By.CSS_SELECTOR, "div.scan-text-editor-result"),
+                ),
+            )
+            print("Done")
+            screenshot = driver.get_screenshot_as_png()
+            driver.quit()
             await ctx.respond(
                 embed=EmbedBuilder(
-                    title="Error",
-                    description=f"An error occurred while running the command:\n\n{e}",
+                    title="AI Detector",
+                    description="Here is the result of running the text through the AI detector:",
                 ).build(),
-                ephemeral=True,
+                file=discord.File(io.BytesIO(screenshot), filename="result.png"),
+                ephemeral=ephemeral,
             )
+        except Exception as e:
+            raise e
+            # await ctx.respond(
+            #     embed=EmbedBuilder(
+            #         title="Error",
+            #         description=f"An error occurred while running the command:\n\n{e}",
+            #     ).build(),
+            #     ephemeral=True,
+            # )
 
 
 def setup(bot: commands.Bot) -> None:
