@@ -173,47 +173,39 @@ class Alerts(commands.Cog):
                 self.bot.user is not None
             ), "on_message only fires when the bot is already logged in"
 
-            if (
-                message.author.bot
-                or isinstance(message.author, discord.User)  # it's a DM
-                or message.channel not in message.author.guild.channels
-                or not message.author.guild.get_member(self.bot.user.id)
-            ):
+            # do not process alerts for bot messages or in DMs
+            if message.author.bot or isinstance(message.author, discord.User):
                 return
 
-            # Ignore messages that do not contain a keyword.
             c = self.db.cursor()
-            c.execute("SELECT * FROM alert")
-            keywords = c.fetchall()
-            if not any(
-                re.search(keyword[2], message.content, re.IGNORECASE)
-                for keyword in keywords
-            ):
-                return
+            c.execute("SELECT message, uid FROM alert")
 
-            # Send a DM to the user who added the alert.
-            for keyword in keywords:
-                if re.search(keyword[2], message.content, re.IGNORECASE):
-                    try:
-                        member = await message.channel.guild.fetch_member(keyword[1])
-                    except discord.NotFound:
-                        return
-                    if not message.channel.permissions_for(member).view_channel:
-                        return
-                    embed = EmbedBuilder(
-                        title="Alert",
-                        description=f"Your keyword `{keyword[2]}` was mentioned in {message.channel.mention} by {message.author.mention}.",
-                        fields=[
-                            ("Message", message.content[:1024], False),
-                            (
-                                "Message Link",
-                                f"[Click to see message]({message.jump_url})",
-                                False,
-                            ),
-                        ],
-                    ).build()
-                    with contextlib.suppress(discord.Forbidden):
-                        await member.send(embed=embed)
+            for keyword, uid in c.fetchall():
+                if not re.search(keyword, message.content, re.IGNORECASE):
+                    continue
+
+                try:
+                    member = await message.channel.guild.fetch_member(uid)
+                except discord.NotFound:
+                    continue
+
+                if not message.channel.permissions_for(member).view_channel:
+                    continue
+
+                embed = EmbedBuilder(
+                    title="Alert",
+                    description=f"Your keyword `{keyword}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    fields=[
+                        ("Message", message.content[:1024], False),
+                        (
+                            "Message Link",
+                            f"[Click to see message]({message.jump_url})",
+                            False,
+                        ),
+                    ],
+                ).build()
+                with contextlib.suppress(discord.Forbidden):
+                    await member.send(embed=embed)
 
         await user_alerts()
 
