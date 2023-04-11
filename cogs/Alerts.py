@@ -88,7 +88,7 @@ class Alerts(commands.Cog):
             title="Success",
             description=f"Added alert for keyword `{keyword}`."
             + (
-                " Note: the input was not valid regex, so special characters have been escaped."
+                "\nNote: the input was not valid regex, so special characters have been escaped."
                 if escaped
                 else ""
             ),
