@@ -177,6 +177,11 @@ class Alerts(commands.Cog):
             if message.author.bot or isinstance(message.author, discord.User):
                 return
 
+            # Should be impossible (since we already checked if this is a DM)
+            # this is just to satisfy type-checkers
+            if message.channel not in message.author.guild.channels:
+                return
+
             c = self.db.cursor()
             c.execute("SELECT message, uid FROM alert")
 
