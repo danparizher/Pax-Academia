@@ -189,10 +189,13 @@ class Alerts(commands.Cog):
                 if not re.search(keyword, message.content, re.IGNORECASE):
                     continue
 
-                try:
-                    member = await message.channel.guild.fetch_member(uid)
-                except discord.NotFound:
-                    continue
+                # try to pull from cache, otherwise re-fetch
+                member = message.channel.guild.get_member(uid)
+                if not member:
+                    try:
+                        member = await message.channel.guild.fetch_member(uid)
+                    except discord.NotFound:
+                        continue
 
                 if not message.channel.permissions_for(member).view_channel:
                     continue
