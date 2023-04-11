@@ -4,13 +4,14 @@ import sqlite3
 
 import discord
 from discord.commands import option
+from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log
 
 
-def get_keywords(ctx: discord.AutocompleteContext) -> list:
+def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
     """
     It gets all the keywords from the database for the user who is currently using the command
 
@@ -19,11 +20,14 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list:
     :return: A list of keywords that the user has set up for alerts.
     """
 
+    if not ctx.interaction.user:
+        return []
+
     # We no longer keep track of the name because this can change, breaking the alert.
     conn = sqlite3.connect("util/database.sqlite")
     data = [
-        keyword[0]
-        for keyword in conn.cursor()
+        keyword
+        for (keyword,) in conn.cursor()
         .execute("SELECT message FROM alert WHERE uid = ?", (ctx.interaction.user.id,))
         .fetchall()
     ]
@@ -41,17 +45,25 @@ class Alerts(commands.Cog):
         name="alerts-add",
         description="Adds an alert for a keyword.",
     )
-    async def add_alert(self, ctx: commands.Context, keyword: str) -> None:
+    async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         Checks if the keyword is already in the database, if it is, sends an error message, if it
         isn't, adds the keyword to the database and sends a success message.
+        Properly escapes invalid regex.
 
-        :param ctx: commands.Context
-        :type ctx: commands.Context
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
         :param keyword: str
         :type keyword: str
         :return: The return type is None.
         """
+
+        try:
+            re.compile(keyword)
+            escaped = False
+        except re.error:
+            keyword = re.escape(keyword)
+            escaped = True
 
         c = self.db.cursor()
         c.execute(
@@ -74,7 +86,12 @@ class Alerts(commands.Cog):
 
         embed = EmbedBuilder(
             title="Success",
-            description=f"Added alert for keyword `{keyword}`.",
+            description=f"Added alert for keyword `{keyword}`."
+            + (
+                " Note: the input was not valid regex, so special characters have been escaped."
+                if escaped
+                else ""
+            ),
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
@@ -89,12 +106,12 @@ class Alerts(commands.Cog):
         description="The keyword to remove.",
         autocomplete=get_keywords,
     )
-    async def remove_alert(self, ctx: commands.Context, keyword: str) -> None:
+    async def remove_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         It removes an alert from the database.
 
-        :param ctx: commands.Context
-        :type ctx: commands.Context
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
         :param keyword: str
         :type keyword: str
         """
@@ -127,12 +144,12 @@ class Alerts(commands.Cog):
         Log(f"Alert removed by {ctx.author} in {ctx.guild}.")
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
-    async def list_alerts(self, ctx: commands.Context) -> None:
+    async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
 
-        :param ctx: commands.Context
-        :type ctx: commands.Context
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
         """
         c = self.db.cursor()
         c.execute("SELECT * FROM alert WHERE uid = ?", (ctx.author.id,))
@@ -152,8 +169,13 @@ class Alerts(commands.Cog):
             If a message contains a keyword, send a DM to the user who added the keyword
             :return: The message.content is being returned.
             """
+            assert (
+                self.bot.user is not None
+            ), "on_message only fires when the bot is already logged in"
+
             if (
                 message.author.bot
+                or isinstance(message.author, discord.User)  # it's a DM
                 or message.channel not in message.author.guild.channels
                 or not message.author.guild.get_member(self.bot.user.id)
             ):
