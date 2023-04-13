@@ -26,23 +26,20 @@ class AI(commands.Cog):
         description="The text to run through the AI.",
         required=True,
     )
-    @option(
-        "ephemeral",
-        bool,
-        description="Whether the response should be ephemeral or not. Only staff can make this False.",
-        required=False,
-        default=True,
-    )
-    async def ai(self, ctx: commands.Context, text: str, ephemeral: bool) -> None:
+    async def ai(self, ctx: commands.Context, text: str) -> None:
         """
-        It opens a headless browser, goes to the website, fills in the text, clicks the button, waits for
-        the result, takes a screenshot of the result, closes the browser, and sends the screenshot to the
-        channel
+        Runs a given text through an AI detector and returns the result as an image.
 
-        :param ctx: commands.Context - The context of the command
+        :param ctx: The context of the command, which includes information about the user, channel, and
+        server where the command was invoked
         :type ctx: commands.Context
-        :param text: str
+        :param text: The text that will be analyzed by the AI detector
         :type text: str
+        :param ephemeral: A boolean parameter that determines whether the response message should only be
+        visible to the user who triggered the command (True) or visible to everyone in the channel (False)
+        :type ephemeral: bool
+        :return: The function is not returning anything, it is using the `await` keyword to send responses
+        to the user in the Discord chat.
         """
         if not isinstance(ctx.channel, discord.TextChannel):
             return
@@ -104,12 +101,8 @@ class AI(commands.Cog):
             driver.quit()
 
             await ctx.respond(
-                embed=EmbedBuilder(
-                    title="AI Detector",
-                    description="Here is the result of running the text through the AI detector:",
-                ).build(),
                 file=discord.File(io.BytesIO(screenshot), filename="result.png"),
-                ephemeral=ephemeral,
+                ephemeral=True,
             )
         except Exception as e:
             await ctx.respond(
