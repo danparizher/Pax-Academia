@@ -4,10 +4,11 @@ import io
 import discord
 import undetected_chromedriver as uc
 from discord import option
+from discord.commands.context import ApplicationContext
 from discord.ext import commands
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.wait import WebDriverWait
 
 from util.EmbedBuilder import EmbedBuilder
 
@@ -26,13 +27,13 @@ class AI(commands.Cog):
         description="The text to run through the AI.",
         required=True,
     )
-    async def ai(self, ctx: commands.Context, text: str) -> None:
+    async def ai(self, ctx: ApplicationContext, text: str) -> None:
         """
         Runs a given text through an AI detector and returns the result as an image.
 
         :param ctx: The context of the command, which includes information about the user, channel, and
         server where the command was invoked
-        :type ctx: commands.Context
+        :type ctx: ApplicationContext
         :param text: The text that will be analyzed by the AI detector
         :type text: str
         :param ephemeral: A boolean parameter that determines whether the response message should only be
