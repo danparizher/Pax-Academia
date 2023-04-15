@@ -1,4 +1,5 @@
 import asyncio
+import colorsys
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -28,41 +29,6 @@ AuthorPredicationValue = (
 )
 
 
-def hsv_to_rgb(hue: float, saturation: float, value: float) -> tuple[int, int, int]:
-    """
-    Simple utility to translate the HSV color space to the RGB color space.
-    stolen from https://stackoverflow.com/a/26856771/9816919 and modified to be less esoteric
-
-    :param hue: the hue, from 0 - 1
-    :param saturation: the saturation, from 0 - 1
-    :param value: the value, from 0 - 1
-    :return: a tuple of (r, g, b) from 0-255
-    """
-    if saturation == 0:
-        value = int(255 * value)
-        return (value, value, value)
-
-    i = int(hue * 6)
-    f = hue * 6 - i
-    p = int(255 * value * (1 - saturation))
-    q = int(255 * value * (1 - saturation * f))
-    t = int(255 * value * (1 - saturation * (1 - f)))
-    value = int(255 * value)
-    i %= 6
-
-    if i == 0:
-        return (value, t, p)
-    if i == 1:
-        return (q, value, p)
-    if i == 2:
-        return (p, value, t)
-    if i == 3:
-        return (p, q, value)
-    if i == 4:
-        return (t, p, value)
-    return (value, p, q)
-
-
 @dataclass
 class AIDetectionResult:
     author_predication: AuthorPredicationValue
@@ -80,12 +46,12 @@ class AIDetectionResult:
 
         # the "factor" goes from 0 (AI) to 1 (human)
         if self.author_predication == AuthorPredication.ArtificialIntelligence:
-            factor = self.confidence / 2
+            factor = 0.5 - self.confidence / 2
         else:
             factor = 0.5 + self.confidence / 2
 
-        r, g, b = hsv_to_rgb(factor / 3, 0.85, 1)
-        return r << 16 | g << 8 | b
+        r, g, b = colorsys.hsv_to_rgb(factor / 3, 0.85, 1)
+        return int(r * 255) << 16 | int(g * 255) << 8 | int(b * 255)
 
     def text_summary(self) -> str:
         """
@@ -369,7 +335,7 @@ class AI(commands.Cog):
                 ).build(),
                 ephemeral=True,
             )
-            return
+            raise
 
         embed_builder = EmbedBuilder(
             title=f"AI Detection Result",
