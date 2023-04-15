@@ -83,9 +83,9 @@ class AIDetectionResult:
         """
         if self.confidence < 0.2:
             return "Inconclusive"
-        elif self.confidence < 0.6:
+        if self.confidence < 0.6:
             return f"Plausibly {self.author_predication.value}\n{self.confidence:.1%} Confident"
-        elif self.confidence < 0.9:
+        if self.confidence < 0.9:
             return f"Probably {self.author_predication.value}\n{self.confidence:.1%} Confident"
 
         return f"Certainly {self.author_predication.value}\n{self.confidence:.1%} Confident"
@@ -199,7 +199,7 @@ def parse_result_element(result_element: bs4.Tag) -> AIDetectionResult:
                 confidence=scan_probability,
                 author_predication=author_predication,
                 parts=[],  # individual parts are not broken down further
-            )
+            ),
         )
 
     # The copyleaks page _only_ provides the part-by-part breakdown of the overall text.
@@ -253,12 +253,10 @@ def detect_ai(text: str) -> AIDetectionResult:
     driver = launch_chrome()
     driver.get("https://app.copyleaks.com/v1/scan/ai/embedded")
     submit_text(driver, text)
-    rate_limited = wait_for_processing_completion(driver)
-
-    if rate_limited:
+    if wait_for_processing_completion(driver):
         driver.quit()
         raise Exception(
-            "You have reached your limit for the day. Please try again tomorrow."
+            "You have reached your limit for the day. Please try again tomorrow.",
         )
 
     soup = bs4.BeautifulSoup(driver.page_source, "html.parser")
@@ -337,7 +335,7 @@ class AI(commands.Cog):
             raise
 
         embed_builder = EmbedBuilder(
-            title=f"AI Detection Result",
+            title="AI Detection Result",
             description=f"Overall result: {result}\n\nBelow is the word-by-word breakdown of the analysis.",
             footer="Retrieved from CopyLeaks by Homework Help",
             color=result.color_classification(),
@@ -350,7 +348,7 @@ class AI(commands.Cog):
                     ("Text", result_part.text_summary(), True),
                     ("Analysis", str(result_part), True),
                     ("\N{ZERO WIDTH SPACE}", "\N{ZERO WIDTH SPACE}", True),
-                ]
+                ],
             )
 
         await ctx.respond(embed=embed_builder.build(), ephemeral=True)
