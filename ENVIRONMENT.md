@@ -31,4 +31,4 @@ On Linux/MacOS, create a new virutal environment via
 
     You must specify the priveleged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
 
-    (I, dddictionary, have no clue which intents the bot requires, but enabled all three and it seemed to work. Anyone who knows the intents, please edit this step)
+    The bot requires the message_content priveleged gateway intent. 

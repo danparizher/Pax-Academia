@@ -4,7 +4,7 @@ General purpose utility bot for the Homework Help Discord server
 
 
 ## How to Contribute
-1. Check out [environment.md](./environment.md) on setting up the environment.
+1. Check out [environment.md](./ENVIRONMENT.md) on setting up the environment.
 2. Fork this repository into your own account.
 3. Commit changes to your fork.
 4. Open a pull request, making sure to comapre across forks.  
