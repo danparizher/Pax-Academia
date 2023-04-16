@@ -14,7 +14,7 @@ The DeepL cog implements the `translate` slash command.
 
 If you're confused as to why there are two different `translate` functions, one is to actually translate the text through the DeepL module while the other one is used to run service in a different thread. Note the use of `async`.
 
-## DetectAI
+## DetectAI (In Progress)
 The DetectAI cog implements the `detect-ai` slash command.
 
 Uses a hacky soltuion to open a browser, submit the text to the form and get the result back. (Correct me if I'm wrong, but this is a WIP).
