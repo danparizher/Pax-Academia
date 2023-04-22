@@ -15,7 +15,8 @@ c.execute(
     uid INTEGER PRIMARY KEY,
     messagesSent INTEGER NOT NULL,
     markedSpam BOOLEAN NOT NULL,
-    cooldown varchar(100)
+    cooldown varchar(100),
+    helpMessagesSent INTEGER NOT NULL
     );
     """,
 )
