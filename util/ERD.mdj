@@ -61,7 +61,7 @@
 											"font": "Arial;13;1",
 											"left": 389,
 											"top": 119,
-											"width": 157.1552734375,
+											"width": 162.58251953125,
 											"height": 13,
 											"text": "User"
 										},
@@ -96,7 +96,7 @@
 									"font": "Arial;13;0",
 									"left": 384,
 									"top": 112,
-									"width": 167.1552734375,
+									"width": 172.58251953125,
 									"height": 25,
 									"stereotypeLabel": {
 										"$ref": "AAAAAAGG5UQbbQhGKSs="
@@ -133,7 +133,7 @@
 											"font": "Arial;13;0",
 											"left": 389,
 											"top": 142,
-											"width": 157.1552734375,
+											"width": 162.58251953125,
 											"height": 13,
 											"text": "uid INT PK",
 											"horizontalAlignment": 0
@@ -150,7 +150,7 @@
 											"font": "Arial;13;0",
 											"left": 389,
 											"top": 157,
-											"width": 157.1552734375,
+											"width": 162.58251953125,
 											"height": 13,
 											"text": "messagesSent INT Nna",
 											"horizontalAlignment": 0
@@ -167,9 +167,9 @@
 											"font": "Arial;13;0",
 											"left": 389,
 											"top": 172,
-											"width": 157.1552734375,
+											"width": 162.58251953125,
 											"height": 13,
-											"text": "marked_spam BOOL Nna",
+											"text": "markedSpam BOOL Nna",
 											"horizontalAlignment": 0
 										},
 										{
@@ -184,17 +184,34 @@
 											"font": "Arial;13;0",
 											"left": 389,
 											"top": 187,
-											"width": 157.1552734375,
+											"width": 162.58251953125,
 											"height": 13,
 											"text": "cooldown DATETIME",
+											"horizontalAlignment": 0
+										},
+										{
+											"_type": "UMLAttributeView",
+											"_id": "AAAAAAGHqQYaqU4vtHE=",
+											"_parent": {
+												"$ref": "AAAAAAGG5UQbbghK7p8="
+											},
+											"model": {
+												"$ref": "AAAAAAGHqQYan04shfk="
+											},
+											"font": "Arial;13;0",
+											"left": 389,
+											"top": 202,
+											"width": 162.58251953125,
+											"height": 13,
+											"text": "helpMessagesSent INT Nna",
 											"horizontalAlignment": 0
 										}
 									],
 									"font": "Arial;13;0",
 									"left": 384,
 									"top": 137,
-									"width": 167.1552734375,
-									"height": 68
+									"width": 172.58251953125,
+									"height": 83
 								},
 								{
 									"_type": "UMLOperationCompartmentView",
@@ -249,8 +266,8 @@
 							"containerChangeable": true,
 							"left": 384,
 							"top": 112,
-							"width": 167.1552734375,
-							"height": 103,
+							"width": 172.58251953125,
+							"height": 108,
 							"showVisibility": false,
 							"nameCompartment": {
 								"$ref": "AAAAAAGG5UQbbQhF1V4="
@@ -1642,8 +1659,8 @@
 										"$ref": "AAAAAAGG5WuEKw1j4MU="
 									},
 									"font": "Arial;13;0",
-									"left": 313,
-									"top": 232,
+									"left": 312,
+									"top": 234,
 									"width": 24.2099609375,
 									"height": 13,
 									"alpha": 1.5707963267948966,
@@ -1665,8 +1682,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 317,
-									"top": 219,
+									"left": 316,
+									"top": 221,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -1686,8 +1703,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 342,
-									"top": 257,
+									"left": 341,
+									"top": 259,
 									"height": 13,
 									"alpha": -1.5707963267948966,
 									"distance": 15,
@@ -1707,7 +1724,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 293,
+									"left": 295,
 									"top": 254,
 									"height": 13,
 									"alpha": 0.5235987755982988,
@@ -1728,7 +1745,7 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 288,
+									"left": 290,
 									"top": 241,
 									"height": 13,
 									"alpha": 0.7853981633974483,
@@ -1748,7 +1765,7 @@
 										"$ref": "AAAAAAGG5WuEKw1krXE="
 									},
 									"font": "Arial;13;0",
-									"left": 295,
+									"left": 297,
 									"top": 279,
 									"width": 19.5126953125,
 									"height": 13,
@@ -1770,8 +1787,8 @@
 										"$ref": "AAAAAAGG5WuEKw1liVw="
 									},
 									"font": "Arial;13;0",
-									"left": 345,
-									"top": 210,
+									"left": 341,
+									"top": 215,
 									"width": 29.275390625,
 									"height": 13,
 									"alpha": -0.5235987755982988,
@@ -1792,8 +1809,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 349,
-									"top": 200,
+									"left": 345,
+									"top": 205,
 									"height": 13,
 									"alpha": -0.7853981633974483,
 									"distance": 40,
@@ -1812,8 +1829,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 377,
-									"top": 231,
+									"left": 373,
+									"top": 236,
 									"height": 13,
 									"alpha": 0.5235987755982988,
 									"distance": 25,
@@ -1858,7 +1875,7 @@
 								"$ref": "AAAAAAGG5WmpKgtPVb8="
 							},
 							"lineStyle": 1,
-							"points": "280:287;389:215",
+							"points": "282:287;385:220",
 							"nameLabel": {
 								"$ref": "AAAAAAGG5WuELA1oLAQ="
 							},
@@ -2186,8 +2203,8 @@
 										"$ref": "AAAAAAGG5W2Nshn13g8="
 									},
 									"font": "Arial;13;0",
-									"left": 542,
-									"top": 243,
+									"left": 544,
+									"top": 245,
 									"width": 24.2099609375,
 									"height": 13,
 									"alpha": 1.5707963267948966,
@@ -2209,8 +2226,8 @@
 									},
 									"visible": null,
 									"font": "Arial;13;0",
-									"left": 566,
-									"top": 234,
+									"left": 568,
+									"top": 236,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 30,
@@ -2230,8 +2247,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 531,
-									"top": 262,
+									"left": 533,
+									"top": 264,
 									"height": 13,
 									"alpha": -1.5707963267948966,
 									"distance": 15,
@@ -2250,8 +2267,8 @@
 										"$ref": "AAAAAAGG5W2Nshn2rrA="
 									},
 									"font": "Arial;13;0",
-									"left": 521,
-									"top": 219,
+									"left": 526,
+									"top": 225,
 									"width": 29.275390625,
 									"height": 13,
 									"alpha": 0.5235987755982988,
@@ -2273,8 +2290,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 547,
-									"top": 213,
+									"left": 552,
+									"top": 218,
 									"height": 13,
 									"alpha": 0.7853981633974483,
 									"distance": 40,
@@ -2294,8 +2311,8 @@
 									},
 									"visible": false,
 									"font": "Arial;13;0",
-									"left": 511,
-									"top": 233,
+									"left": 516,
+									"top": 238,
 									"height": 13,
 									"alpha": -0.5235987755982988,
 									"distance": 25,
@@ -2402,7 +2419,7 @@
 								"$ref": "AAAAAAGG5UQbbQhELhw="
 							},
 							"lineStyle": 1,
-							"points": "508:215;578:303",
+							"points": "513:220;578:303",
 							"nameLabel": {
 								"$ref": "AAAAAAGG5W2Nsxn6pVg="
 							},
@@ -2486,7 +2503,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5UQbbAhC134="
 							},
-							"name": "uid INT PK"
+							"name": "uid INT PK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2494,7 +2512,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5UQbbAhC134="
 							},
-							"name": "messagesSent INT Nna"
+							"name": "messagesSent INT Nna",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2502,7 +2521,7 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5UQbbAhC134="
 							},
-							"name": "marked_spam BOOL Nna"
+							"name": "markedSpam BOOL Nna"
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2510,7 +2529,16 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5UQbbAhC134="
 							},
-							"name": "cooldown DATETIME"
+							"name": "cooldown DATETIME",
+							"type": ""
+						},
+						{
+							"_type": "UMLAttribute",
+							"_id": "AAAAAAGHqQYan04shfk=",
+							"_parent": {
+								"$ref": "AAAAAAGG5UQbbAhC134="
+							},
+							"name": "helpMessagesSent INT Nna"
 						}
 					]
 				},
@@ -2590,7 +2618,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "appId INT PK"
+							"name": "appId INT PK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2598,7 +2627,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "uid INT FK1"
+							"name": "uid INT FK1",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2606,7 +2636,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "discordName VARCHAR"
+							"name": "discordName VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2614,7 +2645,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "firstName VARCHAR"
+							"name": "firstName VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2622,7 +2654,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "nda BOOL"
+							"name": "nda BOOL",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2630,7 +2663,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "timeZone VARCHAR"
+							"name": "timeZone VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2638,7 +2672,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "hoursAvailableWk VARCHAR"
+							"name": "hoursAvailableWk VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2646,7 +2681,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "staffReason VARCHAR"
+							"name": "staffReason VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2654,7 +2690,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "contributeReason VARCHAR"
+							"name": "contributeReason VARCHAR",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2662,7 +2699,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "submissionTime DATETIME"
+							"name": "submissionTime DATETIME",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2670,7 +2708,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5VL9qgiROtw="
 							},
-							"name": "status FK4 Nna"
+							"name": "status FK4 Nna",
+							"type": ""
 						}
 					]
 				},
@@ -2688,7 +2727,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5V6qBQkMWNQ="
 							},
-							"name": "likeId INT PK"
+							"name": "likeId INT PK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2696,7 +2736,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5V6qBQkMWNQ="
 							},
-							"name": "appId FK2 Nna"
+							"name": "appId FK2 Nna",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2704,7 +2745,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5V6qBQkMWNQ="
 							},
-							"name": "uid INT Nna"
+							"name": "uid INT Nna",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2712,7 +2754,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5V6qBQkMWNQ="
 							},
-							"name": "name VARCHAR Nna"
+							"name": "name VARCHAR Nna",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2720,7 +2763,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5V6qBQkMWNQ="
 							},
-							"name": "likes BOOL Nna"
+							"name": "likes BOOL Nna",
+							"type": ""
 						}
 					]
 				},
@@ -2738,7 +2782,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5WLc8wqbY4Q="
 							},
-							"name": "statusID PK"
+							"name": "statusID PK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2746,7 +2791,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5WLc8wqbY4Q="
 							},
-							"name": "description VARCHAR Nna"
+							"name": "description VARCHAR Nna",
+							"type": ""
 						}
 					]
 				},
@@ -2796,7 +2842,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5WmpKQtNbF4="
 							},
-							"name": "alertId INT PK"
+							"name": "alertId INT PK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2804,7 +2851,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5WmpKQtNbF4="
 							},
-							"name": "uid INT FK3 AK"
+							"name": "uid INT FK3 AK",
+							"type": ""
 						},
 						{
 							"_type": "UMLAttribute",
@@ -2812,7 +2860,8 @@
 							"_parent": {
 								"$ref": "AAAAAAGG5WmpKQtNbF4="
 							},
-							"name": "message VARCHAR AK"
+							"name": "message VARCHAR AK",
+							"type": ""
 						}
 					]
 				}
