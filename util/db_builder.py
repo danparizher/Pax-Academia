@@ -1,6 +1,6 @@
 """
-Builds the database from scratch.
-This file needs to be ran once before starting the bot for the first time
+Builds the database from scratch if it doesn't exist
+this file is used on import in main.py and should not be run manually
 Author: !SKA#0001
 """
 
