@@ -18,17 +18,17 @@ If you're confused as to why there are two different `translate` functions, one 
 
 The DetectAI cog implements the `detect-ai` slash command.
 
-Uses a hacky soltuion to open a browser, submit the text to the form and get the result back. (Correct me if I'm wrong, but this is a WIP).
+Uses a hacky solution to open a browser, submit the text to the form and get the result back. This feature of the bot is still a work in progress. The tool used or approach may change in the future. 
 
 ## Dictionary
 
-The dictionary cog implements the `define` slash command, used to help define certain words. Uses more hacky HTML div element selction stuff to generate a response.
+The dictionary cog implements the `define` slash command, used to help define certain words. Uses more hacky HTML div element selection stuff to generate a response.
 
 Returns an markdown embed with the definition, and some links to the pronunciation.
 
 ## MessageCounter
 
-The message counter cog does not implement any slash commands but (I assume) is used to keep track of how many messages a user has sent(?).
+The message counter cog does not implement any slash commands but is used to keep track of how many messages a user has sent. The message count for a user is used to check eligibility for applying to be a staff member. 
 
 ## Misc
 

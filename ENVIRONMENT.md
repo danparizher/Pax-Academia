@@ -1,8 +1,9 @@
 # Setting up the Environment
 
 1. Clone the forked repository onto your machine.
-2. Activate the virtual environment. On windows, running the [`setup.bat`](./setup.bat) file will suffice.  
-   On Linux/MacOS, create a new virutal environment via
+   - Make sure the default system python version is `>=3.10` as there is a match case within the codebase. Recommended version is `3.11` 
+
+2. Create and activate the virtual environment by running the following in your terminal:
 
    ```bash
    python -m venv venv
@@ -10,6 +11,7 @@
    ```
 
 3. Install the required libraries within the virtual environment.
+   
    ```bash
    pip install -r requirements.txt
    playwright install
@@ -34,4 +36,4 @@
 
    You must specify the priveleged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
 
-   The bot requires the message_content priveleged gateway intent.
+   The bot requires the `message_content` priveleged gateway intent.
