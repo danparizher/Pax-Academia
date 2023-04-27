@@ -1,5 +1,6 @@
 import asyncio
 import colorsys
+import os
 from dataclasses import dataclass
 from enum import Enum
 from typing import Literal
@@ -16,6 +17,12 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from util.EmbedBuilder import EmbedBuilder
+
+DETECT_AI_GUILD = os.getenv("ALLOW_DETECT_AI_GUILD")
+DETECT_AI_ROLE = os.getenv("ALLOW_DETECT_AI_ROLE")
+DETECT_AI_PERMISSIONS = (
+    (lambda x: x) if DETECT_AI_ROLE is None else commands.has_role(DETECT_AI_ROLE)
+)
 
 
 class AuthorPredication(Enum):
@@ -271,6 +278,7 @@ class AI(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
 
+    @DETECT_AI_PERMISSIONS
     @commands.slash_command(
         name="detect-ai",
         description="Runs text through an AI detector.",
