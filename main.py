@@ -18,7 +18,7 @@ def load() -> None:
     cogs = [
         "Alerts",
         "DeepL",
-        # "DetectAI", Depcrecated until we find a more reliable detection service
+        "DetectAI",
         "Dictionary",
         "MessageCounter",
         "Misc",
