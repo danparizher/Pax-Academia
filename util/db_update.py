@@ -10,17 +10,12 @@ db = sqlite3.connect("util/database.sqlite")
 c = db.cursor()
 
 """
-escape invalid regex
+Alter table to include a new column
 """
-c.execute("SELECT uid, message FROM alert")
-for uid, message in c.fetchall():
-    try:
-        re.compile(message)
-    except re.error:
-        c.execute(
-            "UPDATE alerts SET message = ? WHERE uid = ? AND message = ?",
-            (re.escape(message), uid, message),
-        )
+c.execute("""
+ALTER TABLE user
+ADD helpMessagesSent INTEGER NOT NULL DEFAULT 0
+""")
 
 db.commit()
 db.close()
