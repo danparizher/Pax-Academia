@@ -14,7 +14,6 @@
    
    ```bash
    pip install -r requirements.txt
-   playwright install
    ```
 
 <!-- While the user can't run the exact Pax-Academia bot, this .env file is to configure their bot with the same functionality as Pax-Academia -->
@@ -30,6 +29,8 @@
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
    ALLOW_DUMP_DATABASE_GUILD = <a guild ID where the /dump_database command will be enabled>
    ALLOW_DUMP_DATABASE_ROLE = <a role name whose members can use the /dump_database command>
+   ALLOW_DETECT_AI_GUILD=<a guildID where the /detect-ai command will be enabled>
+   ALLOW_DETECT_AI_ROLE=<a role name whose members can use the /detect-ai command>
    ```
 
 5. Configure bot permissions.

@@ -14,11 +14,13 @@ The DeepL cog implements the `translate` slash command.
 
 If you're confused as to why there are two different `translate` functions, one is to actually translate the text through the DeepL module while the other one is used to run service in a different thread. Note the use of `async`.
 
-## DetectAI (In Progress)
+## DetectAI
 
 The DetectAI cog implements the `detect-ai` slash command.
 
-Uses a hacky solution to open a browser, submit the text to the form and get the result back. This feature of the bot is still a work in progress. The tool used or approach may change in the future. 
+This command is reserved for certain roles, preferrably those with higher authority to use when needed. It is also limited to be used in any channel under a discord category with the name `help`. This is to prevent abuse by users and get the bot banned from copyleaks. 
+
+Uses selenium to scrape the HTML of the live demo provided by copyleaks (no api key yet :pensive:). The bot will find the text field, enter the provided text, find the submit button and click on it. Then it will scrape the website again to find the response and return a discord embed for a user to view.
 
 ## Dictionary
 
@@ -42,7 +44,7 @@ The moderation cog implements no slash commands but is used to enforce multipost
 
 The PubChem cog implements the `chemsearch` slash command, used to search chemsitry databases for compunds.
 
-Builds and embed with compund details and returns an error if compound is not found.
+Builds and embed with compound details and returns an error if compound is not found.
 
 ## Rules
 
@@ -62,7 +64,7 @@ A cog to detect if a survey is sent in the wrong channel and alert the message s
 
 ## Tips
 
-This cog implements the `tip` slash command to show tips to users.
+This cog implements the `tip` slash command to show tips to users. Users can choose from prewritten tips and ping someone (anonymously or otherwise) to read it.
 
 ## Wikipedia
 
