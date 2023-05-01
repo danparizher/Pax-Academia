@@ -18,7 +18,7 @@ If you're confused as to why there are two different `translate` functions, one 
 
 The DetectAI cog implements the `detect-ai` slash command.
 
-This command is reserved for certain roles, preferrably those with higher authority to use when needed. It is also limited to be used in any channel under a discord category with the name `help`. This is to prevent abuse by users and get the bot banned from copyleaks. 
+This command is reserved for certain roles, preferrably those with higher authority to use when needed. It is also limited to be used in any channel under a discord category with the name `help`. This is to prevent abuse by users and get the bot banned from copyleaks.
 
 Uses selenium to scrape the HTML of the live demo provided by copyleaks (no api key yet :pensive:). The bot will find the text field, enter the provided text, find the submit button and click on it. Then it will scrape the website again to find the response and return a discord embed for a user to view.
 
@@ -30,7 +30,7 @@ Returns an markdown embed with the definition, and some links to the pronunciati
 
 ## MessageCounter
 
-The message counter cog does not implement any slash commands but is used to keep track of how many messages a user has sent. The message count for a user is used to check eligibility for applying to be a staff member. 
+The message counter cog does not implement any slash commands but is used to keep track of how many messages a user has sent. The message count for a user is used to check eligibility for applying to be a staff member.
 
 ## Misc
 
