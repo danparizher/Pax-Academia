@@ -22,10 +22,17 @@ class MessageCounter(commands.Cog):
         if message.author.bot:
             return
 
-        messages_sent = None if (sent := self.cursor.execute(
-            "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
-            (message.author.id,),
-        ).fetchall()) == [] else sent
+        messages_sent = (
+            None
+            if (
+                sent := self.cursor.execute(
+                    "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
+                    (message.author.id,),
+                ).fetchall()
+            )
+            == []
+            else sent
+        )
 
         # Fetch the category name of the channel the message was sent in
         category_name = message.channel.category.name.lower()
@@ -46,7 +53,6 @@ class MessageCounter(commands.Cog):
 
         # commit changes
         self.db.commit()
-
 
     def add_user(self, uid: int) -> None:
         self.cursor.execute(
