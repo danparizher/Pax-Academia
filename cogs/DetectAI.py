@@ -97,6 +97,9 @@ def launch_chrome() -> uc.Chrome:
     :return: uc.Chrome
     """
     options = uc.ChromeOptions()
+    options.add_argument(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36",
+    )
     options.add_argument("--headless")
     return uc.Chrome(options=options)
 
@@ -162,7 +165,8 @@ def wait_for_processing_completion(driver: uc.Chrome) -> bool:
             return False
 
     # did not find it within 20 seconds...
-    raise TimeoutError("Failed to complete within 20 seconds.")
+    msg = "Failed to complete within 20 seconds."
+    raise TimeoutError(msg)
 
 
 def parse_result_element(result_element: bs4.Tag) -> AIDetectionResult:
@@ -255,8 +259,9 @@ def detect_ai(text: str) -> AIDetectionResult:
     submit_text(driver, text)
     if wait_for_processing_completion(driver):
         driver.quit()
+        msg = "You have reached your limit for the day. Please try again tomorrow."
         raise Exception(
-            "You have reached your limit for the day. Please try again tomorrow.",
+            msg,
         )
 
     soup = bs4.BeautifulSoup(driver.page_source, "html.parser")
