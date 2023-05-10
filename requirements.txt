@@ -8,5 +8,5 @@ pubchempy==1.0.4
 py-cord==2.4.1
 python-dotenv==1.0.0
 selenium==4.9.0
-undetected-chromedriver==3.4.6
+undetected-chromedriver==3.4.7
 wikipedia==1.4.0
