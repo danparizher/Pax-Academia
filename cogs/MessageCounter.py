@@ -1,5 +1,6 @@
 import sqlite3
 
+import discord
 from discord.ext import commands
 
 
@@ -20,6 +21,9 @@ class MessageCounter(commands.Cog):
 
         # Ignore messages from bots
         if message.author.bot:
+            return
+
+        if isinstance(message.channel, discord.DMChannel):
             return
 
         messages_sent = (
