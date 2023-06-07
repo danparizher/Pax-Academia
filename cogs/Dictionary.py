@@ -286,7 +286,8 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
     if headword_element := soup.select_one(".webtop > .headword"):
         word = headword_element.text.strip()
     else:
-        raise ValueError("Failed to find word via selector `.webtop > .headword`")
+        msg = "Failed to find word via selector `.webtop > .headword`"
+        raise ValueError(msg)
 
     if us_pronunciation_element := soup.select_one(".webtop > .phonetics .phons_n_am"):
         us_pronunciation = Pronunciation.parse_from_oxford_phonetic_element(
@@ -380,8 +381,9 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
         )
 
     if not senses:
+        msg = "Failed to find a single definition on the page via selector `.sense`"
         raise ValueError(
-            "Failed to find a single definition on the page via selector `.sense`",
+            msg,
         )
 
     return WordInformation(
@@ -411,8 +413,9 @@ async def search(word: str) -> WordInformation | list[str]:
     if status_code == 200:
         return parse_oxford_definition_page(url, soup)
 
+    msg = f"Unexpected status code {status_code} while searching for word {word!r}"
     raise Exception(
-        f"Unexpected status code {status_code} while searching for word {word!r}",
+        msg,
     )
 
 
