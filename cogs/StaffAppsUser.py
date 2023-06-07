@@ -492,6 +492,16 @@ class StaffAppsUser(commands.Cog):
         Lets users apply for staff positions
         """
 
+        # DM check
+        if ctx.guild_id is None:
+            embed = EmbedBuilder(
+                "You cannot use this command in DMs",
+                "Please use this command in the HWH server",
+                0xFF0000,
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
         # create user class
         logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
         applicant = user(ctx.author)
