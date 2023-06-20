@@ -370,7 +370,7 @@ class staffAppsMain(discord.ui.View):
         description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant Name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
         fields = [
             ["Status", statusname, False],
-            ["first name", self.data[self.cur_page - 1][4], False],
+            ["First Name", self.data[self.cur_page - 1][4], False],
             ["Time zone", self.data[self.cur_page - 1][6], False],
             ["Hours available per week", self.data[self.cur_page - 1][7], False],
             ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
