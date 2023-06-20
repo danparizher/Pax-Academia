@@ -580,7 +580,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by {self.author}",
+            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion Required by {self.author}",
         )
         embed = EmbedBuilder(
             title=title,
