@@ -371,7 +371,7 @@ class staffAppsMain(discord.ui.View):
         fields = [
             ["Status", statusname, False],
             ["First Name", self.data[self.cur_page - 1][4], False],
-            ["Time zone", self.data[self.cur_page - 1][6], False],
+            ["Time Zone", self.data[self.cur_page - 1][6], False],
             ["Hours available per week", self.data[self.cur_page - 1][7], False],
             ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
             ["Contribute reason", self.data[self.cur_page - 1][9][:1024], False],
@@ -790,7 +790,7 @@ class StaffAppsBackoffice(commands.Cog):
             fields = [
                 ["Status", data[9], False],
                 ["first name", data[3], False],
-                ["Time zone", data[4], False],
+                ["Time Zone", data[4], False],
                 ["Hours available per week", data[5], False],
                 ["Why staff?", data[6][:1024], False],
                 ["Contribute reason", data[7][:1024], False],
