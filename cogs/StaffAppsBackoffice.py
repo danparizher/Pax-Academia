@@ -372,7 +372,7 @@ class staffAppsMain(discord.ui.View):
             ["Status", statusname, False],
             ["First Name", self.data[self.cur_page - 1][4], False],
             ["Time Zone", self.data[self.cur_page - 1][6], False],
-            ["Hours available per week", self.data[self.cur_page - 1][7], False],
+            ["Hours available per Week", self.data[self.cur_page - 1][7], False],
             ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
             ["Contribute reason", self.data[self.cur_page - 1][9][:1024], False],
             [
@@ -791,7 +791,7 @@ class StaffAppsBackoffice(commands.Cog):
                 ["Status", data[9], False],
                 ["first name", data[3], False],
                 ["Time Zone", data[4], False],
-                ["Hours available per week", data[5], False],
+                ["Hours available per Week", data[5], False],
                 ["Why staff?", data[6][:1024], False],
                 ["Contribute reason", data[7][:1024], False],
                 ["Submission time", datetime.fromtimestamp(int(data[8])), False],
