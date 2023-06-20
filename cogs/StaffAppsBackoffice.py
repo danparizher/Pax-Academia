@@ -376,7 +376,7 @@ class staffAppsMain(discord.ui.View):
             ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
             ["Contribute reason", self.data[self.cur_page - 1][9][:1024], False],
             [
-                "Submission time",
+                "Submission Time",
                 datetime.fromtimestamp(int(self.data[self.cur_page - 1][10])),
                 False,
             ],
@@ -794,7 +794,7 @@ class StaffAppsBackoffice(commands.Cog):
                 ["Hours available per Week", data[5], False],
                 ["Why staff?", data[6][:1024], False],
                 ["Contribute reason", data[7][:1024], False],
-                ["Submission time", datetime.fromtimestamp(int(data[8])), False],
+                ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
             ]
             embed = EmbedBuilder(
