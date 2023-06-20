@@ -367,7 +367,7 @@ class staffAppsMain(discord.ui.View):
             self.children[7].disabled = False
         self.db.close()
         title = f"Staff applications page {self.cur_page}/{len(self.data)}"
-        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
+        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant Name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
         fields = [
             ["Status", statusname, False],
             ["first name", self.data[self.cur_page - 1][4], False],
