@@ -373,7 +373,7 @@ class staffAppsMain(discord.ui.View):
             ["First Name", self.data[self.cur_page - 1][4], False],
             ["Time Zone", self.data[self.cur_page - 1][6], False],
             ["Hours available per Week", self.data[self.cur_page - 1][7], False],
-            ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
+            ["Why do you want to become a staff member?", self.data[self.cur_page - 1][8][:1024], False],
             ["Contribute reason", self.data[self.cur_page - 1][9][:1024], False],
             [
                 "Submission Time",
@@ -792,7 +792,7 @@ class StaffAppsBackoffice(commands.Cog):
                 ["first name", data[3], False],
                 ["Time Zone", data[4], False],
                 ["Hours available per Week", data[5], False],
-                ["Why staff?", data[6][:1024], False],
+                ["Why do you want to become a staff member?", data[6][:1024], False],
                 ["Contribute reason", data[7][:1024], False],
                 ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
