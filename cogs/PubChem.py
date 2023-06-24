@@ -87,7 +87,7 @@ class PubChem(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            Log(f"Chemsearch command used by {ctx.author} in {ctx.guild}.")
+            Log(f"Chemsearch command used by $ in {ctx.guild}.", ctx.author)
 
         except IndexError:
             embed = EmbedBuilder(
