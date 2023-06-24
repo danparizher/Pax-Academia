@@ -83,4 +83,26 @@ c.execute(
     """,
 )
 
+l = c.execute(
+    """
+    select * from status;
+    """,
+).fetchall()
+if not len(l) > 1:
+    c.execute(
+        """
+        INSERT INTO status (statusId, description) VALUES
+        (1, 'Application submitted'),
+        (2, 'Application Denied'),
+        (3, 'Second Opinion required'),
+        (4, 'Meets requirements'),
+        (5, 'Pending first interview'),
+        (6, 'Pending second interview'),
+        (7, 'Pending decision'),
+        (8, 'Pending onboardment'),
+        (9, 'Accepted');
+        """
+    )
+
+
 db.commit()
