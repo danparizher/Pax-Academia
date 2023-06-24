@@ -248,7 +248,7 @@ class staffAppsSeeSpam(discord.ui.View):
             view=None,
         )
         Log(
-            f"{self.author} unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
+            f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.", self.author
         )
 
 
@@ -276,7 +276,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"{interaction.user} unbanned user {self.author} from applying for staff.")
+        Log(f"$ unbanned user {self.author} from applying for staff.", interaction.user)
         embed = EmbedBuilder(
             title="User unbanned.",
             description="This user can now apply for staff again.",
@@ -449,7 +449,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"User {self.data[self.cur_page-1][1]} marked as spam by {self.author}")
+        Log(f"User {self.data[self.cur_page-1][1]} marked as spam by $", self.author)
         embed = EmbedBuilder(
             title="User marked as spam.",
             description="This user can no longer apply for staff.",
@@ -486,7 +486,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"Application {self.data[self.cur_page-1][0]} denied by {self.author}")
+        Log(f"Application {self.data[self.cur_page-1][0]} denied by $", self.author)
         embed = EmbedBuilder(
             title="Application denied.",
             description="This application has been denied and a cooldown has been applied.",
@@ -543,7 +543,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by {self.author}",
+            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $", self.author
         )
         embed = EmbedBuilder(
             title=title,
@@ -580,7 +580,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by {self.author}",
+            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $", self.author
         )
         embed = EmbedBuilder(
             title=title,
@@ -619,7 +619,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} liked by {interaction.user} ({interaction.user.id})",
+            f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})", interaction.user
         )
         embed = EmbedBuilder(
             title="Like added.",
@@ -658,7 +658,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} disliked by {interaction.user} ({interaction.user.id})",
+            f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})", interaction.user
         )
         embed = EmbedBuilder(
             title="Dislike added.",
