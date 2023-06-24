@@ -367,16 +367,16 @@ class staffAppsMain(discord.ui.View):
             self.children[7].disabled = False
         self.db.close()
         title = f"Staff applications page {self.cur_page}/{len(self.data)}"
-        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
+        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant Name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
         fields = [
             ["Status", statusname, False],
-            ["first name", self.data[self.cur_page - 1][4], False],
-            ["Time zone", self.data[self.cur_page - 1][6], False],
-            ["Hours available per week", self.data[self.cur_page - 1][7], False],
-            ["Why staff?", self.data[self.cur_page - 1][8][:1024], False],
-            ["Contribute reason", self.data[self.cur_page - 1][9][:1024], False],
+            ["First Name", self.data[self.cur_page - 1][4], False],
+            ["Time Zone", self.data[self.cur_page - 1][6], False],
+            ["Hours available per Week", self.data[self.cur_page - 1][7], False],
+            ["Why do you want to become a staff member?", self.data[self.cur_page - 1][8][:1024], False],
+            ["How will you contribute if you become a staff member?", self.data[self.cur_page - 1][9][:1024], False],
             [
-                "Submission time",
+                "Submission Time",
                 datetime.fromtimestamp(int(self.data[self.cur_page - 1][10])),
                 False,
             ],
@@ -793,11 +793,11 @@ class StaffAppsBackoffice(commands.Cog):
             fields = [
                 ["Status", data[9], False],
                 ["first name", data[3], False],
-                ["Time zone", data[4], False],
-                ["Hours available per week", data[5], False],
-                ["Why staff?", data[6][:1024], False],
-                ["Contribute reason", data[7][:1024], False],
-                ["Submission time", datetime.fromtimestamp(int(data[8])), False],
+                ["Time Zone", data[4], False],
+                ["Hours available per Week", data[5], False],
+                ["Why do you want to become a staff member?", data[6][:1024], False],
+                ["How will you contribute if you become a staff member?", data[7][:1024], False],
+                ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
             ]
             embed = EmbedBuilder(
