@@ -168,4 +168,4 @@ log.txt
 *.sqlit*
 .vscode/
 *.csv
-.idea\
+.idea/
