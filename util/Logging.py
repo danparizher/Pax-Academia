@@ -9,7 +9,9 @@ class Log:
     def __init__(self, message: str, user: discord.User = None) -> None:
         """
         Basic logging module.
-        If a message is given
+        If a message and a user is given, Will replace $ in message with the user's name, 
+        depending on whether it is an old or new username.
+        If no user given, will just log the message.
         """
         with open("log.txt", "a", encoding="utf-8") as log_file:
             # get current time
