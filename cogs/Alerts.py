@@ -95,7 +95,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert added by {ctx.author} in {ctx.guild}.")
+        Log(f"Alert added by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-remove",
@@ -141,7 +141,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert removed by {ctx.author} in {ctx.guild}.")
+        Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
     async def list_alerts(self, ctx: ApplicationContext) -> None:
