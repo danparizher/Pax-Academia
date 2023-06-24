@@ -126,6 +126,7 @@ class Misc(commands.Cog):
             await message.edit_original_response(content=content)
         else:
             await message.edit(content=content)
+        Log("$ used ping", ctx.author)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
