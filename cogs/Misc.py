@@ -171,7 +171,7 @@ class Misc(commands.Cog):
             else:
                 await message.edit(content=text)
 
-        Log(f"{ctx.author} dumped the database in {ctx.channel}, {ctx.guild}.")
+        Log(f"$ dumped the database in {ctx.channel}, {ctx.guild}.", ctx.author)
 
         tables = grep_tables()
         await edit(f"{LOADING_EMOJI} Dumped 0/{len(tables)} table(s).")
