@@ -116,6 +116,22 @@ class user:
         self.joined_at = user.joined_at
         self.created_at = user.created_at
         # get user data from database
+        # check if user exists, else add
+        messages_sent = (
+            None
+            if (
+                   sent := self.cursor.execute(
+                       "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
+                       (user.id,),
+                   ).fetchall()
+               )
+               == []
+            else sent
+        )
+        # If a user is not in db, add them
+        if messages_sent is None:
+            self.add_user(user.id)
+
         self.messages_sent = cursor.execute(
             "SELECT messagesSent FROM user WHERE uid = ?",
             (self.uid,),
@@ -153,6 +169,12 @@ class user:
         Same as __str__.
         """
         return f"User: {self.uid}, Joined: {self.joined_at}, Messages: {self.messages_sent}, Marked Spam: {self.marked_spam}, Cooldown: {self.cooldown}"
+
+    def add_user(self, uid: int) -> None:
+        self.cursor.execute(
+            "INSERT INTO user VALUES (?, ?, ?, ?, ?)",
+            (uid, 0, False, None, 0),
+        )  # See ERD.mdj
 
     def min_reqs(self) -> tuple[bool, int, datetime]:
         """
