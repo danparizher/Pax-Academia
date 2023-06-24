@@ -500,7 +500,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log(f"{self.author} has completed the Staff Application")
+        Log(f"$ has completed the Staff Application", self.author)
 
 
 class StaffAppsUser(commands.Cog):
