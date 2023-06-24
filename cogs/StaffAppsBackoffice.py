@@ -612,7 +612,7 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}" if str(interaction.user.discriminator) == '0' else f"{interaction.user.name}#{interaction.user.discriminator}",
                 1,
             ),
         )
@@ -651,7 +651,7 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}" if str(interaction.user.discriminator) == '0' else f"{interaction.user.name}#{interaction.user.discriminator}",
                 0,
             ),
         )
@@ -766,7 +766,10 @@ class StaffAppsBackoffice(commands.Cog):
         subcommand: str,
         specific_id: int,
     ) -> None:
-        username = f"{ctx.author.name}#{ctx.author.discriminator}"
+        if str(ctx.author.discriminator) == '0':
+            username = f"@{ctx.author.name}"
+        else:
+            username = f"{ctx.author.name}#{ctx.author.discriminator}"
         Log(f"see-apps command used by {username}:({ctx.author.id})")
         if specific_id:
             data = self.cursor.execute(
