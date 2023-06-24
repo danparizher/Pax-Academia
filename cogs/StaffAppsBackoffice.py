@@ -248,7 +248,8 @@ class staffAppsSeeSpam(discord.ui.View):
             view=None,
         )
         Log(
-            f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.", self.author
+            f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
+            self.author,
         )
 
 
@@ -373,8 +374,16 @@ class staffAppsMain(discord.ui.View):
             ["First Name", self.data[self.cur_page - 1][4], False],
             ["Time Zone", self.data[self.cur_page - 1][6], False],
             ["Hours available per Week", self.data[self.cur_page - 1][7], False],
-            ["Why do you want to become a staff member?", self.data[self.cur_page - 1][8][:1024], False],
-            ["How will you contribute if you become a staff member?", self.data[self.cur_page - 1][9][:1024], False],
+            [
+                "Why do you want to become a staff member?",
+                self.data[self.cur_page - 1][8][:1024],
+                False,
+            ],
+            [
+                "How will you contribute if you become a staff member?",
+                self.data[self.cur_page - 1][9][:1024],
+                False,
+            ],
             [
                 "Submission Time",
                 datetime.fromtimestamp(int(self.data[self.cur_page - 1][10])),
@@ -543,7 +552,8 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $", self.author
+            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $",
+            self.author,
         )
         embed = EmbedBuilder(
             title=title,
@@ -580,7 +590,8 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $", self.author
+            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $",
+            self.author,
         )
         embed = EmbedBuilder(
             title=title,
@@ -612,14 +623,17 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"@{interaction.user.name}" if str(interaction.user.discriminator) == '0' else f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}"
+                if str(interaction.user.discriminator) == "0"
+                else f"{interaction.user.name}#{interaction.user.discriminator}",
                 1,
             ),
         )
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})", interaction.user
+            f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})",
+            interaction.user,
         )
         embed = EmbedBuilder(
             title="Like added.",
@@ -651,14 +665,17 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"@{interaction.user.name}" if str(interaction.user.discriminator) == '0' else f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}"
+                if str(interaction.user.discriminator) == "0"
+                else f"{interaction.user.name}#{interaction.user.discriminator}",
                 0,
             ),
         )
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})", interaction.user
+            f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})",
+            interaction.user,
         )
         embed = EmbedBuilder(
             title="Dislike added.",
@@ -766,7 +783,7 @@ class StaffAppsBackoffice(commands.Cog):
         subcommand: str,
         specific_id: int,
     ) -> None:
-        if str(ctx.author.discriminator) == '0':
+        if str(ctx.author.discriminator) == "0":
             username = f"@{ctx.author.name}"
         else:
             username = f"{ctx.author.name}#{ctx.author.discriminator}"
@@ -796,7 +813,11 @@ class StaffAppsBackoffice(commands.Cog):
                 ["Time Zone", data[4], False],
                 ["Hours available per Week", data[5], False],
                 ["Why do you want to become a staff member?", data[6][:1024], False],
-                ["How will you contribute if you become a staff member?", data[7][:1024], False],
+                [
+                    "How will you contribute if you become a staff member?",
+                    data[7][:1024],
+                    False,
+                ],
                 ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
             ]

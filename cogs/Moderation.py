@@ -350,7 +350,10 @@ class Moderation(commands.Cog):
                     delete_after=15,
                 )
                 await message.delete()
-                Log(f"Subsequent mp warning for $ in {message.channel.name}", message.author)
+                Log(
+                    f"Subsequent mp warning for $ in {message.channel.name}",
+                    message.author,
+                )
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multiposted message has already been deleted, take no action

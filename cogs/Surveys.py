@@ -51,7 +51,9 @@ class Surveys(commands.Cog):
                                 embed=embed,
                             )
         await self.bot.process_commands(message)
-        Log(f" $ sent a survey in {message.channel.name}, bot responded", message.author)
+        Log(
+            f" $ sent a survey in {message.channel.name}, bot responded", message.author
+        )
 
 
 def setup(bot: commands.Bot) -> None:

@@ -15,7 +15,8 @@ c.execute(
     """
 ALTER TABLE user
 ADD helpMessagesSent INTEGER NOT NULL DEFAULT 0
-""")
+"""
+)
 
 db.commit()
 db.close()

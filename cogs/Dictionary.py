@@ -527,7 +527,7 @@ class Dictionary(commands.Cog):
             view = None
 
         await ctx.edit(embed=word_info.build_embed(), view=view)
-        Log(f"$ used the dictionary command", ctx.author)
+        Log("$ used the dictionary command", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

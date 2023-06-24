@@ -120,12 +120,12 @@ class user:
         messages_sent = (
             None
             if (
-                   sent := self.cursor.execute(
-                       "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
-                       (user.id,),
-                   ).fetchall()
-               )
-               == []
+                sent := self.cursor.execute(
+                    "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
+                    (user.id,),
+                ).fetchall()
+            )
+            == []
             else sent
         )
         # If a user is not in db, add them
@@ -451,7 +451,7 @@ class StaffAppModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         # New discord names
-        if str(self.author.discriminator) == '0':
+        if str(self.author.discriminator) == "0":
             self.discord_name = f"@{self.author.name}"
         else:
             self.discord_name = f"{self.author.name}#{self.author.discriminator}"
@@ -500,7 +500,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log(f"$ has completed the Staff Application", self.author)
+        Log("$ has completed the Staff Application", self.author)
 
 
 class StaffAppsUser(commands.Cog):
@@ -531,7 +531,7 @@ class StaffAppsUser(commands.Cog):
             return
 
         # create user class, with care for new discord names
-        if str(ctx.author.discriminator) == '0':
+        if str(ctx.author.discriminator) == "0":
             logname = f"@{ctx.author.name}:{ctx.author.id}"
         else:
             logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
