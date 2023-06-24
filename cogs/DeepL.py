@@ -159,7 +159,7 @@ class Translation(commands.Cog):
 
         await ctx.send(embed=embed)
 
-        Log(f"Translate command used by {ctx.author} in {ctx.guild}.")
+        Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:
