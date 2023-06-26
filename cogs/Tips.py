@@ -3,7 +3,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 TIPS = {
     "Ask Your Question": (
@@ -73,6 +73,7 @@ class Tips(commands.Cog):
         choices=["Yes", "No"],
         required=False,
     )
+    @limit(3)
     async def tip(
         self,
         ctx: ApplicationContext,
