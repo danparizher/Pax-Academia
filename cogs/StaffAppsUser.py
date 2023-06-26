@@ -10,7 +10,7 @@ from discord.ext import commands
 from humanize import precisedelta
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 class embeds:
@@ -515,6 +515,7 @@ class StaffAppsUser(commands.Cog):
         name="apply-for-staff",
         description="Apply for a staff position if your account meets the requirements!",
     )
+    @limit(1)
     async def apply(self, ctx: commands.Context) -> None:
         """
         Lets users apply for staff positions
