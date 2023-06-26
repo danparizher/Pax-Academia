@@ -5,7 +5,7 @@ from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 LANGUAGES = [
     "Bulgarian",
@@ -106,6 +106,7 @@ class Translation(commands.Cog):
         required=False,
         choices=FORMALITY_TONES,
     )
+    @limit(2)
     async def translate(
         self,
         ctx: commands.Context,
