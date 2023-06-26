@@ -8,7 +8,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
@@ -45,6 +45,7 @@ class Alerts(commands.Cog):
         name="alerts-add",
         description="Adds an alert for a keyword.",
     )
+    @limit(1)
     async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         Checks if the keyword is already in the database, if it is, sends an error message, if it
@@ -106,6 +107,7 @@ class Alerts(commands.Cog):
         description="The keyword to remove.",
         autocomplete=get_keywords,
     )
+    @limit(1)
     async def remove_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         It removes an alert from the database.
@@ -144,6 +146,7 @@ class Alerts(commands.Cog):
         Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
+    @limit(3) # User should still be allowed to remove their alerts if they have too many
     async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
