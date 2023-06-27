@@ -120,7 +120,7 @@ class user:
         messages_sent = (
             None
             if (
-                sent := self.cursor.execute(
+                sent := cursor.execute(
                     "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
                     (user.id,),
                 ).fetchall()
