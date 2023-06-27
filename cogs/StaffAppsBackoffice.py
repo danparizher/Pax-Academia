@@ -248,7 +248,8 @@ class staffAppsSeeSpam(discord.ui.View):
             view=None,
         )
         Log(
-            f"{self.author} unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
+            f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
+            self.author,
         )
 
 
@@ -276,7 +277,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"{interaction.user} unbanned user {self.author} from applying for staff.")
+        Log(f"$ unbanned user {self.author} from applying for staff.", interaction.user)
         embed = EmbedBuilder(
             title="User unbanned.",
             description="This user can now apply for staff again.",
@@ -373,8 +374,16 @@ class staffAppsMain(discord.ui.View):
             ["First Name", self.data[self.cur_page - 1][4], False],
             ["Time Zone", self.data[self.cur_page - 1][6], False],
             ["Hours available per Week", self.data[self.cur_page - 1][7], False],
-            ["Why do you want to become a staff member?", self.data[self.cur_page - 1][8][:1024], False],
-            ["How will you contribute if you become a staff member?", self.data[self.cur_page - 1][9][:1024], False],
+            [
+                "Why do you want to become a staff member?",
+                self.data[self.cur_page - 1][8][:1024],
+                False,
+            ],
+            [
+                "How will you contribute if you become a staff member?",
+                self.data[self.cur_page - 1][9][:1024],
+                False,
+            ],
             [
                 "Submission Time",
                 datetime.fromtimestamp(int(self.data[self.cur_page - 1][10])),
@@ -449,7 +458,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"User {self.data[self.cur_page-1][1]} marked as spam by {self.author}")
+        Log(f"User {self.data[self.cur_page-1][1]} marked as spam by $", self.author)
         embed = EmbedBuilder(
             title="User marked as spam.",
             description="This user can no longer apply for staff.",
@@ -486,7 +495,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"Application {self.data[self.cur_page-1][0]} denied by {self.author}")
+        Log(f"Application {self.data[self.cur_page-1][0]} denied by $", self.author)
         embed = EmbedBuilder(
             title="Application denied.",
             description="This application has been denied and a cooldown has been applied.",
@@ -543,7 +552,8 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by {self.author}",
+            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $",
+            self.author,
         )
         embed = EmbedBuilder(
             title=title,
@@ -580,7 +590,8 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion Required by {self.author}",
+            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $",
+            self.author,
         )
         embed = EmbedBuilder(
             title=title,
@@ -612,14 +623,17 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}"
+                if str(interaction.user.discriminator) == "0"
+                else f"{interaction.user.name}#{interaction.user.discriminator}",
                 1,
             ),
         )
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} liked by {interaction.user} ({interaction.user.id})",
+            f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})",
+            interaction.user,
         )
         embed = EmbedBuilder(
             title="Like added.",
@@ -651,14 +665,17 @@ class staffAppsMain(discord.ui.View):
             (
                 self.data[self.cur_page - 1][0],
                 interaction.user.id,
-                f"{interaction.user.name}#{interaction.user.discriminator}",
+                f"@{interaction.user.name}"
+                if str(interaction.user.discriminator) == "0"
+                else f"{interaction.user.name}#{interaction.user.discriminator}",
                 0,
             ),
         )
         self.db.commit()
         self.db.close()
         Log(
-            f"Application {self.data[self.cur_page-1][0]} disliked by {interaction.user} ({interaction.user.id})",
+            f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})",
+            interaction.user,
         )
         embed = EmbedBuilder(
             title="Dislike added.",
@@ -766,7 +783,10 @@ class StaffAppsBackoffice(commands.Cog):
         subcommand: str,
         specific_id: int,
     ) -> None:
-        username = f"{ctx.author.name}#{ctx.author.discriminator}"
+        if str(ctx.author.discriminator) == "0":
+            username = f"@{ctx.author.name}"
+        else:
+            username = f"{ctx.author.name}#{ctx.author.discriminator}"
         Log(f"see-apps command used by {username}:({ctx.author.id})")
         if specific_id:
             data = self.cursor.execute(
@@ -793,7 +813,11 @@ class StaffAppsBackoffice(commands.Cog):
                 ["Time Zone", data[4], False],
                 ["Hours available per Week", data[5], False],
                 ["Why do you want to become a staff member?", data[6][:1024], False],
-                ["How will you contribute if you become a staff member?", data[7][:1024], False],
+                [
+                    "How will you contribute if you become a staff member?",
+                    data[7][:1024],
+                    False,
+                ],
                 ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
                 ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
             ]

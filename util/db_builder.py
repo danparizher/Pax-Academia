@@ -4,6 +4,7 @@ this file is used on import in main.py and should not be run manually
 Author: !SKA#0001
 """
 
+
 import sqlite3
 
 db = sqlite3.connect("util/database.sqlite")
@@ -88,7 +89,7 @@ l = c.execute(
     select * from status;
     """,
 ).fetchall()
-if not len(l) > 1:
+if len(l) <= 1:
     c.execute(
         """
         INSERT INTO status (statusId, description) VALUES

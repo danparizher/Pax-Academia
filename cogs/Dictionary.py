@@ -11,6 +11,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
+from util.Logging import Log
 
 
 @dataclass
@@ -526,6 +527,7 @@ class Dictionary(commands.Cog):
             view = None
 
         await ctx.edit(embed=word_info.build_embed(), view=view)
+        Log("$ used the dictionary command", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

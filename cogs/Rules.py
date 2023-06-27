@@ -44,7 +44,7 @@ class Rules(commands.Cog):
 
         await ctx.respond(content=f"<@{user.id}>" if user else None, embed=embed)
 
-        Log(f"Rule command used by {ctx.author} in {ctx.guild}.")
+        Log(f"Rule command used by $ in {ctx.guild}.", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

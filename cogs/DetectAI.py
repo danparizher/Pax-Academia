@@ -16,6 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from util.EmbedBuilder import EmbedBuilder
+from util.Logging import Log
 
 
 class AuthorPredication(Enum):
@@ -357,6 +358,7 @@ class AI(commands.Cog):
             )
 
         await ctx.respond(embed=embed_builder.build(), ephemeral=True)
+        Log(f"$ used the detect-ai command in {ctx.channel.name}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

@@ -53,7 +53,7 @@ class Wikipedia(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            Log(f"Wikipedia command used by {ctx.author} in {ctx.guild}.")
+            Log(f"Wikipedia command used by $ in {ctx.guild}.", ctx.author)
 
         except wikipedia.exceptions.DisambiguationError:
             embed = EmbedBuilder(

@@ -3,6 +3,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
+from util.Logging import Log
 
 TIPS = {
     "Ask Your Question": (
@@ -95,6 +96,7 @@ class Tips(commands.Cog):
             )
         else:
             await ctx.respond(message_content, embed=embed)
+        Log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

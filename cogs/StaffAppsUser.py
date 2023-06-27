@@ -116,6 +116,22 @@ class user:
         self.joined_at = user.joined_at
         self.created_at = user.created_at
         # get user data from database
+        # check if user exists, else add
+        messages_sent = (
+            None
+            if (
+                sent := self.cursor.execute(
+                    "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
+                    (user.id,),
+                ).fetchall()
+            )
+            == []
+            else sent
+        )
+        # If a user is not in db, add them
+        if messages_sent is None:
+            self.add_user(user.id)
+
         self.messages_sent = cursor.execute(
             "SELECT messagesSent FROM user WHERE uid = ?",
             (self.uid,),
@@ -153,6 +169,12 @@ class user:
         Same as __str__.
         """
         return f"User: {self.uid}, Joined: {self.joined_at}, Messages: {self.messages_sent}, Marked Spam: {self.marked_spam}, Cooldown: {self.cooldown}"
+
+    def add_user(self, uid: int) -> None:
+        self.cursor.execute(
+            "INSERT INTO user VALUES (?, ?, ?, ?, ?)",
+            (uid, 0, False, None, 0),
+        )  # See ERD.mdj
 
     def min_reqs(self) -> tuple[bool, int, datetime]:
         """
@@ -428,6 +450,12 @@ class StaffAppModal(discord.ui.Modal):
         )
 
     async def callback(self, interaction: discord.Interaction) -> None:
+        # New discord names
+        if str(self.author.discriminator) == "0":
+            self.discord_name = f"@{self.author.name}"
+        else:
+            self.discord_name = f"{self.author.name}#{self.author.discriminator}"
+
         self.cursor.execute(
             """
         INSERT INTO application (
@@ -449,7 +477,7 @@ class StaffAppModal(discord.ui.Modal):
             (
                 self.author.id,
                 1,
-                f"{self.author.name}#{self.author.discriminator}",
+                self.discord_name,
                 self.children[0].value,
                 self.nda,
                 self.timezone,
@@ -472,7 +500,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log(f"{self.author} has completed the Staff Application")
+        Log("$ has completed the Staff Application", self.author)
 
 
 class StaffAppsUser(commands.Cog):
@@ -502,8 +530,11 @@ class StaffAppsUser(commands.Cog):
             await ctx.respond(embed=embed, ephemeral=True)
             return
 
-        # create user class
-        logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
+        # create user class, with care for new discord names
+        if str(ctx.author.discriminator) == "0":
+            logname = f"@{ctx.author.name}:{ctx.author.id}"
+        else:
+            logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
         applicant = user(ctx.author)
 
         # check if user is banned

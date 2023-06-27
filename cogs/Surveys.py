@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
+from util.Logging import Log
 
 
 def survey_list() -> list[str]:
@@ -33,7 +34,8 @@ class Surveys(commands.Cog):
         with contextlib.suppress(AttributeError):
             if (
                 message.channel.name != "surveys"
-                and "276969339901444096"
+                and "276969339901444096"  # Why is this still hardcoded?
+                # TODO: Add role to env
                 not in [role.id for role in message.author.roles]
                 and not message.author.bot
             ):
@@ -41,7 +43,7 @@ class Surveys(commands.Cog):
                     if survey in message.content:
                         embed = EmbedBuilder(
                             title="Survey Link Detected",
-                            description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",
+                            description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",  # Also hardcoded channel
                         ).build()
                         with contextlib.suppress(discord.errors.Forbidden):
                             await message.channel.send(
@@ -49,6 +51,9 @@ class Surveys(commands.Cog):
                                 embed=embed,
                             )
         await self.bot.process_commands(message)
+        Log(
+            f" $ sent a survey in {message.channel.name}, bot responded", message.author
+        )
 
 
 def setup(bot: commands.Bot) -> None:
