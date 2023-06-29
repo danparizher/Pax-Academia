@@ -1,10 +1,12 @@
 # !SKA#0001 24/10/2022
 
 import datetime
-import discord
+import functools
 import re
 import sqlite3
-import functools
+
+import discord
+
 from util.EmbedBuilder import EmbedBuilder
 
 
