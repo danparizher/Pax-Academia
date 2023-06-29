@@ -43,7 +43,8 @@ def limit(_limit_level: int) -> callable:
                 c = conn.cursor()
                 limit_level = (
                     c.execute(
-                        "SELECT limitLevel from user where uid = ?", (author_id,)
+                        "SELECT limitLevel from user where uid = ?",
+                        (author_id,),
                     ).fetchone()[0]
                     or 0
                 )  # if no limit level exists, then it is 0
@@ -89,7 +90,9 @@ class Log:
                     user_name = f"{user.name}#{user.discriminator}"
 
                 message = re.sub(
-                    r"(?<!\/)\$", user_name, message
+                    r"(?<!\/)\$",
+                    user_name,
+                    message,
                 )  # replaces $ in string to new username
 
             log_file.write(f"{now_str} - {message}\n")
