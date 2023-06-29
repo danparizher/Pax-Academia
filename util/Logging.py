@@ -70,7 +70,7 @@ def limit(_limit_level: int) -> callable:
 
 
 class Log:
-    def __init__(self, message: str, user: discord.User = None) -> None:
+    def __init__(self, message: str, user: discord.User | None = None) -> None:
         """
         Basic logging module.
         If a message and a user is given, Will replace $ in message with the user's name,
