@@ -34,11 +34,17 @@ def limit(_limit_level: int) -> callable:
                 except AttributeError:  # Type is not a context
                     continue
 
-            if author_id is not None:  # if no author exists, then we cannot limit, return func instead
+            if (
+                author_id is not None
+            ):  # if no author exists, then we cannot limit, return func instead
                 conn = sqlite3.connect("util/database.sqlite")
                 c = conn.cursor()
-                limit_level = c.execute("SELECT limitLevel from user where uid = ?", (author_id,)).fetchone()[
-                    0] or 0  # if no limit level exists, then it is 0
+                limit_level = (
+                    c.execute(
+                        "SELECT limitLevel from user where uid = ?", (author_id,)
+                    ).fetchone()[0]
+                    or 0
+                )  # if no limit level exists, then it is 0
                 if limit_level >= _limit_level:
                     embed = EmbedBuilder(
                         title="You cannot use this command!",
@@ -47,12 +53,16 @@ def limit(_limit_level: int) -> callable:
                     ).build()
                     await ctx.respond(embed=embed, ephemeral=True)
                     Log(
-                        f"$ tried to use {ctx.command.name}. But is limited from using it.", ctx.author)
+                        f"$ tried to use {ctx.command.name}. But is limited from using it.",
+                        ctx.author,
+                    )
                     return
 
             result = await func(*args, **kwargs)
             return result
+
         return wrapper
+
     return decorator
 
 

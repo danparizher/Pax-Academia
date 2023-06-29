@@ -146,7 +146,9 @@ class Alerts(commands.Cog):
         Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
-    @limit(3) # User should still be allowed to remove their alerts if they have too many
+    @limit(
+        3
+    )  # User should still be allowed to remove their alerts if they have too many
     async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them

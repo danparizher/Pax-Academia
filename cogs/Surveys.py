@@ -53,10 +53,11 @@ class Surveys(commands.Cog):
         await self.bot.process_commands(message)
         try:
             Log(
-                f" $ sent a survey in {message.channel.name}, bot responded", message.author
+                f" $ sent a survey in {message.channel.name}, bot responded",
+                message.author,
             )
         except AttributeError:
-            pass # WHY??? This error happens when a user is limited with the @limited wrapper?
+            pass  # WHY??? This error happens when a user is limited with the @limited wrapper?
 
 
 def setup(bot: commands.Bot) -> None:

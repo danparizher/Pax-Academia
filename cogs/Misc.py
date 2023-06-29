@@ -151,7 +151,7 @@ class Misc(commands.Cog):
         guild_ids=None if DUMP_GUILD is None else [DUMP_GUILD],
         guild_only=DUMP_GUILD is not None,
     )
-    @limit(1) #db access
+    @limit(1)  # db access
     async def dump_database(self, ctx: ApplicationContext) -> None:
         """
         It dumps the database to a csv file and sends it to the user
