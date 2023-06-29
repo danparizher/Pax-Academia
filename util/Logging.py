@@ -59,7 +59,7 @@ def limit(_limit_level: int) -> callable:
                         f"$ tried to use {ctx.command.name}. But is limited from using it.",
                         ctx.author,
                     )
-                    return
+                    return None
 
             return await func(*args, **kwargs)
 
