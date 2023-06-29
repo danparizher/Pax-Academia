@@ -61,8 +61,7 @@ def limit(_limit_level: int) -> callable:
                     )
                     return
 
-            result = await func(*args, **kwargs)
-            return result
+            return await func(*args, **kwargs)
 
         return wrapper
 
