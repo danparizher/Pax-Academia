@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 class AuthorPredication(Enum):
@@ -287,6 +287,7 @@ class AI(commands.Cog):
         description="The text to run through the AI.",
         required=True,
     )
+    @limit(2)
     async def ai(self, ctx: ApplicationContext, text: str) -> None:
         """
         Runs a given text through an AI detector and returns the result as an image.

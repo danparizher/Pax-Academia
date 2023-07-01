@@ -3,7 +3,7 @@ from discord.commands import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 rules = {
     "Rule A): Respect": "Maintain civility and conduct yourself appropriately. Avoid derogatory language, discriminatory jokes, and hate speech.",
@@ -39,6 +39,7 @@ class Rules(commands.Cog):
         choices=get_rules(),
     )
     @option("user", discord.User, description="The user to ping.", required=False)
+    @limit(3)
     async def rule(self, ctx: commands.Context, rule: str, user: discord.User) -> None:
         embed = EmbedBuilder(title=rule, description=rules[rule]).build()
 

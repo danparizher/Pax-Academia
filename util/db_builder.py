@@ -17,7 +17,8 @@ c.execute(
     messagesSent INTEGER NOT NULL,
     markedSpam BOOLEAN NOT NULL,
     cooldown varchar(100),
-    helpMessagesSent INTEGER NOT NULL
+    helpMessagesSent INTEGER NOT NULL,
+    limitLevel INTEGER
     );
     """,
 )

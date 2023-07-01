@@ -4,7 +4,7 @@ import wikipedia
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 def get_wiki_without_logging(query: str) -> dict[str, str]:
@@ -33,6 +33,7 @@ class Wikipedia(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
+    @limit(2)
     async def wiki(self, ctx: commands.Context, query: str) -> None:
         """
         It searches Wikipedia for a query and returns the first result
