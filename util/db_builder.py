@@ -103,7 +103,7 @@ if len(l) <= 1:
         (7, 'Pending decision'),
         (8, 'Pending onboardment'),
         (9, 'Accepted');
-        """
+        """,
     )
 
 

@@ -15,7 +15,7 @@ c.execute(
     """
 ALTER TABLE user
 ADD limitLevel INTEGER
-"""
+""",
 )
 
 db.commit()
