@@ -14,8 +14,8 @@ Alter table to include a new column
 c.execute(
     """
 ALTER TABLE user
-ADD helpMessagesSent INTEGER NOT NULL DEFAULT 0
-"""
+ADD limitLevel INTEGER
+""",
 )
 
 db.commit()

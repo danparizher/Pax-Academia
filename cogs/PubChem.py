@@ -5,7 +5,7 @@ from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 def get_data(name: str) -> dict:
@@ -54,6 +54,7 @@ class PubChem(commands.Cog):
         description="The name of the compound to be searched.",
         required=True,
     )
+    @limit(2)
     async def pubchem(self, ctx: commands.Context, name: str) -> None:
         """
         It takes a string, searches for it on PubChem, and returns a Discord embed with the results

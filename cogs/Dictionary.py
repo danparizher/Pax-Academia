@@ -11,7 +11,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 @dataclass
@@ -498,6 +498,7 @@ class Dictionary(commands.Cog):
 
     @commands.slash_command(name="define", description="Defines a word.")
     @option("word", str, description="The word to define.", required=True)
+    @limit(2)
     async def define(self, ctx: ApplicationContext, word: str) -> None:
         """
         It takes a word as an argument, and returns the definition of that word

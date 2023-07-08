@@ -17,7 +17,8 @@ c.execute(
     messagesSent INTEGER NOT NULL,
     markedSpam BOOLEAN NOT NULL,
     cooldown varchar(100),
-    helpMessagesSent INTEGER NOT NULL
+    helpMessagesSent INTEGER NOT NULL,
+    limitLevel INTEGER
     );
     """,
 )
@@ -102,7 +103,7 @@ if len(l) <= 1:
         (7, 'Pending decision'),
         (8, 'Pending onboardment'),
         (9, 'Accepted');
-        """
+        """,
     )
 
 

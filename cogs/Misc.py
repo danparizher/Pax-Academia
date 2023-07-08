@@ -10,7 +10,7 @@ from discord.commands.context import ApplicationContext
 from discord.ext import commands
 from discord.interactions import Interaction
 
-from util.Logging import Log
+from util.Logging import Log, limit
 
 DATABASE_FILES = [
     "util/database.sqlite",
@@ -112,6 +112,7 @@ class Misc(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="ping", description="Pings the bot.")
+    @limit(3)
     async def ping(self, ctx: ApplicationContext) -> None:
         """
         It sends a message, then edits that message to say "Pong!" and the latency of the bot
@@ -150,6 +151,7 @@ class Misc(commands.Cog):
         guild_ids=None if DUMP_GUILD is None else [DUMP_GUILD],
         guild_only=DUMP_GUILD is not None,
     )
+    @limit(1)  # db access
     async def dump_database(self, ctx: ApplicationContext) -> None:
         """
         It dumps the database to a csv file and sends it to the user

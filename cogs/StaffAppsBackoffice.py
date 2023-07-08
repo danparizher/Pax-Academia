@@ -10,7 +10,7 @@ from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
-from util.Logging import Log
+from util.Logging import Log, limit
 
 
 class staffAppsSeeAll(discord.ui.View):
@@ -777,6 +777,7 @@ class StaffAppsBackoffice(commands.Cog):
         description="The specific application ID to check. IGNORES SUBCOMMAND",
         required=False,
     )
+    @limit(1)
     async def see_apps(
         self,
         ctx: commands.Context,
