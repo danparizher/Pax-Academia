@@ -1,7 +1,7 @@
 import asyncio
 
 import deepl
-from discord import option
+from discord import option, Interaction
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
@@ -128,36 +128,45 @@ class Translation(commands.Cog):
         :type formality_tone: Optional[str]
         :return: The translated text.
         """
-        try:
-            translated_text = await asyncio.to_thread(
-                translate,
-                text,
-                source_language,
-                target_language,
-                formality_tone,
-            )
-        except Exception as e:
+        if source_language == target_language:
             embed = EmbedBuilder(
                 title="Error",
-                description=f"An error occurred while translating the text:\n\n{e}",
+                description=f"Source language and target language cannot be the same.",
             ).build()
 
-            await ctx.send(embed=embed, ephemeral=True)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
+        else:
+            try:
+                translated_text = await asyncio.to_thread(
+                    translate,
+                    text,
+                    source_language,
+                    target_language,
+                    formality_tone,
+                )
+            except Exception as e:
+                embed = EmbedBuilder(
+                    title="Error",
+                    description=f"An error occurred while translating the text:\n\n{e}",
+                ).build()
 
-        embed = EmbedBuilder(
-            title=f"Original Text ({source_language})",
-            description=f"{text}",
-        ).build()
+                await ctx.send(embed=embed, ephemeral=True)
+                return
 
-        await ctx.respond(embed=embed)
+            embed = EmbedBuilder(
+                title=f"Original Text ({source_language})",
+                description=f"{text}",
+            ).build()
 
-        embed = EmbedBuilder(
-            title=f"Translated Text ({target_language})",
-            description=f"{translated_text}",
-        ).build()
+            await ctx.respond(embed=embed)
 
-        await ctx.send(embed=embed)
+            embed = EmbedBuilder(
+                title=f"Translated Text ({target_language})",
+                description=f"{translated_text}",
+            ).build()
+
+            await ctx.send(embed=embed)
 
         Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
