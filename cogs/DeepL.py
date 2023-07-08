@@ -1,7 +1,7 @@
 import asyncio
 
 import deepl
-from discord import option, Interaction
+from discord import option
 from discord.ext import commands
 
 from util.EmbedBuilder import EmbedBuilder
