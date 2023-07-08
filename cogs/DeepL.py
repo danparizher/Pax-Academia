@@ -129,6 +129,14 @@ class Translation(commands.Cog):
         :type formality_tone: Optional[str]
         :return: The translated text.
         """
+        if source_language == target_language:
+            embed = EmbedBuilder(
+                title="Error",
+                description="Source language and target language cannot be the same.",
+            ).build()
+
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
         try:
             translated_text = await asyncio.to_thread(
                 translate,
