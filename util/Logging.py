@@ -4,6 +4,7 @@ import datetime
 import functools
 import re
 import sqlite3
+from pathlib import Path
 
 import discord
 
@@ -76,7 +77,7 @@ class Log:
         depending on whether it is an old or new username.
         If no user given, will just log the message.
         """
-        with open("log.txt", "a", encoding="utf-8") as log_file:
+        with Path("log.txt").open("a", encoding="utf-8") as log_file:
             # get current time
             now = datetime.datetime.now(tz=datetime.timezone.utc)
             now_str: str = now.strftime("%Y-%m-%d %H:%M:%S")
