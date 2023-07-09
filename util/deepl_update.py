@@ -75,4 +75,5 @@ def overwrite_deepl_settings(new_format: list[dict[str, str]]) -> None:
         f.writelines(lines)
 
 
-overwrite_deepl_settings(new_format)
+if __name__ == "__main__":
+    overwrite_deepl_settings(new_format)
