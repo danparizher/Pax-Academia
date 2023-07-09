@@ -28,6 +28,7 @@ new_format = [
     {"code": code.upper(), "language": language.title()}
     for language, code in new_format
 ]
+new_format = sorted(new_format, key=lambda x: x["language"])
 
 
 def overwrite_deepl_settings(new_format: list[dict[str, str]]) -> None:
