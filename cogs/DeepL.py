@@ -9,29 +9,34 @@ from util.Logging import Log, limit
 
 LANGUAGES = [
     "Bulgarian",
-    "Chinese",
     "Czech",
     "Danish",
-    "Dutch",
+    "German",
+    "Greek",
     "English",
+    "Spanish",
     "Estonian",
     "Finnish",
     "French",
-    "German",
-    "Greek",
     "Hungarian",
+    "Indonesian",
     "Italian",
     "Japanese",
-    "Latvian",
+    "Korean",
     "Lithuanian",
+    "Latvian",
+    "Norwegian",
+    "Dutch",
     "Polish",
     "Portuguese",
     "Romanian",
     "Russian",
     "Slovak",
     "Slovenian",
-    "Spanish",
     "Swedish",
+    "Turkish",
+    "Ukrainian",
+    "Chinese",
 ]
 FORMALITY_TONES = ["Formal", "Informal"]
 
@@ -170,6 +175,7 @@ class Translation(commands.Cog):
 
         Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
+# TODO(<@pharmony_01>): Create an autocomplete for the languages so that the user isn't limited to the first 25 languages
 
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Translation(bot))
