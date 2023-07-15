@@ -513,7 +513,7 @@ class Dictionary(commands.Cog):
         if not isinstance(word_info, WordInformation):
             suggestions = word_info
             embed = EmbedBuilder(
-                title=f"Unknown Word __**{word}**__",
+                title=f"Unknown Word __**{word[:235]}**__",
                 description="The Oxford Learner's Dictionary does not contain that word.",
                 color=0xFF0000,  # RED
                 fields=[("Suggestions", "\n".join(suggestions), True)],
