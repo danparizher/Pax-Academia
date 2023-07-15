@@ -209,7 +209,7 @@ class Alerts(commands.Cog):
                     title="Alert",
                     description=f"Your keyword `{keyword}` was mentioned in {message.channel.mention} by {message.author.mention}.",
                     fields=[
-                        ("Message", message.content[:1024], False),
+                        ("Message", message.content, False),
                         (
                             "Message Link",
                             f"[Click to see message]({message.jump_url})",
