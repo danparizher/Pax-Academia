@@ -26,8 +26,8 @@ class EmbedBuilder:
 
     def build(self) -> discord.Embed:
         embed = discord.Embed(
-            title=self.title,
-            description=self.description,
+            title=self.title[:256],
+            description=self.description[:4096],
             color=self.color,
         )
         if self.image:
@@ -36,8 +36,8 @@ class EmbedBuilder:
             embed.set_thumbnail(url=self.thumbnail)
         if self.fields:
             for name, value, inline in self.fields:
-                embed.add_field(name=name, value=value, inline=inline)
+                embed.add_field(name=name[:256], value=value[:1024], inline=inline)
         if self.url:
             embed.url = self.url
-        embed.set_footer(text=self.footer, icon_url=self.icon_url)
+        embed.set_footer(text=self.footer[:2048], icon_url=self.icon_url)
         return embed
