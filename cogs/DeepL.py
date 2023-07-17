@@ -20,10 +20,13 @@ LANGUAGES = [
     "German",
     "Greek",
     "Hungarian",
+    "Indonesian",
     "Italian",
     "Japanese",
+    "Korean",
     "Latvian",
     "Lithuanian",
+    "Norwegian",
     "Polish",
     "Portuguese",
     "Romanian",
@@ -32,6 +35,8 @@ LANGUAGES = [
     "Slovenian",
     "Spanish",
     "Swedish",
+    "Turkish",
+    "Ukrainian",
 ]
 FORMALITY_TONES = ["Formal", "Informal"]
 
@@ -170,6 +175,7 @@ class Translation(commands.Cog):
 
         Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
-
+# TODO(<@pharmony_01>): Create an autocomplete for the languages so that the user isn't limited to the first 25 languages
+# https://github.com/Arborym/Pax-Academia/issues/194
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Translation(bot))

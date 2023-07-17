@@ -261,9 +261,7 @@ def detect_ai(text: str) -> AIDetectionResult:
     if wait_for_processing_completion(driver):
         driver.quit()
         msg = "You have reached your limit for the day. Please try again tomorrow."
-        raise Exception(
-            msg,
-        )
+        raise Exception(msg)
 
     soup = bs4.BeautifulSoup(driver.page_source, "html.parser")
     driver.quit()
