@@ -46,9 +46,19 @@ def limit(_limit_level: int) -> callable:
                     c.execute(
                         "SELECT limitLevel from user where uid = ?",
                         (author_id,),
-                    ).fetchone()[0]
-                    or 0
-                )  # if no limit level exists, then it is 0
+                    ).fetchone()
+                )
+
+                if limit_level is None: # User DOES NOT exist in database, add them.
+                    c.execute(
+                        "INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)",
+                        (author_id, 0, False, None, 0, None),
+                    )  # See ERD.mdj
+                    limit_level = 0
+                    conn.commit()
+                else:
+                    limit_level = limit_level[0] or 0
+         
                 if limit_level >= _limit_level:
                     embed = EmbedBuilder(
                         title="You cannot use this command!",
