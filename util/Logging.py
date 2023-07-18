@@ -42,14 +42,12 @@ def limit(_limit_level: int) -> callable:
             ):  # if no author exists, then we cannot limit, return func instead
                 conn = sqlite3.connect("util/database.sqlite")
                 c = conn.cursor()
-                limit_level = (
-                    c.execute(
-                        "SELECT limitLevel from user where uid = ?",
-                        (author_id,),
-                    ).fetchone()
-                )
+                limit_level = c.execute(
+                    "SELECT limitLevel from user where uid = ?",
+                    (author_id,),
+                ).fetchone()
 
-                if limit_level is None: # User DOES NOT exist in database, add them.
+                if limit_level is None:  # User DOES NOT exist in database, add them.
                     c.execute(
                         "INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)",
                         (author_id, 0, False, None, 0, None),
@@ -58,7 +56,7 @@ def limit(_limit_level: int) -> callable:
                     conn.commit()
                 else:
                     limit_level = limit_level[0] or 0
-         
+
                 if limit_level >= _limit_level:
                     embed = EmbedBuilder(
                         title="You cannot use this command!",
