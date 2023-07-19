@@ -1,7 +1,8 @@
 # Setting up the Environment
 
 1. Clone the forked repository onto your machine.
-   - Make sure the default system python version is `>=3.10` as there is a match case within the codebase. Recommended version is `3.11` 
+
+   - Make sure the default system python version is `>=3.10` as there is a match case within the codebase. Recommended version is `3.11`
 
 2. Create and activate the virtual environment by running the following in your terminal:
 
@@ -11,7 +12,7 @@
    ```
 
 3. Install the required libraries within the virtual environment.
-   
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -29,8 +30,8 @@
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
    ALLOW_DUMP_DATABASE_GUILD = <a guild ID where the /dump_database command will be enabled>
    ALLOW_DUMP_DATABASE_ROLE = <a role name whose members can use the /dump_database command>
-   ALLOW_DETECT_AI_GUILD=<a guildID where the /detect-ai command will be enabled>
-   ALLOW_DETECT_AI_ROLE=<a role name whose members can use the /detect-ai command>
+   ALLOW_DETECT_AI_GUILD = <a guildID where the /detect-ai command will be enabled>
+   ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
    ```
 
 5. Configure bot permissions.
