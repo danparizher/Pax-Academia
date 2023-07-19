@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 # Creates the db if it doesn't exist
 import util.db_builder
+
 # updates the deepL lang config
 import util.deepl_update
 
