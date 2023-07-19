@@ -276,6 +276,16 @@ class Alerts(commands.Cog):
             if message.channel not in message.author.guild.channels:
                 return
 
+            # if the users alerts are paused, don't send them
+            c = self.db.cursor()
+            c.execute(
+                "SELECT * FROM alert WHERE uid = ? AND paused = 0",
+                (message.author.id,),
+            )
+            alerts = c.fetchall()
+            if not alerts:
+                return
+
             c = self.db.cursor()
             c.execute("SELECT message, uid FROM alert")
 
