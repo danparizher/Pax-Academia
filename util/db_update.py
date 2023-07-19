@@ -13,8 +13,8 @@ Alter table to include a new column
 """
 c.execute(
     """
-ALTER TABLE user
-ADD limitLevel INTEGER
+ALTER TABLE alert
+ADD COLUMN paused INTEGER DEFAULT 0
 """,
 )
 
