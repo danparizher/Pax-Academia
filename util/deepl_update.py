@@ -32,8 +32,8 @@ new_format = sorted(new_format, key=lambda x: x["language"])
 
 
 def overwrite_deepl_settings(new_format: list[dict[str, str]]) -> None:
-    PACKAGE_PATH = ".venv\\Lib\\site-packages\\deepl\\settings.py"
-    PAX_PATH = "cogs\\DeepL.py"
+    PACKAGE_PATH = list(Path.cwd().rglob("deepl/settings.py"))[0]
+    PAX_PATH = "cogs/DeepL.py"
     # Updating the settings.py file in the deepl package
     with Path(PACKAGE_PATH).open() as f:
         lines = f.readlines()
@@ -75,5 +75,4 @@ def overwrite_deepl_settings(new_format: list[dict[str, str]]) -> None:
         f.writelines(lines)
 
 
-if __name__ == "__main__":
-    overwrite_deepl_settings(new_format)
+overwrite_deepl_settings(new_format)
