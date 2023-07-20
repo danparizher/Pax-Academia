@@ -1,6 +1,6 @@
-import contextlib
 import re
 import sqlite3
+from contextlib import suppress
 
 import discord
 from discord.commands import option
@@ -204,7 +204,9 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,))
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,),
+        )
         if c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -239,7 +241,9 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,))
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,),
+        )
         if c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -316,7 +320,7 @@ class Alerts(commands.Cog):
                         ),
                     ],
                 ).build()
-                with contextlib.suppress(discord.Forbidden):
+                with suppress(discord.Forbidden):
                     await member.send(embed=embed)
 
         await user_alerts()

@@ -175,6 +175,7 @@ class Translation(commands.Cog):
 
         Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
+
 # TODO(<@pharmony_01>): Create an autocomplete for the languages so that the user isn't limited to the first 25 languages
 # https://github.com/Arborym/Pax-Academia/issues/194
 def setup(bot: commands.Bot) -> None:
