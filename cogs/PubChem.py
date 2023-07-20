@@ -8,7 +8,7 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log, limit
 
 
-def get_data(name: str) -> dict:
+def get_data(name: str) -> dict[str, str]:
     """
     It takes a string as an argument, and returns a dictionary of data about the compound
 
