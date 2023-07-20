@@ -199,12 +199,12 @@ class Alerts(commands.Cog):
         """
         c = self.db.cursor()
         c.execute(
-            "UPDATE alert SET paused = 1 WHERE uid = ?",
+            "UPDATE alert SET paused = TRUE WHERE uid = ?",
             (ctx.author.id,),
         )
         self.db.commit()
 
-        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = 1", (ctx.author.id,))
+        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,))
         if c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -234,12 +234,12 @@ class Alerts(commands.Cog):
         """
         c = self.db.cursor()
         c.execute(
-            "UPDATE alert SET paused = 0 WHERE uid = ?",
+            "UPDATE alert SET paused = FALSE WHERE uid = ?",
             (ctx.author.id,),
         )
         self.db.commit()
 
-        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = 0", (ctx.author.id,))
+        c.execute("SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,))
         if c.fetchone():
             embed = EmbedBuilder(
                 title="Error",
@@ -279,7 +279,7 @@ class Alerts(commands.Cog):
             # if the users alerts are paused, don't send them
             c = self.db.cursor()
             c.execute(
-                "SELECT * FROM alert WHERE uid = ? AND paused = 0",
+                "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
                 (message.author.id,),
             )
             alerts = c.fetchall()

@@ -14,7 +14,7 @@ Alter table to include a new column
 c.execute(
     """
 ALTER TABLE alert
-ADD COLUMN paused INTEGER DEFAULT 0
+ADD COLUMN paused BOOLEAN DEFAULT FALSE;
 """,
 )
 
