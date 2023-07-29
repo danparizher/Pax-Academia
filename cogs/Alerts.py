@@ -40,6 +40,100 @@ class Alerts(commands.Cog):
         self.bot = bot
         self.db = sqlite3.connect("util/database.sqlite")
 
+    @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
+    async def clear_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It clears all alerts from the database.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute("DELETE FROM alert WHERE uid = ?", (ctx.author.id,))
+        self.db.commit()
+
+        embed = EmbedBuilder(
+            title="Success",
+            description="Cleared all alerts.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
+
+    @commands.slash_command(
+        name="alerts-pause",
+        description="Pauses alerts.",
+    )
+    async def pause_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It pauses alerts for the user who is currently using the command.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute(
+            "UPDATE alert SET paused = TRUE WHERE uid = ?",
+            (ctx.author.id,),
+        )
+        self.db.commit()
+
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,),
+        )
+        if c.fetchone():
+            embed = EmbedBuilder(
+                title="Error",
+                description="Alerts are already paused.",
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        embed = EmbedBuilder(
+            title="Success",
+            description="Paused alerts.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
+
+    @commands.slash_command(
+        name="alerts-resume",
+        description="Resumes alerts.",
+    )
+    async def resume_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It resumes alerts for the user who is currently using the command.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute(
+            "UPDATE alert SET paused = FALSE WHERE uid = ?",
+            (ctx.author.id,),
+        )
+        self.db.commit()
+
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,),
+        )
+        if c.fetchone():
+            embed = EmbedBuilder(
+                title="Error",
+                description="Alerts are already resumed.",
+            ).build()
+            await ctx.respond(embed=embed, ephemeral=True)
+            return
+
+        embed = EmbedBuilder(
+            title="Success",
+            description="Resumed alerts.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
+        
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
         name="alerts-add",
@@ -165,100 +259,6 @@ class Alerts(commands.Cog):
             description=alert_list,
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
-
-    @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
-    async def clear_alerts(self, ctx: ApplicationContext) -> None:
-        """
-        It clears all alerts from the database.
-
-        :param ctx: ApplicationContext
-        :type ctx: ApplicationContext
-        """
-        c = self.db.cursor()
-        c.execute("DELETE FROM alert WHERE uid = ?", (ctx.author.id,))
-        self.db.commit()
-
-        embed = EmbedBuilder(
-            title="Success",
-            description="Cleared all alerts.",
-        ).build()
-        await ctx.respond(embed=embed, ephemeral=True)
-
-        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
-
-    @commands.slash_command(
-        name="alerts-pause",
-        description="Pauses alerts.",
-    )
-    async def pause_alerts(self, ctx: ApplicationContext) -> None:
-        """
-        It pauses alerts for the user who is currently using the command.
-
-        :param ctx: ApplicationContext
-        :type ctx: ApplicationContext
-        """
-        c = self.db.cursor()
-        c.execute(
-            "UPDATE alert SET paused = TRUE WHERE uid = ?",
-            (ctx.author.id,),
-        )
-        self.db.commit()
-
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Error",
-                description="Alerts are already paused.",
-            ).build()
-            await ctx.respond(embed=embed, ephemeral=True)
-            return
-
-        embed = EmbedBuilder(
-            title="Success",
-            description="Paused alerts.",
-        ).build()
-        await ctx.respond(embed=embed, ephemeral=True)
-
-        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
-
-    @commands.slash_command(
-        name="alerts-resume",
-        description="Resumes alerts.",
-    )
-    async def resume_alerts(self, ctx: ApplicationContext) -> None:
-        """
-        It resumes alerts for the user who is currently using the command.
-
-        :param ctx: ApplicationContext
-        :type ctx: ApplicationContext
-        """
-        c = self.db.cursor()
-        c.execute(
-            "UPDATE alert SET paused = FALSE WHERE uid = ?",
-            (ctx.author.id,),
-        )
-        self.db.commit()
-
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Error",
-                description="Alerts are already resumed.",
-            ).build()
-            await ctx.respond(embed=embed, ephemeral=True)
-            return
-
-        embed = EmbedBuilder(
-            title="Success",
-            description="Resumed alerts.",
-        ).build()
-        await ctx.respond(embed=embed, ephemeral=True)
-
-        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
