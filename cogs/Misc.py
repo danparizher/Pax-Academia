@@ -4,6 +4,7 @@ import os
 import sqlite3
 from collections.abc import Iterable
 from dataclasses import dataclass
+from pathlib import Path
 
 import discord
 from discord.commands.context import ApplicationContext
@@ -40,7 +41,7 @@ def grep_tables() -> list[Table]:
     """
     tables: list[Table] = []
     for database_file in DATABASE_FILES:
-        database_name = os.path.basename(database_file)
+        database_name = Path(database_file).name
         if database_file.endswith(".txt"):
             tables.append(
                 Table(
