@@ -79,7 +79,8 @@ class Alerts(commands.Cog):
         self.db.commit()
 
         c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE", (ctx.author.id,),
+            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE",
+            (ctx.author.id,),
         )
         if c.fetchone():
             embed = EmbedBuilder(
@@ -116,7 +117,8 @@ class Alerts(commands.Cog):
         self.db.commit()
 
         c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE", (ctx.author.id,),
+            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
+            (ctx.author.id,),
         )
         if c.fetchone():
             embed = EmbedBuilder(
@@ -133,7 +135,7 @@ class Alerts(commands.Cog):
         await ctx.respond(embed=embed, ephemeral=True)
 
         Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
-        
+
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
         name="alerts-add",
