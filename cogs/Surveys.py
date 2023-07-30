@@ -1,4 +1,4 @@
-import contextlib
+from contextlib import suppress
 
 import discord
 from discord.ext import commands
@@ -31,7 +31,7 @@ class Surveys(commands.Cog):
         :param message: The message object that triggered the event
         :type message: discord.Message
         """
-        with contextlib.suppress(AttributeError):
+        with suppress(AttributeError):
             if (
                 message.channel.name != "surveys"
                 and "276969339901444096"  # Why is this still hardcoded?
@@ -45,19 +45,18 @@ class Surveys(commands.Cog):
                             title="Survey Link Detected",
                             description=f"Hey {message.author.mention}, it looks like you tried to post a survey link. If this is correct, please post survey links in the <#580936851360055296> channel instead! Thanks.",  # Also hardcoded channel
                         ).build()
-                        with contextlib.suppress(discord.errors.Forbidden):
+                        with suppress(discord.errors.Forbidden):
                             await message.channel.send(
                                 content=f"<@{message.author.id}>",
                                 embed=embed,
                             )
+                        with suppress(AttributeError):
+                            Log(
+                                f" $ sent a survey in {message.channel.name}, bot responded",
+                                message.author,
+                            )
+                        break
         await self.bot.process_commands(message)
-        try:
-            Log(
-                f" $ sent a survey in {message.channel.name}, bot responded",
-                message.author,
-            )
-        except AttributeError:
-            pass  # WHY??? This error happens when a user is limited with the @limited wrapper?
 
 
 def setup(bot: commands.Bot) -> None:
