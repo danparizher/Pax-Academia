@@ -1,6 +1,7 @@
 import asyncio
 
 import deepl
+import discord
 from discord import option
 from discord.ext import commands
 
@@ -39,6 +40,10 @@ LANGUAGES = [
     "Ukrainian",
 ]
 FORMALITY_TONES = ["Formal", "Informal"]
+
+
+def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
+    return [language for language in LANGUAGES if ctx.value in language][:25]
 
 
 def translate(
@@ -95,14 +100,14 @@ class Translation(commands.Cog):
         str,
         description="The language of the text.",
         required=True,
-        choices=LANGUAGES,
+        autocomplete=autocomplete_language,
     )
     @option(
         "target_language",
         str,
         description="The language to translate the text to.",
         required=True,
-        choices=LANGUAGES,
+        autocomplete=autocomplete_language,
     )
     @option(
         "formality_tone",
