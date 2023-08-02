@@ -47,13 +47,10 @@ def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
     current = ctx.value
     if not current.strip():
         return LANGUAGES[:25]
-    else:
-        matches: list[tuple[str, int]]
-        matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
+    matches: list[tuple[str, int]]
+    matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
 
-        minimum_score = matches[0][1] / 2
-
-        return [language for language, score in matches if score > minimum_score]
+    return [language for language, score in matches if score > matches[0][1] / 2]
 
 
 def translate(
