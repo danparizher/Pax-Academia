@@ -2,6 +2,7 @@ import asyncio
 
 import deepl
 import discord
+import thefuzz.process
 from discord import option
 from discord.ext import commands
 
@@ -43,7 +44,16 @@ FORMALITY_TONES = ["Formal", "Informal"]
 
 
 def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
-    return [language for language in LANGUAGES if ctx.value in language][:25]
+    current = ctx.value
+    if not current.strip():
+        return LANGUAGES[:25]
+    else:
+        matches: list[tuple[str, int]]
+        matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
+
+        minimum_score = matches[0][1] / 2
+
+        return [language for language, score in matches if score > minimum_score]
 
 
 def translate(
