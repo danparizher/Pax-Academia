@@ -167,6 +167,7 @@ class Alerts(commands.Cog):
         await ctx.respond(embed=embed, ephemeral=True)
 
     @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
+    @limit(3)
     async def clear_alerts(self, ctx: ApplicationContext) -> None:
         """
         It clears all alerts from the database.
@@ -190,6 +191,7 @@ class Alerts(commands.Cog):
         name="alerts-pause",
         description="Pauses alerts.",
     )
+    @limit(1)
     async def pause_alerts(self, ctx: ApplicationContext) -> None:
         """
         It pauses alerts for the user who is currently using the command.
@@ -221,6 +223,7 @@ class Alerts(commands.Cog):
         name="alerts-resume",
         description="Resumes alerts.",
     )
+    @limit(1)
     async def resume_alerts(self, ctx: ApplicationContext) -> None:
         """
         It resumes alerts for the user who is currently using the command.
@@ -271,7 +274,7 @@ class Alerts(commands.Cog):
             # if the users alerts are paused, don't send them
             c = self.db.cursor()
             c.execute(
-                "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
+                "SELECT * FROM alert WHERE uid = ? AND (paused = FALSE OR paused IS NULL)",
                 (message.author.id,),
             )
             alerts = c.fetchall()

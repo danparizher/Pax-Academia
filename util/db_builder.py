@@ -39,7 +39,7 @@ c.execute(
     alertId INTEGER PRIMARY KEY,
     uid INTEGER NOT NULL,
     message VARCHAR(2000) NOT NULL,
-    paused BOOLEAN DEFAULT FALSE,
+    paused BOOLEAN,
     CONSTRAINT FK3_alert_user
         FOREIGN KEY (uid)
         REFERENCES user(uid)
