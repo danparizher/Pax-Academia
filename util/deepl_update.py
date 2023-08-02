@@ -32,39 +32,26 @@ new_format = sorted(new_format, key=lambda x: x["language"])
 
 
 def overwrite_deepl_settings(new_format: list[dict[str, str]]) -> None:
-    PACKAGE_PATH = next(iter(Path.cwd().rglob("deepl/settings.py")))
+    PACKAGE_PATH = next(Path.cwd().rglob("deepl/settings.py"))
     PAX_PATH = "cogs/DeepL.py"
+
     # Updating the settings.py file in the deepl package
-    with Path(PACKAGE_PATH).open() as f:
+    with PACKAGE_PATH.open() as f:
         lines = f.readlines()
 
-    for i, line in enumerate(lines):
-        if "SUPPORTED_LANGUAGES" in line:
-            start = i
-            break
-
-    for i, line in enumerate(lines[start:]):
-        if "]" in line:
-            end = i + start
-            break
+    start = next(i for i, line in enumerate(lines) if "SUPPORTED_LANGUAGES" in line)
+    end = next(i for i, line in enumerate(lines[start:], start) if "]" in line)
 
     lines[start + 1 : end] = [f"    {language},\n" for language in new_format]
-    with Path(PACKAGE_PATH).open("w") as f:
+    with PACKAGE_PATH.open("w") as f:
         f.writelines(lines)
 
     # Updating the available languages in the DeepL cog
     with Path(PAX_PATH).open() as f:
         lines = f.readlines()
 
-    for i, line in enumerate(lines):
-        if "LANGUAGES = [" in line:
-            start = i
-            break
-
-    for i, line in enumerate(lines[start:]):
-        if "]" in line:
-            end = i + start
-            break
+    start = next(i for i, line in enumerate(lines) if "LANGUAGES = [" in line)
+    end = next(i for i, line in enumerate(lines[start:], start) if "]" in line)
 
     lines[start + 1 : end] = [
         f'    "{language}",\n'
