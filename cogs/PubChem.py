@@ -8,7 +8,7 @@ from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log, limit
 
 
-def get_data(name: str) -> dict:
+def get_data(name: str) -> dict[str, str]:
     """
     It takes a string as an argument, and returns a dictionary of data about the compound
 
@@ -76,12 +76,12 @@ class PubChem(commands.Cog):
                         self.to_subscript(data["molecular_formula"]),
                         True,
                     ],
-                    ["Exact Mass", round(float(data["exact_mass"]), 2), True],
-                    ["Charge", data["charge"], True],
-                    ["Molecular Weight", data["molecular_weight"], True],
-                    ["XLogP", data["xlogp"], True],
-                    ["TPSA", data["tpsa"], True],
-                    ["Complexity", data["complexity"], True],
+                    ["Exact Mass", str(round(float(data["exact_mass"]), 2)), True],
+                    ["Charge", str(data["charge"]), True],
+                    ["Molecular Weight", str(data["molecular_weight"]), True],
+                    ["XLogP", str(data["xlogp"]), True],
+                    ["TPSA", str(data["tpsa"]), True],
+                    ["Complexity", str(data["complexity"]), True],
                 ],
                 image=f"https://pubchem.ncbi.nlm.nih.gov/image/imagefly.cgi?cid={data['cid']}&width=400&height=400",
             ).build()

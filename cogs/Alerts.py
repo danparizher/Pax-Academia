@@ -1,6 +1,6 @@
-import contextlib
 import re
 import sqlite3
+from contextlib import suppress
 
 import discord
 from discord.commands import option
@@ -146,9 +146,8 @@ class Alerts(commands.Cog):
         Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
-    @limit(
-        3
-    )  # User should still be allowed to remove their alerts if they have too many
+    @limit(3)
+    # User should still be allowed to remove their alerts if they have too many
     async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
@@ -166,6 +165,91 @@ class Alerts(commands.Cog):
             description=alert_list,
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
+
+    @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
+    @limit(3)
+    async def clear_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It clears all alerts from the database.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute("DELETE FROM alert WHERE uid = ?", (ctx.author.id,))
+        self.db.commit()
+
+        embed = EmbedBuilder(
+            title="Success",
+            description="Cleared all alerts.",
+        ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
+
+    @commands.slash_command(
+        name="alerts-pause",
+        description="Pauses alerts.",
+    )
+    @limit(1)
+    async def pause_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It pauses alerts for the user who is currently using the command.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute(
+            "UPDATE alert SET paused = TRUE WHERE uid = ?",
+            (ctx.author.id,),
+        )
+        self.db.commit()
+
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE",
+            (ctx.author.id,),
+        )
+        if c.fetchone():
+            embed = EmbedBuilder(
+                title="Success",
+                description="Paused alerts.",
+            ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
+
+    @commands.slash_command(
+        name="alerts-resume",
+        description="Resumes alerts.",
+    )
+    @limit(1)
+    async def resume_alerts(self, ctx: ApplicationContext) -> None:
+        """
+        It resumes alerts for the user who is currently using the command.
+
+        :param ctx: ApplicationContext
+        :type ctx: ApplicationContext
+        """
+        c = self.db.cursor()
+        c.execute(
+            "UPDATE alert SET paused = FALSE WHERE uid = ?",
+            (ctx.author.id,),
+        )
+        self.db.commit()
+
+        c.execute(
+            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
+            (ctx.author.id,),
+        )
+        if c.fetchone():
+            embed = EmbedBuilder(
+                title="Success",
+                description="Resumed alerts.",
+            ).build()
+        await ctx.respond(embed=embed, ephemeral=True)
+
+        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -185,6 +269,16 @@ class Alerts(commands.Cog):
             # Should be impossible (since we already checked if this is a DM)
             # this is just to satisfy type-checkers
             if message.channel not in message.author.guild.channels:
+                return
+
+            # if the users alerts are paused, don't send them
+            c = self.db.cursor()
+            c.execute(
+                "SELECT * FROM alert WHERE uid = ? AND (paused = FALSE OR paused IS NULL)",
+                (message.author.id,),
+            )
+            alerts = c.fetchall()
+            if not alerts:
                 return
 
             c = self.db.cursor()
@@ -217,7 +311,7 @@ class Alerts(commands.Cog):
                         ),
                     ],
                 ).build()
-                with contextlib.suppress(discord.Forbidden):
+                with suppress(discord.Forbidden):
                     await member.send(embed=embed)
 
         await user_alerts()

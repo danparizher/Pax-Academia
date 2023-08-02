@@ -57,6 +57,11 @@ class Surveys(commands.Cog):
                             )
                         break
         await self.bot.process_commands(message)
+        with suppress(AttributeError):
+            Log(
+                f" $ sent a survey in {message.channel.name}, bot responded",
+                message.author,
+            )
 
 
 def setup(bot: commands.Bot) -> None:

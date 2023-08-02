@@ -1,6 +1,8 @@
 import asyncio
 
 import deepl
+import discord
+import thefuzz.process
 from discord import option
 from discord.ext import commands
 
@@ -39,6 +41,16 @@ LANGUAGES = [
     "Ukrainian",
 ]
 FORMALITY_TONES = ["Formal", "Informal"]
+
+
+def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
+    current = ctx.value
+    if not current.strip():
+        return LANGUAGES[:25]
+    matches: list[tuple[str, int]]
+    matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
+
+    return [language for language, score in matches if score > matches[0][1] / 2]
 
 
 def translate(
@@ -95,14 +107,14 @@ class Translation(commands.Cog):
         str,
         description="The language of the text.",
         required=True,
-        choices=LANGUAGES,
+        autocomplete=autocomplete_language,
     )
     @option(
         "target_language",
         str,
         description="The language to translate the text to.",
         required=True,
-        choices=LANGUAGES,
+        autocomplete=autocomplete_language,
     )
     @option(
         "formality_tone",
@@ -175,7 +187,6 @@ class Translation(commands.Cog):
 
         Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
-# TODO(<@pharmony_01>): Create an autocomplete for the languages so that the user isn't limited to the first 25 languages
-# https://github.com/Arborym/Pax-Academia/issues/194
+
 def setup(bot: commands.Bot) -> None:
     bot.add_cog(Translation(bot))
