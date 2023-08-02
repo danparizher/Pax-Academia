@@ -210,16 +210,9 @@ class Alerts(commands.Cog):
         )
         if c.fetchone():
             embed = EmbedBuilder(
-                title="Error",
-                description="Alerts are already paused.",
+                title="Success",
+                description="Paused alerts.",
             ).build()
-            await ctx.respond(embed=embed, ephemeral=True)
-            return
-
-        embed = EmbedBuilder(
-            title="Success",
-            description="Paused alerts.",
-        ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
         Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
@@ -248,16 +241,9 @@ class Alerts(commands.Cog):
         )
         if c.fetchone():
             embed = EmbedBuilder(
-                title="Error",
-                description="Alerts are already resumed.",
+                title="Success",
+                description="Resumed alerts.",
             ).build()
-            await ctx.respond(embed=embed, ephemeral=True)
-            return
-
-        embed = EmbedBuilder(
-            title="Success",
-            description="Resumed alerts.",
-        ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
         Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
