@@ -386,7 +386,7 @@ class staffAppsMain(discord.ui.View):
             ],
             [
                 "Submission Time",
-                datetime.fromtimestamp(int(self.data[self.cur_page - 1][10])),
+                str(datetime.fromtimestamp(int(self.data[self.cur_page - 1][10]))),
                 False,
             ],
             ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
