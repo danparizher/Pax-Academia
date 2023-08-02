@@ -50,6 +50,12 @@ class Surveys(commands.Cog):
                                 content=f"<@{message.author.id}>",
                                 embed=embed,
                             )
+                        with suppress(AttributeError):
+                            Log(
+                                f" $ sent a survey in {message.channel.name}, bot responded",
+                                message.author,
+                            )
+                        break
         await self.bot.process_commands(message)
         with suppress(AttributeError):
             Log(
