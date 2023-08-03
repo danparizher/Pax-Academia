@@ -273,7 +273,7 @@ class Alerts(commands.Cog):
 
             c = self.db.cursor()
             c.execute(
-                "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)"
+                "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)",
             )
 
             for keyword, uid in c.fetchall():
