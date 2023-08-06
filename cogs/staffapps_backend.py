@@ -745,7 +745,7 @@ class fullViewApplication(discord.ui.View):
         )
 
 
-SEE_GUILD = getenv("ALLOW_VIEW_DATABASE_GUILD")
+SEE_GUILD = getenv("ALLOW_VIEW_DATABASE_GUILD_ID")
 SEE_ROLE = getenv("ALLOW_SEE_APPS_ROLE")
 SEE_PERMISSIONS = (lambda x: x) if SEE_ROLE is None else commands.has_role(SEE_ROLE)
 SUBCOMMANDS = ["all", "spam", "accepted", "denied"]
