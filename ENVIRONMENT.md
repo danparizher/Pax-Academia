@@ -42,6 +42,6 @@
 
 5. Configure bot permissions.
 
-   You must specify the priveleged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
+   You must specify the privileged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
 
-   The bot requires the `message_content` priveleged gateway intent.
+   The bot requires the `message_content` privileged gateway intent.
