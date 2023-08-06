@@ -147,13 +147,13 @@ class Misc(commands.Cog):
 
     @DUMP_PERMISSIONS
     @commands.slash_command(
-        name="dump_database",
+        name="view-database",
         description="Download all database tables as CSV files.",
         guild_ids=None if DUMP_GUILD is None else [DUMP_GUILD],
         guild_only=DUMP_GUILD is not None,
     )
     @limit(1)  # db access
-    async def dump_database(self, ctx: ApplicationContext) -> None:
+    async def view_database(self, ctx: ApplicationContext) -> None:
         """
         It dumps the database to a csv file and sends it to the user
 

@@ -52,7 +52,7 @@ Cogs are a way of organizing commands, listeners, and some state into one class.
 
 - Commands implemented:
   - `ping`
-  - `dump-database
+  - `view-database
 - Description:
   - Miscellaneous commands to test the response time of the bot and a dump of the database for debugging.
 
