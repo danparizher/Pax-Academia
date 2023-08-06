@@ -35,6 +35,8 @@
    UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category ID where code-formatting tips will be sent automatically>
    AUTO_FORMAT_CODE_CHANNEL_IDS = <a comma-separated list of channel IDs where code will be auto-formatted>
    DEEPL_API_KEY = <your deepl.com api key>
+   STDOUT_LOG_FILE = <optionally, the file path where stdout is being redirected>
+   STDERR_LOG_FILE = <optionally, the file path where stderr is being redirected>
    ```
 
 5. Configure bot permissions.
