@@ -102,10 +102,10 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
             with io.StringIO() as f:
                 writer = csv.writer(f)
                 writer.writerow(table.column_names)
-                writer.writerows(cursor.fetchall())
+                writer.writerows(cursor)
                 f.seek(0)
                 yield discord.File(
-                    f,
+                    f,  # type: ignore (the class clearly accepts any readable, seekable IOBase)
                     filename=f"{table.database_name}.{table.name}.csv",
                 )
 
