@@ -65,9 +65,10 @@ async def send_tip(
             ephemeral=True,
             delete_after=5,
         )
-    else:
+    elif anonymous.casefold() == "no":
         await ctx.respond(message_content, embed=embed)
-    Log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
+    else:
+        await ctx.send(message_content, embed=embed)
 
 
 class Tips(commands.Cog):
@@ -104,6 +105,7 @@ class Tips(commands.Cog):
         anonymous: str = "No",
     ) -> None:
         await send_tip(ctx, tip, ping, anonymous)
+        Log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

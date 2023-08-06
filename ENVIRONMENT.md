@@ -32,6 +32,7 @@
    ALLOW_DUMP_DATABASE_ROLE = <a role name whose members can use the /dump_database command>
    ALLOW_DETECT_AI_GUILD = <a guildID where the /detect-ai command will be enabled>
    ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
+   UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category channel ID where the DetectCode cog will run>
    ```
 
 5. Configure bot permissions.
