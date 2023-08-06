@@ -16,7 +16,7 @@ LimitedCommandReturnValue = TypeVar("LimitedCommandReturnValue")
 
 
 def limit(
-    minimum_limit_level: int,  # the minimum `limitLevel` required to use the command
+    limit_level_requirement: int,  # users at this `limitLevel` or higher are banned from using the command
 ) -> Callable[
     [Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]]],
     Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue | None]],
@@ -50,7 +50,7 @@ def limit(
             if not ctx or not ctx.author or not ctx.author.id:
                 # in order to actually do any limiting, we need to know who used the command
                 Log(
-                    f"@limit({minimum_limit_level}) is BROKEN for {func!r}. Failed to find an author!"
+                    f"@limit({limit_level_requirement}) is BROKEN for {func!r}. Failed to find an author!"
                 )
                 return await func(*args, **kwargs)
 
@@ -66,12 +66,12 @@ def limit(
                     "INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)",
                     (ctx.author.id, 0, False, None, 0, None),
                 )  # See ERD.mdj
-                limit_level = float("inf")
+                limit_level = 0
                 conn.commit()
             else:
-                limit_level = limit_level[0] or float("inf")
+                limit_level = limit_level[0] or 0
 
-            if limit_level >= minimum_limit_level:
+            if limit_level >= limit_level_requirement:
                 embed = EmbedBuilder(
                     title="You cannot use this command!",
                     description="You are limited from using this command! Please contact a moderator if you believe this is a mistake.",
