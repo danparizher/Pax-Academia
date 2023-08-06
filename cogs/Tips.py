@@ -48,6 +48,32 @@ TIPS = {
 }
 
 
+async def send_tip(
+    ctx: ApplicationContext,
+    tip: str,
+    ping: Member | None = None,
+    anonymous: str = "No",
+) -> None:
+    message_content = None if ping is None else ping.mention
+    embed = EmbedBuilder(
+        title=f"Tip: {tip.capitalize()}.",
+        description=TIPS[tip],
+        color=0x32DC64,  # a nice pastel green
+    ).build()
+
+    if anonymous.casefold() == "yes":
+        await ctx.send(message_content, embed=embed)
+        await ctx.respond(
+            "Thanks for the tip! It was sent anonymously.",
+            ephemeral=True,
+            delete_after=5,
+        )
+    elif anonymous.casefold() == "no":
+        await ctx.respond(message_content, embed=embed)
+    else:
+        await ctx.send(message_content, embed=embed)
+
+
 class Tips(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
@@ -81,22 +107,7 @@ class Tips(commands.Cog):
         ping: Member | None = None,
         anonymous: str = "No",
     ) -> None:
-        message_content = None if ping is None else ping.mention
-        embed = EmbedBuilder(
-            title=f"Tip: {tip.capitalize()}.",
-            description=TIPS[tip],
-            color=0x32DC64,  # a nice pastel green
-        ).build()
-
-        if anonymous.casefold() == "yes":
-            await ctx.send(message_content, embed=embed)
-            await ctx.respond(
-                "Thanks for the tip! It was sent anonymously.",
-                ephemeral=True,
-                delete_after=5,
-            )
-        else:
-            await ctx.respond(message_content, embed=embed)
+        await send_tip(ctx, tip, ping, anonymous)
         Log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
 
 
