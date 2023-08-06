@@ -4,7 +4,7 @@ from discord.commands.context import ApplicationContext
 from cogs.Tips import send_tip
 
 
-class CodeDetector(commands.Cog):
+class DetectCode(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.cs_category_id = 436053375717736469 # Computer Science Category ID
@@ -50,4 +50,4 @@ class CodeDetector(commands.Cog):
 
 
 def setup(bot: commands.Bot) -> None:
-    bot.add_cog(CodeDetector(bot))
+    bot.add_cog(DetectCode(bot))
