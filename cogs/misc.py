@@ -19,10 +19,12 @@ DATABASE_FILES = [
 ]
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
-DUMP_GUILD = os.getenv("ALLOW_DUMP_DATABASE_GUILD")
-DUMP_ROLE = os.getenv("ALLOW_DUMP_DATABASE_ROLE")
+VIEW_DB_GUILD = os.getenv("ALLOW_VIEW_DATABASE_GUILD_ID")
+VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 
-DUMP_PERMISSIONS = (lambda x: x) if DUMP_ROLE is None else commands.has_role(DUMP_ROLE)
+VIEW_DB_PERMISSIONS = (
+    (lambda x: x) if VIEW_DB_ROLE is None else commands.has_role(VIEW_DB_ROLE)
+)
 
 
 @dataclass
@@ -145,17 +147,17 @@ class Misc(commands.Cog):
             ),
         )
 
-    @DUMP_PERMISSIONS
+    @VIEW_DB_PERMISSIONS
     @commands.slash_command(
         name="view-database",
         description="Download all database tables as CSV files.",
-        guild_ids=None if DUMP_GUILD is None else [DUMP_GUILD],
-        guild_only=DUMP_GUILD is not None,
+        guild_ids=None if VIEW_DB_GUILD is None else [VIEW_DB_GUILD],
+        guild_only=VIEW_DB_GUILD is not None,
     )
     @limit(1)  # db access
     async def view_database(self, ctx: ApplicationContext) -> None:
         """
-        It dumps the database to a csv file and sends it to the user
+        It provides the database in a CSV format
 
         :param ctx: ApplicationContext
         :type ctx: ApplicationContext
@@ -174,10 +176,10 @@ class Misc(commands.Cog):
             else:
                 await message.edit(content=text)
 
-        Log(f"$ dumped the database in {ctx.channel}, {ctx.guild}.", ctx.author)
+        Log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
 
         tables = grep_tables()
-        await edit(f"{LOADING_EMOJI} Dumped 0/{len(tables)} table(s).")
+        await edit(f"{LOADING_EMOJI} Presented 0/{len(tables)} table(s).")
 
         for i, (table, file) in enumerate(
             zip(tables, dump_tables_to_csv(tables), strict=False),
@@ -187,9 +189,9 @@ class Misc(commands.Cog):
                 file=file,
                 ephemeral=True,
             )
-            await edit(f"{LOADING_EMOJI} Dumped {i + 1}/{len(tables)} table(s).")
+            await edit(f"{LOADING_EMOJI} Presented {i + 1}/{len(tables)} table(s).")
 
-        await edit(f"{COMPLETED_EMOJI} Dumped {len(tables)} table(s).")
+        await edit(f"{COMPLETED_EMOJI} Presented {len(tables)} table(s).")
 
 
 def setup(bot: commands.Bot) -> None:

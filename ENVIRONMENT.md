@@ -28,8 +28,8 @@
    ALLOW_SEE_APPS_ROLE = <a role name whose members can see applications>
    MULTIPOST_EMOJI = <optional, specify a custom emoji for multiposts e.g. ":multipost:1046975187930849280">
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
-   ALLOW_DUMP_DATABASE_GUILD = <a guild ID where the /dump_database command will be enabled>
-   ALLOW_DUMP_DATABASE_ROLE = <a role name whose members can use the /dump_database command>
+   ALLOW_VIEW_DATABASE_GUILD_ID = <a guild ID where the /dump_database command will be enabled>
+   ALLOW_VIEW_DATABASE_ROLE_NAME = <a role name whose members can use the /dump_database command>
    ALLOW_DETECT_AI_GUILD = <a guildID where the /detect-ai command will be enabled>
    ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
    UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category ID where code-formatting tips will be sent automatically>
