@@ -5,7 +5,7 @@ import functools
 import re
 import sqlite3
 from pathlib import Path
-from typing import Awaitable, Callable, ParamSpec, TypeAlias, TypeVar
+from typing import Awaitable, Callable, ParamSpec, TypeVar
 
 import discord
 
