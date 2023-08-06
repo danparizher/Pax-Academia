@@ -7,7 +7,7 @@ from cogs.Tips import send_tip
 class CodeDetector(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.cs_category_id = 1137609015573106728  # Replace with actual category ID
+        self.cs_category_id = 436053375717736469 # Computer Science Category ID
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
