@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from discord.commands.context import ApplicationContext
 from cogs.Tips import send_tip
 
 
