@@ -4,8 +4,9 @@ import datetime
 import functools
 import re
 import sqlite3
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Awaitable, Callable, ParamSpec, TypeVar
+from typing import ParamSpec, TypeVar
 
 import discord
 
@@ -31,11 +32,12 @@ def limit(
     """
 
     def decorator(
-        func: Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]]
+        func: Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]],
     ) -> Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue | None]]:
         @functools.wraps(func)
         async def wrapper(
-            *args: LimitedCommandParams.args, **kwargs: LimitedCommandParams.kwargs
+            *args: LimitedCommandParams.args,
+            **kwargs: LimitedCommandParams.kwargs,
         ) -> LimitedCommandReturnValue | None:
             """
             Wrapper to determine if the user is limited or not.
@@ -50,7 +52,7 @@ def limit(
             if not ctx or not ctx.author or not ctx.author.id:
                 # in order to actually do any limiting, we need to know who used the command
                 Log(
-                    f"@limit({limit_level_requirement}) is BROKEN for {func!r}. Failed to find an author!"
+                    f"@limit({limit_level_requirement}) is BROKEN for {func!r}. Failed to find an author!",
                 )
                 return await func(*args, **kwargs)
 
@@ -93,7 +95,9 @@ def limit(
 
 class Log:
     def __init__(
-        self, message: str, user: discord.User | discord.Member | None = None
+        self,
+        message: str,
+        user: discord.User | discord.Member | None = None,
     ) -> None:
         """
         Basic logging module.

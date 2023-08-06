@@ -239,18 +239,21 @@ class Misc(commands.Cog):
     )
     @limit(1)
     async def view_logs(
-        self, ctx: ApplicationContext, filename: str, line_count: int
+        self,
+        ctx: ApplicationContext,
+        filename: str,
+        line_count: int,
     ) -> None:
         if filename not in LOG_FILES:
             # Discord guarantees that this is impossible, but the pycord library might have issues!
             # The risk is low, but the consequences would be huge (reading the .env file).
-            raise Exception(
-                f"Expected `filename` to be one of {tuple(LOG_FILES)!r} but it's actually {filename!r}"
-            )
+            msg = f"Expected `filename` to be one of {tuple(LOG_FILES)!r} but it's actually {filename!r}"
+            raise Exception(msg)
 
         with FileReadBackwards(filename) as log_file_backwards:
             log_lines_backwards = [
-                line for _, line in zip(range(line_count), log_file_backwards)
+                line
+                for _, line in zip(range(line_count), log_file_backwards, strict=False)
             ]
             log_lines = reversed(log_lines_backwards)
 
