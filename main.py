@@ -22,6 +22,7 @@ def load() -> None:
         "Alerts",
         "DeepL",
         "DetectAI",
+        "DetectCode",
         "Dictionary",
         "MessageCounter",
         "Misc",
