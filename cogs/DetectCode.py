@@ -1,8 +1,10 @@
-import discord
-from cogs.Tips import send_tip
 from contextlib import suppress
-from discord.ext import commands
 from os import getenv
+
+import discord
+from discord.ext import commands
+
+from cogs.Tips import send_tip
 from util.Logging import Log
 
 
@@ -35,9 +37,9 @@ class DetectCode(commands.Cog):
             for line in non_blank_lines
             if any(
                 [
-                    line.startswith(("  ")),
+                    line.startswith("  "),
                     line.endswith((";", "{", "}", "]", "[", ")", "(", ":", ",")),
-                ]
+                ],
             )
         ]
 

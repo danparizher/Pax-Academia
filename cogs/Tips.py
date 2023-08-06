@@ -49,7 +49,10 @@ TIPS = {
 
 
 async def send_tip(
-    ctx: ApplicationContext, tip: str, ping: Member | None = None, anonymous: str = "No"
+    ctx: ApplicationContext,
+    tip: str,
+    ping: Member | None = None,
+    anonymous: str = "No",
 ) -> None:
     message_content = None if ping is None else ping.mention
     embed = EmbedBuilder(
