@@ -1,3 +1,4 @@
+import random
 from contextlib import suppress
 from os import getenv
 
@@ -49,10 +50,17 @@ class DetectCode(commands.Cog):
         )
 
         if percentage_code_like >= minimum_code_probability:
-            await send_tip(message.channel, "Format Your Code", message.author, "bot")
+            use_embed = random.random() < 0.5
+            await send_tip(
+                message.channel,
+                "Format Your Code",
+                message.author,
+                "bot",
+                use_embed,
+            )
             with suppress(AttributeError):
                 Log(
-                    f" $ sent potential code in {message.channel.name}, bot responded with tip",
+                    f" $ sent potential code in {message.channel.name}, bot responded with {'' if use_embed else 'NON-'}EMBEDDED tip",
                     message.author,
                 )
 
