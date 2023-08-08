@@ -14,18 +14,18 @@ class DetectedSection:
     lines: tuple[str, ...]
 
     @property
-    def is_plain_text(self):
+    def is_plain_text(self) -> bool:
         return self.classification is Classification.PLAIN_TEXT
 
     @property
-    def is_code(self):
+    def is_code(self) -> bool:
         return self.classification is Classification.CODE
 
     @property
-    def text(self):
+    def text(self) -> str:
         return "\n".join(self.lines)
 
-    def debug(self):
+    def debug(self) -> str:
         """
         A simple string that describes the detection result. Useful for testing.
         - "8p" => 8 lines of plain text
@@ -35,7 +35,7 @@ class DetectedSection:
 
 
 class DetectorBase(ABC):
-    def __init__(self, text: str):
+    def __init__(self, text: str) -> None:
         self.text = text
 
     @property
@@ -97,10 +97,7 @@ class DetectorBase(ABC):
         if previous_classification is Classification.CODE:
             is_code = is_code or self.line_is_plausibly_code(line)
 
-        if is_code:
-            return Classification.CODE
-        else:
-            return Classification.PLAIN_TEXT
+        return Classification.CODE if is_code else Classification.PLAIN_TEXT
 
     def classify_lines(self) -> list[DetectedSection]:
         """
@@ -134,7 +131,7 @@ class DetectorBase(ABC):
             else:
                 current_section = DetectedSection(
                     classification=classification,
-                    lines=current_section.lines + (line,),
+                    lines=(*current_section.lines, line),
                 )
         sections.append(current_section)
 
@@ -146,8 +143,7 @@ class DetectorBase(ABC):
         """
         if section.is_code:
             return len(section.lines) < self.min_code_lines_in_a_row
-        else:
-            return len(section.lines) < self.min_plain_text_lines_in_a_row
+        return len(section.lines) < self.min_plain_text_lines_in_a_row
 
     def reduce_section_group(self, sections: list[DetectedSection]) -> DetectedSection:
         """
@@ -167,7 +163,8 @@ class DetectorBase(ABC):
         )
 
     def merge_short_sections(
-        self, sections: list[DetectedSection]
+        self,
+        sections: list[DetectedSection],
     ) -> list[DetectedSection]:
         """
         Merges together sections which are too short
@@ -205,7 +202,7 @@ class DetectorBase(ABC):
                 DetectedSection(
                     classification=Classification.PLAIN_TEXT,
                     lines=tuple(line for section in sections for line in section.lines),
-                )
+                ),
             ]
 
         # firstly, merge adjacent short sections into single sections
@@ -238,7 +235,7 @@ class DetectorBase(ABC):
                 adjacent_short_sections_group.append(section)
             else:
                 merged_short_sections.append(
-                    self.reduce_section_group(adjacent_short_sections_group)
+                    self.reduce_section_group(adjacent_short_sections_group),
                 )
                 adjacent_short_sections_group.clear()
                 merged_short_sections.append(section)
@@ -253,7 +250,7 @@ class DetectorBase(ABC):
 
         if adjacent_short_sections_group:
             merged_short_sections.append(
-                self.reduce_section_group(adjacent_short_sections_group)
+                self.reduce_section_group(adjacent_short_sections_group),
             )
             adjacent_short_sections_group.clear()
 
@@ -276,7 +273,7 @@ class DetectorBase(ABC):
         for section in merged_short_sections[1:]:
             if section.classification != similar_section_group[0].classification:
                 merged_similar_sections.append(
-                    self.reduce_section_group(similar_section_group)
+                    self.reduce_section_group(similar_section_group),
                 )
                 similar_section_group.clear()
 
@@ -324,7 +321,8 @@ class DetectorBase(ABC):
                 continue
 
             merged_sections.insert(
-                i - 1, self.reduce_section_group(merged_sections[i - 1 : i + 2])
+                i - 1,
+                self.reduce_section_group(merged_sections[i - 1 : i + 2]),
             )
             del merged_sections[i : i + 3]
 

@@ -7,7 +7,7 @@ from base import DetectorBase
 
 class SimpleDetector(DetectorBase):
     @property
-    def language(self):
+    def language(self) -> str:
         return "test"
 
     def line_is_probably_code(self, line: str) -> bool:
@@ -17,7 +17,7 @@ class SimpleDetector(DetectorBase):
 test_counter = 0
 
 
-def test(text: str, expected_result: str):
+def test(text: str, expected_result: str) -> None:
     global test_counter
     test_counter += 1
 
