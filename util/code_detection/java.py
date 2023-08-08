@@ -10,5 +10,20 @@ class JavaDetector(DetectorBase):
         return (
             (line.startswith(("  ", "\t")) and not line.isspace())
             or line.rstrip().endswith((";", "{", "}"))
-            or line.lstrip().startswith(("public", "private", "class"))  # TODO
+            or line.lstrip().startswith(
+                (
+                    "public",
+                    "private",
+                    "class",
+                    "protected",
+                    "static",
+                    "final",
+                    "abstract",
+                    "synchronized",
+                    "volatile",
+                    "transient",
+                    "native",
+                    "strictfp",
+                ),
+            )
         )
