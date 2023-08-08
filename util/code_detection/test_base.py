@@ -13,9 +13,6 @@ class SimpleDetector(DetectorBase):
     def line_is_probably_code(self, line: str) -> bool:
         return "code" in line
 
-    def line_is_plausibly_code(self, line: str) -> bool:
-        return not line or line.isspace()
-
 
 test_counter = 0
 
