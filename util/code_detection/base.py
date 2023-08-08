@@ -72,11 +72,7 @@ class DetectorBase(ABC):
         For example, the line "class DetectorBase(ABC):" is 'probably code'.
         This method is used to tell when plain text stops and code begins.
         """
-        previous_classification = Classification.PLAIN_TEXT
-        if self.lines:
-            previous_classification = self.lines[-1].classification
-
-        return self.classify_line(previous_classification, line) is Classification.CODE
+        # TODO: maybe somehow allow this to be put in context of surrounding lines?
 
     def line_is_plausibly_code(self, line: str) -> bool:
         """
