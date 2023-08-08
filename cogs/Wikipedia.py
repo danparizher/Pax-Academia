@@ -3,7 +3,7 @@ import asyncio
 import wikipedia
 from discord.ext import commands
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embedbuilder import EmbedBuilder
 from util.Logging import Log, limit
 
 

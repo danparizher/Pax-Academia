@@ -10,7 +10,7 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embedbuilder import EmbedBuilder
 from util.Logging import Log
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing

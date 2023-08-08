@@ -4,7 +4,7 @@ from os import getenv
 import discord
 from discord.ext import commands
 
-from cogs.Tips import send_tip
+from cogs.tips import send_tip
 from util.Logging import Log
 
 

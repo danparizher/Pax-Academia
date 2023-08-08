@@ -9,7 +9,7 @@ import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embedbuilder import EmbedBuilder
 from util.Logging import Log, limit
 
 
