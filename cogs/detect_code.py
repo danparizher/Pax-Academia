@@ -63,7 +63,12 @@ class DetectCode(commands.Cog):
         """
         code = cls.get_first_lines_of_code(sections)
         escaped_code = (
-            code.replace("\\", "\\\\").replace("*", "\\*").replace("_", "\\_")
+            code.replace("\\", "\\\\")
+            .replace("*", "\\*")
+            .replace("_", "\\_")
+            .replace("#", "\\#")
+            .replace("<", "\\<")
+            .replace(">", "\\>")
         )
         return (
             f"\\`\\`\\`{language}\n{escaped_code}\n\\`\\`\\`",
