@@ -26,7 +26,7 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"^(global|nonlocal)\s+{COMMA_SEP_NAMES}"),
     re.compile(rf"^if.*{CLAUSE_END}"),
     re.compile(r"^import\b"),
-    re.compile(rf"\blambda.*:"),
+    re.compile(r"\blambda.*:"),
     re.compile(r"^raise\b"),
     re.compile(r"^return\b"),
     re.compile(r"^try\s+:$"),
@@ -35,7 +35,7 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(r"^yield\b"),
     re.compile(r"^#"),
     re.compile(
-        rf"^({CONTAINER_OPENER}|\s)*(\*\s*{NAME}\s*,)?{COMMA_SEP_NAMES}(\s*,\s*\*\s*{NAME}\s*)?({CONTAINER_CLOSER}|\s)*{OPERATOR}?="
+        rf"^({CONTAINER_OPENER}|\s)*(\*\s*{NAME}\s*,)?{COMMA_SEP_NAMES}(\s*,\s*\*\s*{NAME}\s*)?({CONTAINER_CLOSER}|\s)*{OPERATOR}?=",
     ),
     re.compile(rf"\.\s*{NAME}\s*{OPERATOR}?="),
     re.compile(rf"\.\s*{NAME}\s*\("),
@@ -43,10 +43,10 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
     re.compile(rf"^({CONTAINER_CLOSER}|{CONTAINER_OPENER}|\s)+$"),
     re.compile(rf"^@{NAME}"),
-    re.compile(rf"\).*:$"),
-    re.compile(rf"\bif\b.*\belse\b"),
-    re.compile(rf"^\.\.\.$"),
-    re.compile(rf"\b(list|tuple|set|dict)\["),
+    re.compile(r"\).*:$"),
+    re.compile(r"\bif\b.*\belse\b"),
+    re.compile(r"^\.\.\.$"),
+    re.compile(r"\b(list|tuple|set|dict)\["),
     # The following are intentionally disabled because their usage is so common in English
     # re.compile(r"\band\b"),
     # re.compile(r"\bas\b"),
@@ -58,7 +58,7 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
 
 LINE_PATTERNS_NO_STRIP = [  # text will NOT be stripped before testing these patterns
     re.compile(
-        rf"^\s+{CONTAINER_OPENER}*\s*{COMMA_SEP_NAMES}\s*{CONTAINER_CLOSER}*\s*$"
+        rf"^\s+{CONTAINER_OPENER}*\s*{COMMA_SEP_NAMES}\s*{CONTAINER_CLOSER}*\s*$",
     ),
 ]
 

@@ -162,8 +162,7 @@ class DetectorBase(ABC):
                 line = section.lines[-1 - n_blank_lines]
                 if line and not line.isspace():
                     break
-                else:
-                    n_blank_lines += 1
+                n_blank_lines += 1
 
             if n_blank_lines > 0:
                 sections[i] = DetectedSection(
@@ -405,7 +404,7 @@ class DetectorBase(ABC):
         Breaks down the provided text into sections which are or are not code.
         """
         return self.convert_plain_text_to_code(
-            self.merge_short_sections(self.classify_lines())
+            self.merge_short_sections(self.classify_lines()),
         )
 
     def detect(self) -> tuple[DetectedSection, ...]:
