@@ -9,7 +9,7 @@ import discord.ui
 from discord import option
 from discord.ext import commands
 
-from util.embedbuilder import EmbedBuilder
+from util.embed_builder import EmbedBuilder
 from util.Logging import Log, limit
 
 
