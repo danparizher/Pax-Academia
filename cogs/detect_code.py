@@ -28,7 +28,8 @@ class DetectCode(commands.Cog):
 
     @staticmethod
     def get_first_lines_of_code(
-        sections: tuple[code_detection.DetectedSection, ...], n: int = 3
+        sections: tuple[code_detection.DetectedSection, ...],
+        n: int = 3,
     ) -> str:
         """
         Just gets the first N lines of code from the provided sections.
@@ -112,8 +113,7 @@ class DetectCode(commands.Cog):
         ):
             return
 
-        detection_result = code_detection.detect(message.content)
-        if detection_result:
+        if detection_result := code_detection.detect(message.content):
             language, sections = detection_result
             escaped, unescaped = self.get_formatting_example(language, sections)
 
