@@ -59,7 +59,7 @@ class DetectorBase(ABC):
         For example, if this property returns 5 but only 3 lines of code in a row are detected,
         those lines will be categorized as plain text.
         """
-        return 5
+        return 3
 
     @property
     def min_plain_text_lines_in_a_row(self) -> int:
