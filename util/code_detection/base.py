@@ -68,8 +68,10 @@ class DetectorBase(ABC):
         This threshold *does not apply* to the beginning or end of the text. For example if this property
         returns 3, but there is only 2 lines of plain text at the *beginning of the text*, it will still
         be categorized as plain text.
+        Intentionally left very low because your `line_is_probably_code` should be able to detect 100% of lines!
+        Only increase if your code matcher frequently misses code lines.
         """
-        return 3
+        return 1
 
     @abstractmethod
     def line_is_probably_code(self, line: str) -> bool:
