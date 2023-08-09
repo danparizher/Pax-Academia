@@ -19,9 +19,7 @@ class DetectCode(commands.Cog):
         )
         self.auto_format_in_channel_ids = [
             int(channel_id)
-            for channel_id in getenv(
-                "UNFORMATTED_CODE_DETECTION_CATEGORY_ID", "-1"
-            ).split(",")
+            for channel_id in getenv("AUTO_FORMAT_CODE_CHANNEL_IDS", "-1").split(",")
         ]
 
     @staticmethod
