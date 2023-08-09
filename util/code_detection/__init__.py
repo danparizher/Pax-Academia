@@ -1,10 +1,8 @@
-from typing import TYPE_CHECKING, Type
+from typing import Type
 
+from .base import DetectedSection, DetectorBase
 from .java import JavaDetector
 from .python import PythonDetector
-
-if TYPE_CHECKING:
-    from base import DetectedSection, DetectorBase
 
 DETECTOR_CLASSES: list[Type[DetectorBase]] = [
     JavaDetector,
