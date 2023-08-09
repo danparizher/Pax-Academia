@@ -2,12 +2,51 @@ import re
 
 from .base import DetectorBase
 
-NAME = r"[a-zA-Z_][a-zA-Z_0-9]*"
+KEYWORDS = [
+    "and",
+    "as",
+    "assert",
+    "async",
+    "await",
+    "break",
+    "class",
+    "continue",
+    "def",
+    "del",
+    "elif",
+    "else",
+    "except",
+    "False",
+    "finally",
+    "for",
+    "from",
+    "global",
+    "if",
+    "import",
+    "in",
+    "is",
+    "lambda",
+    "None",
+    "nonlocal",
+    "not",
+    "or",
+    "pass",
+    "raise",
+    "return",
+    "True",
+    "try",
+    "while",
+    "with",
+    "yield",
+]
+NOT_KEYWORD_LOOKBEHIND = "".join(f"(?<!{keyword})" for keyword in KEYWORDS)
+
+NAME = rf"[a-zA-Z_][a-zA-Z_0-9]*{NOT_KEYWORD_LOOKBEHIND}"
 COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
 CONTAINER_OPENER = r"(\(|\[|\{)"
 CONTAINER_CLOSER = r"(\)|\]|\})"
 OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
-CLAUSE_END = rf"({CONTAINER_OPENER}|:)$"
+CLAUSE_END = rf"(\(|\[|:)$"
 
 LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(r"^assert\b"),
