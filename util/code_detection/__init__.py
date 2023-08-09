@@ -5,7 +5,7 @@ from .java import JavaDetector
 from .python import PythonDetector
 
 DETECTOR_CLASSES: list[Type[DetectorBase]] = [
-    JavaDetector,
+    # JavaDetector,
     PythonDetector,
 ]
 
