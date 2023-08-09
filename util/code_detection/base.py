@@ -23,7 +23,13 @@ class DetectedSection:
 
     @property
     def text(self) -> str:
-        return "\n".join(self.lines)
+        # there is little to no purpose for blank lines at the start or end of a section
+        lines = list(self.lines)
+        for end in (0, -1):
+            while lines and not lines[end] or lines[end].isspace():
+                del lines[end]
+
+        return "\n".join(lines)
 
     def debug(self) -> str:
         """
