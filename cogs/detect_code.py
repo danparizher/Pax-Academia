@@ -14,7 +14,15 @@ from util.Logging import Log
 class DetectCode(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.cs_category_id = int(getenv("UNFORMATTED_CODE_DETECTION_CATEGORY_ID", -1))
+        self.send_tip_in_category_id = int(
+            getenv("UNFORMATTED_CODE_DETECTION_CATEGORY_ID", -1)
+        )
+        self.auto_format_in_channel_ids = [
+            int(channel_id)
+            for channel_id in getenv(
+                "UNFORMATTED_CODE_DETECTION_CATEGORY_ID", "-1"
+            ).split(",")
+        ]
 
     @staticmethod
     def format_detected_code(
@@ -113,12 +121,14 @@ class DetectCode(commands.Cog):
             message.author.bot
             or not isinstance(message.channel, discord.TextChannel)
             or message.channel.category is None
-            or message.channel.category.id != self.cs_category_id
             or "```" in message.content
         ):
             return
 
-        if detection_result := code_detection.detect(message.content):
+        send_tips = message.channel.category.id == self.send_tip_in_category_id
+        autoformat = message.channel.id in self.auto_format_in_channel_ids
+
+        if autoformat and (detection_result := code_detection.detect(message.content)):
             language, sections = detection_result
             escaped, unescaped = self.get_formatting_example(language, sections)
 
@@ -146,7 +156,7 @@ class DetectCode(commands.Cog):
 
         # if language-specific algorithms fail, use a generic algorithm
         # TODO: maybe remove this once we're confident w/ our language-specific algorithms
-        elif self.likely_contains_code(message.content):
+        elif send_tips and self.likely_contains_code(message.content):
             await send_tip(message.channel, "Format Your Code", message.author, "bot")
             with suppress(AttributeError):
                 Log(
