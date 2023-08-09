@@ -1,3 +1,6 @@
+# Note: this file is currently unused
+# TODO: update it to use regex like python.py
+
 from .base import DetectorBase
 
 # unique starting keywords for java that don't appear in other languages

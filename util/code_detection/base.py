@@ -81,13 +81,13 @@ class DetectorBase(ABC):
         This method is used to tell when plain text stops and code begins.
         """
 
-    @abstractmethod
     def block_is_probably_code(self, block: str) -> bool:
         """
         Same as `line_is_probably_code` except processes multiple lines at once.
         This is called at the end with all of the plain-text sections, and if True,
         the plain-text block is converted into a code section. Useful to detect multiline comments!
         """
+        return False
 
     def line_is_plausibly_code(self, line: str) -> bool:
         """

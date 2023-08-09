@@ -1,12 +1,11 @@
 from typing import Type
 
 from .base import DetectedSection, DetectorBase
-from .java import JavaDetector
 from .python import PythonDetector
 
 DETECTOR_CLASSES: list[Type[DetectorBase]] = [
-    # JavaDetector,
     PythonDetector,
+    # More languages coming soon!
 ]
 
 
