@@ -23,7 +23,13 @@ class DetectedSection:
 
     @property
     def text(self) -> str:
-        return "\n".join(self.lines)
+        # there is little to no purpose for blank lines at the start or end of a section
+        lines = list(self.lines)
+        for end in (0, -1):
+            while lines and not lines[end] or lines[end].isspace():
+                del lines[end]
+
+        return "\n".join(lines)
 
     def debug(self) -> str:
         """
@@ -65,7 +71,7 @@ class DetectorBase(ABC):
         Intentionally left very low because your `line_is_probably_code` should be able to detect 100% of lines!
         Only increase if your code matcher frequently misses code lines.
         """
-        return 1
+        return 2
 
     @abstractmethod
     def line_is_probably_code(self, line: str) -> bool:
@@ -113,7 +119,7 @@ class DetectorBase(ABC):
         Simply classifies each line of the text without applying any section-size limits.
         """
         lines = self.text.splitlines()
-        sections = []
+        sections: list[DetectedSection] = []
 
         # special case for first line
         line = lines.pop(0)
@@ -143,6 +149,31 @@ class DetectorBase(ABC):
                     lines=(*current_section.lines, line),
                 )
         sections.append(current_section)
+
+        # remove blank lines from the end of code blocks and
+        # move them to succeeding plain text sections
+        for i in range(len(sections) - 1):
+            section = sections[i]
+            if not section.is_code:
+                continue
+
+            n_blank_lines = 0
+            while n_blank_lines < len(section.lines):
+                line = section.lines[-1 - n_blank_lines]
+                if line and not line.isspace():
+                    break
+                else:
+                    n_blank_lines += 1
+
+            if n_blank_lines > 0:
+                sections[i] = DetectedSection(
+                    classification=Classification.CODE,
+                    lines=section.lines[:-n_blank_lines],
+                )
+                sections[i + 1] = DetectedSection(
+                    classification=Classification.PLAIN_TEXT,
+                    lines=section.lines[-n_blank_lines:] + sections[i + 1].lines,
+                )
 
         return sections
 
