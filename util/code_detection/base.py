@@ -304,13 +304,13 @@ class DetectorBase(ABC):
         merged_sections = merged_similar_sections.copy()
 
         # special handling to merge code at the top
-        if len(merged_sections) >= 2 and merged_sections[0].is_code:
+        if len(merged_sections) >= 3 and merged_sections[0].is_code:
             before, after, *_ = merged_sections
             if self.section_too_short(before):
                 merged_sections[:2] = (self.reduce_section_group(merged_sections[:2]),)
 
         # special handling to merge code at the bottom
-        if len(merged_sections) >= 2 and merged_sections[-1].is_code:
+        if len(merged_sections) >= 3 and merged_sections[-1].is_code:
             *_, before, after = merged_sections
             if self.section_too_short(after):
                 merged_sections[-2:] = (
