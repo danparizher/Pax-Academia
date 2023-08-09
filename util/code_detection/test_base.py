@@ -13,6 +13,9 @@ class SimpleDetector(DetectorBase):
     def line_is_probably_code(self, line: str) -> bool:
         return "code" in line
 
+    def line_is_plausibly_code(self, line: str) -> bool:
+        return not line or line.isspace()
+
 
 test_counter = 0
 
@@ -50,18 +53,7 @@ test(
     code
     code\
     """,
-    "4p",  # too short to be code
-)
-
-test(
-    """\
-    code
-    code
-    code
-    code
-    code\
-    """,
-    "5c",
+    "4c",
 )
 
 test(
@@ -334,7 +326,7 @@ test(
 
     text\
     """,
-    "2p 10c 1p",
+    "2p 3c 3p 3c 2p",
 )
 
 
@@ -376,5 +368,5 @@ test(
     text
     text\
     """,
-    "5p 14c 4p 10c 2p",
+    "5p 13c 5p 9c 3p",
 )
