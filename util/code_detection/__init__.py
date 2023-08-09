@@ -1,9 +1,7 @@
-from typing import Type
-
 from .base import DetectedSection, DetectorBase
 from .python import PythonDetector
 
-DETECTOR_CLASSES: list[Type[DetectorBase]] = [
+DETECTOR_CLASSES: list[type[DetectorBase]] = [
     PythonDetector,
     # More languages coming soon!
 ]

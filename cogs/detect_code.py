@@ -15,7 +15,7 @@ class DetectCode(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.send_tip_in_category_id = int(
-            getenv("UNFORMATTED_CODE_DETECTION_CATEGORY_ID", -1)
+            getenv("UNFORMATTED_CODE_DETECTION_CATEGORY_ID", -1),
         )
         self.auto_format_in_channel_ids = [
             int(channel_id)
@@ -50,7 +50,9 @@ class DetectCode(commands.Cog):
 
     @classmethod
     def get_formatting_example(
-        cls, language: str, sections: tuple[code_detection.DetectedSection, ...]
+        cls,
+        language: str,
+        sections: tuple[code_detection.DetectedSection, ...],
     ) -> tuple[str, str]:
         r"""
         Returns two versions of a string. The first has all special characters escaped, like so:
