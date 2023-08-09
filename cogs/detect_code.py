@@ -140,7 +140,7 @@ class DetectCode(commands.Cog):
 
             await message.reply(
                 (
-                    "I've detected that you have unformatted code, which is difficult to read.\n"
+                    "It looks like you have some unformatted code, which is difficult to read.\n"
                     "You can format code by surrounding it with backticks `` ``` `` (not quotes `'''`).\n"
                     "\n"
                     "For example, this message:\n"
