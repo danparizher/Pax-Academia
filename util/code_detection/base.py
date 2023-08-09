@@ -12,6 +12,7 @@ class Classification(Enum):
 class DetectedSection:
     classification: Classification
     lines: tuple[str, ...]
+    line_probability: tuple[bool, ...]  # True if probable, False if plausible
 
     @property
     def is_plain_text(self) -> bool:
@@ -30,6 +31,10 @@ class DetectedSection:
                 del lines[end]
 
         return "\n".join(lines)
+
+    @property
+    def probable_lines_of_code(self) -> int:
+        return sum(self.line_probability)
 
     def debug(self) -> str:
         """
@@ -103,16 +108,19 @@ class DetectorBase(ABC):
         self,
         previous_classification: Classification,
         line: str,
-    ) -> Classification:
+    ) -> tuple[Classification, bool]:
         """
         Classifies the line within the context of the previous line.
         Lines immediately following a code line are held to a lower standard for code matching.
+        Also returns whether or not the classification is probable or plausible.
         """
         is_code = self.line_is_probably_code(line)
-        if previous_classification is Classification.CODE:
-            is_code = is_code or self.line_is_plausibly_code(line)
+        probable = True
+        if not is_code and previous_classification is Classification.CODE:
+            is_code = self.line_is_plausibly_code(line)
+            probable = False
 
-        return Classification.CODE if is_code else Classification.PLAIN_TEXT
+        return Classification.CODE if is_code else Classification.PLAIN_TEXT, probable
 
     def classify_lines(self) -> list[DetectedSection]:
         """
@@ -127,26 +135,33 @@ class DetectorBase(ABC):
             current_section = DetectedSection(
                 classification=Classification.CODE,
                 lines=(line,),
+                line_probability=(True,),
             )
         else:
             current_section = DetectedSection(
                 classification=Classification.PLAIN_TEXT,
                 lines=(line,),
+                line_probability=(True,),
             )
 
         # rest of the lines...
         for line in lines:
-            classification = self.classify_line(current_section.classification, line)
+            classification, probable = self.classify_line(
+                current_section.classification,
+                line,
+            )
             if classification != current_section.classification:
                 sections.append(current_section)
                 current_section = DetectedSection(
                     classification=classification,
                     lines=(line,),
+                    line_probability=(probable,),
                 )
             else:
                 current_section = DetectedSection(
                     classification=classification,
                     lines=(*current_section.lines, line),
+                    line_probability=(*current_section.line_probability, probable),
                 )
         sections.append(current_section)
 
@@ -168,10 +183,15 @@ class DetectorBase(ABC):
                 sections[i] = DetectedSection(
                     classification=Classification.CODE,
                     lines=section.lines[:-n_blank_lines],
+                    line_probability=current_section.line_probability[:-n_blank_lines],
                 )
                 sections[i + 1] = DetectedSection(
                     classification=Classification.PLAIN_TEXT,
                     lines=section.lines[-n_blank_lines:] + sections[i + 1].lines,
+                    line_probability=(
+                        section.line_probability[-n_blank_lines:]
+                        + sections[i + 1].line_probability
+                    ),
                 )
 
         return sections
@@ -199,6 +219,9 @@ class DetectorBase(ABC):
                 else Classification.PLAIN_TEXT
             ),
             lines=tuple(line for section in sections for line in section.lines),
+            line_probability=tuple(
+                lp for section in sections for lp in section.line_probability
+            ),
         )
 
     def merge_short_sections(
@@ -241,6 +264,9 @@ class DetectorBase(ABC):
                 DetectedSection(
                     classification=Classification.PLAIN_TEXT,
                     lines=tuple(line for section in sections for line in section.lines),
+                    line_probability=tuple(
+                        lp for section in sections for lp in section.line_probability
+                    ),
                 ),
             ]
 
@@ -344,6 +370,9 @@ class DetectorBase(ABC):
                     DetectedSection(
                         classification=Classification.PLAIN_TEXT,
                         lines=before.lines + after.lines,
+                        line_probability=(
+                            before.line_probability + after.line_probability
+                        ),
                     ),
                 )
 
@@ -355,6 +384,9 @@ class DetectorBase(ABC):
                     DetectedSection(
                         classification=Classification.PLAIN_TEXT,
                         lines=before.lines + after.lines,
+                        line_probability=(
+                            before.line_probability + after.line_probability
+                        ),
                     ),
                 )
 
@@ -390,6 +422,7 @@ class DetectorBase(ABC):
                 sections[i] = DetectedSection(
                     classification=Classification.CODE,
                     lines=section.lines,
+                    line_probability=(True,) * len(section.lines),
                 )
                 sections[i - 1 : i + 2] = (
                     self.reduce_section_group(sections[i - 1 : i + 2]),
@@ -422,6 +455,18 @@ class DetectorBase(ABC):
         The total number of lines of code that were detected.
         """
         return sum(len(s.lines) for s in self.detect() if s.is_code)
+
+    @property
+    def probable_lines_of_code(self) -> float:
+        """
+        The number of lines that are probably code, as opposed to
+        lines that are plausibly code.
+        """
+        return sum(
+            section.probable_lines_of_code
+            for section in self.detect()
+            if section.is_code
+        )
 
     def debug(self) -> str:
         """
