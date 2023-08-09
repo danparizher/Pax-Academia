@@ -2,43 +2,65 @@ import re
 
 from .base import DetectorBase
 
-# not including those which must end with a `:` anyway
-# note that the trailing space is important!
-LINE_STARTING_KEYWORDS = (
-    "and ",
-    "as ",
-    "assert ",
-    "async ",
-    "await ",
-    "break ",
-    "class ",
-    "continue ",
-    "def ",
-    "del ",
-    "elif ",
-    "else:",
-    "except ",
-    "finally ",
-    "for ",
-    "from ",
-    "global ",
-    "if ",
-    "import ",
-    "in ",
-    "is ",
-    "lambda ",
-    "nonlocal ",
-    "not ",
-    "or ",
-    "pass ",
-    "raise ",
-    "return ",
-    "try ",
-    "while ",
-    "with ",
-    "yield ",
-    "#",
-)
+NAME = r"[a-zA-Z_][a-zA-Z_0-9]*"
+COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
+CONTAINER_OPENER = r"(\(|\[|\{)"
+CONTAINER_CLOSER = r"(\)|\]|\})"
+OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
+CLAUSE_END = rf"({CONTAINER_OPENER}|:)$"
+
+LINE_PATTERNS = [  # note that lines will first be stripped!
+    re.compile(r"^assert\b"),
+    re.compile(r"^async\s+(def|for|with)\b"),
+    re.compile(rf"\bawait[\(\s]+{NAME}"),
+    re.compile(r"^(break|continue|pass)$"),
+    re.compile(rf"^class\s+{NAME}\s*(\(|:)"),
+    re.compile(rf"^def\s+{NAME}\s*\("),
+    re.compile(rf"^del\s+{NAME}"),
+    re.compile(rf"^elif.*{CLAUSE_END}"),
+    re.compile(r"^else\s*:$"),
+    re.compile(rf"^except.*{CLAUSE_END}"),
+    re.compile(r"^finally\s*:$"),
+    re.compile(r"^from\b"),
+    re.compile(rf"for\b.+{COMMA_SEP_NAMES}.+in.+(\(|\[|\{{|{NAME})"),
+    re.compile(rf"^(global|nonlocal)\s+{COMMA_SEP_NAMES}"),
+    re.compile(rf"^if.*{CLAUSE_END}"),
+    re.compile(r"^import\b"),
+    re.compile(rf"\blambda.*:"),
+    re.compile(r"^raise\b"),
+    re.compile(r"^return\b"),
+    re.compile(r"^try\s+:$"),
+    re.compile(rf"^while.*{CLAUSE_END}"),
+    re.compile(rf"^with.*{CLAUSE_END}"),
+    re.compile(r"^yield\b"),
+    re.compile(r"^#"),
+    re.compile(
+        rf"^({CONTAINER_OPENER}|\s)*(\*\s*{NAME}\s*,)?{COMMA_SEP_NAMES}(\s*,\s*\*\s*{NAME}\s*)?({CONTAINER_CLOSER}|\s)*{OPERATOR}?="
+    ),
+    re.compile(rf"\.\s*{NAME}\s*{OPERATOR}?="),
+    re.compile(rf"\.\s*{NAME}\s*\("),
+    re.compile(rf"^{NAME}\s*\("),
+    re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
+    re.compile(rf"^({CONTAINER_CLOSER}|{CONTAINER_OPENER}|\s)+$"),
+    re.compile(rf"^@{NAME}"),
+    re.compile(rf"\).*:$"),
+    re.compile(rf"\bif\b.*\belse\b"),
+    re.compile(rf"^\.\.\.$"),
+    re.compile(rf"\b(list|tuple|set|dict)\["),
+    # The following are intentionally disabled because their usage is so common in English
+    # re.compile(r"\band\b"),
+    # re.compile(r"\bas\b"),
+    # re.compile(r"\bin\b"),
+    # re.compile(r"\bis\b"),
+    # re.compile(r"\bor\b"),
+    # re.compile(r"\bnot\b"),
+]
+
+LINE_PATTERNS_NO_STRIP = [  # text will NOT be stripped before testing these patterns
+    re.compile(
+        rf"^\s+{CONTAINER_OPENER}*\s*{COMMA_SEP_NAMES}\s*{CONTAINER_CLOSER}*\s*$"
+    ),
+]
 
 
 class PythonDetector(DetectorBase):
@@ -46,10 +68,15 @@ class PythonDetector(DetectorBase):
     def language(self) -> str:
         return "python"
 
-    def line_is_probably_code(self, line: str) -> bool:
+    def block_is_probably_code(self, block: str) -> bool:
         return (
-            (line.startswith(("  ", "\t")) and not line.isspace())
-            or line.rstrip().endswith((":", "(", ")", "[", "]", "{", "}", ","))
-            or line.lstrip().startswith(LINE_STARTING_KEYWORDS)
-            or re.match(r"\s*[a-zA-Z_][a-zA-Z_0-9]*\s*=", line) is not None
+            re.match("^[brf]*('''|\"\"\").*('''|\"\"\")", block.strip(), re.DOTALL)
+            is not None
         )
+
+    def line_is_probably_code(self, line: str) -> bool:
+        if any(pattern.search(line) for pattern in LINE_PATTERNS_NO_STRIP):
+            return True
+
+        line = line.strip()
+        return any(pattern.search(line) for pattern in LINE_PATTERNS)

@@ -23,13 +23,7 @@ class DetectedSection:
 
     @property
     def text(self) -> str:
-        # there is little to no purpose for blank lines at the start or end of a section
-        lines = list(self.lines)
-        for end in (0, -1):
-            while lines and not lines[end] or lines[end].isspace():
-                del lines[end]
-
-        return "\n".join(lines)
+        return "\n".join(self.lines)
 
     def debug(self) -> str:
         """
@@ -80,7 +74,14 @@ class DetectorBase(ABC):
         For example, the line "class DetectorBase(ABC):" is 'probably code'.
         This method is used to tell when plain text stops and code begins.
         """
-        # TODO: maybe somehow allow this to be put in context of surrounding lines?
+
+    @abstractmethod
+    def block_is_probably_code(self, block: str) -> bool:
+        """
+        Same as `line_is_probably_code` except processes multiple lines at once.
+        This is called at the end with all of the plain-text sections, and if True,
+        the plain-text block is converted into a code section. Useful to detect multiline comments!
+        """
 
     def line_is_plausibly_code(self, line: str) -> bool:
         """
@@ -90,7 +91,7 @@ class DetectorBase(ABC):
         NOTE: There is no need to duplicate checks from `line_is_probably_code`!
         """
         # Default implementation provided because this should be pretty common in all languages
-        return not line or line.isspace()
+        return not line or line.isspace() or line.startswith("  ")
 
     def classify_line(
         self,
@@ -306,17 +307,25 @@ class DetectorBase(ABC):
         merged_sections = merged_similar_sections.copy()
 
         # special handling to merge code at the top
-        if len(merged_sections) >= 3 and merged_sections[0].is_code:
+        if len(merged_sections) >= 2 and merged_sections[0].is_code:
             before, after, *_ = merged_sections
             if self.section_too_short(before):
-                merged_sections[:2] = (self.reduce_section_group(merged_sections[:2]),)
+                merged_sections[:2] = (
+                    DetectedSection(
+                        classification=Classification.PLAIN_TEXT,
+                        lines=before.lines + after.lines,
+                    ),
+                )
 
         # special handling to merge code at the bottom
-        if len(merged_sections) >= 3 and merged_sections[-1].is_code:
+        if len(merged_sections) >= 2 and merged_sections[-1].is_code:
             *_, before, after = merged_sections
             if self.section_too_short(after):
                 merged_sections[-2:] = (
-                    self.reduce_section_group(merged_sections[-2:]),
+                    DetectedSection(
+                        classification=Classification.PLAIN_TEXT,
+                        lines=before.lines + after.lines,
+                    ),
                 )
 
         # merge middle sections normally
@@ -336,11 +345,37 @@ class DetectorBase(ABC):
 
         return merged_sections
 
+    def convert_plain_text_to_code(
+        self,
+        sections: list[DetectedSection],
+    ) -> list[DetectedSection]:
+        """
+        Converts plain-text sections into code sections based on `block_is_probably_code`.
+        Edits the list IN-PLACE.
+        """
+        i = 1
+        while i < len(sections) - 1:
+            section = sections[i]
+            if section.is_plain_text and self.block_is_probably_code(section.text):
+                sections[i] = DetectedSection(
+                    classification=Classification.CODE,
+                    lines=section.lines,
+                )
+                sections[i - 1 : i + 2] = (
+                    self.reduce_section_group(sections[i - 1 : i + 2]),
+                )
+            else:
+                i += 1
+
+        return sections
+
     def detect_uncached(self) -> list[DetectedSection]:
         """
         Breaks down the provided text into sections which are or are not code.
         """
-        return self.merge_short_sections(self.classify_lines())
+        return self.convert_plain_text_to_code(
+            self.merge_short_sections(self.classify_lines())
+        )
 
     def detect(self) -> tuple[DetectedSection, ...]:
         """
