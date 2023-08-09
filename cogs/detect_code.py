@@ -34,7 +34,10 @@ class DetectCode(commands.Cog):
         Just gets the first N lines of code from the provided sections.
         """
         code_generator = (
-            line for section in sections for line in section.lines if section.is_code
+            line
+            for section in sections
+            for line in section.lines
+            if section.is_code and line and not line.isspace()
         )
         return "\n".join(islice(code_generator, n))
 
