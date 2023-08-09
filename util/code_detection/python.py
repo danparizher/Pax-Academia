@@ -46,7 +46,7 @@ COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
 CONTAINER_OPENER = r"(\(|\[|\{)"
 CONTAINER_CLOSER = r"(\)|\]|\})"
 OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
-CLAUSE_END = rf"(\(|\[|:)$"
+CLAUSE_END = r"(\(|\[|:)$"
 
 LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(r"^assert\b"),
