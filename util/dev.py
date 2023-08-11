@@ -13,10 +13,21 @@ import discord
 import discord.ui
 from time import time
 
+ALLOWED_ROLES = [  # This is not in the env for a reason
+    1040358438242365490,  # pax
+    892124929590431815, # VH
+    267486666292199435, # VC
+    319948173554745345, # EC
+    410350754180890624, # Guide
+    267474828863340545  # Mod
+]
+
+
 class feedback(discord.ui.View):
-    def __init__(self, author: discord.Member,) -> None:
+    def __init__(self, author: discord.Member, func_name: str) -> None:
         super().__init__()
         self.author = author
+        self.func_name = func_name
         
     @discord.ui.button(
         label="",
@@ -24,13 +35,14 @@ class feedback(discord.ui.View):
         emoji="👍",
         disabled=False,
     )
-    async def button_callback(
+    async def ok_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
         self.children[0].disabled = True
         self.children[1].disabled = True
+        await self.insert(True, interaction)
         await interaction.response.edit_message(view=self)
 
     @discord.ui.button(
@@ -39,14 +51,30 @@ class feedback(discord.ui.View):
         emoji="👎",
         disabled=False,
     )
-    async def button_callback(
+    async def nok_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
         self.children[0].disabled = True
         self.children[1].disabled = True
+        await self.insert(False, interaction)
         await interaction.response.edit_message(view=self)
+
+    async def insert(self, like, interaction):
+        """Inserts the feedback into the database"""
+        # Since this won't be used often, we can just open and close the db every time
+        db = sqlite3.connect("util/dev.sqlite")
+        c = db.cursor()
+        c.execute(
+            "INSERT INTO feedback VALUES (?, ?, ?, ?, ?, ?)",
+            (None, time(), self.author.id, self.func_name, like, interaction.message.jump_url),
+        )
+        db.commit()
+        db.close()
+
+    async def is_allowed():
+        ...
 
 
 
@@ -91,7 +119,7 @@ def experimental(func):
         Wrapper to add a feedback view
         """
         r = await func(*args, **kwargs)
-        await r[0].respond(content=r[1], ephemeral=r[2], view=feedback(r[0].author))
+        await r[0].respond(content=r[1], ephemeral=r[2], view=feedback(r[0].author, func.__name__))
         return r
     return wrapper
 
