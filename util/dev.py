@@ -9,9 +9,12 @@ Users can give feedback to specific functions by liking or disliking. This will 
 # Imports
 import functools
 import sqlite3
+from collections.abc import Coroutine
+from time import time
+from typing import Any
+
 import discord
 import discord.ui
-from time import time
 
 ALLOWED_ROLES = [  # This is ok to be harcoded
     1040358438242365490,  # pax
@@ -19,7 +22,7 @@ ALLOWED_ROLES = [  # This is ok to be harcoded
     267486666292199435,  # VC
     319948173554745345,  # EC
     410350754180890624,  # Guide
-    267474828863340545  # Mod
+    267474828863340545,  # Mod
 ]
 
 
@@ -73,24 +76,34 @@ class feedback(discord.ui.View):
         await self.insert(False, interaction)
         await interaction.response.edit_message(view=self)
 
-    async def insert(self, like, interaction):
+    async def insert(
+        self,
+        like: bool,
+        interaction: discord.Interaction,
+    ) -> Coroutine[Any, Any, None]:
         """Inserts the feedback into the database"""
         # Since this won't be used often, we can just open and close the db every time
         db = sqlite3.connect("util/dev.sqlite")
         c = db.cursor()
         c.execute(
             "INSERT INTO feedback VALUES (?, ?, ?, ?, ?, ?)",
-            (None, time(), self.author.id, self.func_name,
-             like, interaction.message.jump_url),
+            (
+                None,
+                time(),
+                self.author.id,
+                self.func_name,
+                like,
+                interaction.message.jump_url,
+            ),
         )
         db.commit()
         db.close()
 
-    def is_allowed(self):
-        return any([role.id in ALLOWED_ROLES for role in self.author.roles])
+    def is_allowed(self) -> bool:
+        return any(role.id in ALLOWED_ROLES for role in self.author.roles)
 
 
-def database():
+def database() -> None:
     """
     The database should be seperate from the production database.
     This function creates the db if it doesn't exist yet.
@@ -108,13 +121,13 @@ def database():
             likes INTEGER NOT NULL,
             link TEXT NOT NULL
         );
-        """
+        """,
     )
     db.commit()
     db.close()
 
 
-def experimental(func):
+def experimental(func: Coroutine) -> Coroutine:
     """
     USAGE:
 
@@ -125,8 +138,9 @@ def experimental(func):
     Instead of responding to the user, return your response in a tuple.
     This wrapper will send the response and add the view.
     """
+
     @functools.wraps(func)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs) -> Coroutine[Any, Any, None]:
         """
         Wrapper to add a feedback view
         """
@@ -136,10 +150,18 @@ def experimental(func):
             return r
 
         if isinstance(r[0], discord.ApplicationContext):
-            await r[0].respond(content=r[1], ephemeral=r[2], view=feedback(r[0].author, func.__name__))
+            await r[0].respond(
+                content=r[1],
+                ephemeral=r[2],
+                view=feedback(r[0].author, func.__name__),
+            )
         elif isinstance(r[0], discord.Message):
-            await r[0].channel.send(content=r[1], view=feedback(r[0].author, func.__name__))
+            await r[0].channel.send(
+                content=r[1],
+                view=feedback(r[0].author, func.__name__),
+            )
         return r
+
     return wrapper
 
 
