@@ -13,7 +13,7 @@ import discord
 import discord.ui
 from time import time
 
-ALLOWED_ROLES = [  # This is not in the env for a reason
+ALLOWED_ROLES = [  # This is ok to be harcoded
     1040358438242365490,  # pax
     892124929590431815, # VH
     267486666292199435, # VC
@@ -40,6 +40,12 @@ class feedback(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
+        if not self.is_allowed():
+            await interaction.response.send_message(
+                "Sorry, only Verified Helpers and above can give feedback!",
+                ephemeral=True,
+            )
+            return
         self.children[0].disabled = True
         self.children[1].disabled = True
         await self.insert(True, interaction)
@@ -56,6 +62,12 @@ class feedback(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
+        if not self.is_allowed():
+            await interaction.response.send_message(
+                "Sorry, only Verified Helpers and above can give feedback!",
+                ephemeral=True,
+            )
+            return
         self.children[0].disabled = True
         self.children[1].disabled = True
         await self.insert(False, interaction)
@@ -73,9 +85,8 @@ class feedback(discord.ui.View):
         db.commit()
         db.close()
 
-    async def is_allowed():
-        ...
-
+    def is_allowed(self):
+        return any([role.id in ALLOWED_ROLES for role in self.author.roles])
 
 
 def database():
@@ -108,7 +119,7 @@ def experimental(func):
 
     @experimental
     async def function():
-        return tuple[ctx | message,embed,ephemeral]
+        return tuple[discord.ApplicationContext | discord.Message, embed | content, ephemeral]
 
     Instead of responding to the user, return your response in a tuple.
     This wrapper will send the response and add the view.
