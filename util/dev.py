@@ -143,6 +143,5 @@ def experimental(func):
     return wrapper
 
 
-if 'a':
-    # if __name__ != "__main__":
+if __name__ != "__main__":
     database()
