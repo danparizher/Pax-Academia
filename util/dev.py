@@ -108,7 +108,7 @@ def experimental(func):
 
     @experimental
     async def function():
-        return tuple[ctx,embed,ephemeral]
+        return tuple[ctx | message,embed,ephemeral]
 
     Instead of responding to the user, return your response in a tuple.
     This wrapper will send the response and add the view.
@@ -119,7 +119,14 @@ def experimental(func):
         Wrapper to add a feedback view
         """
         r = await func(*args, **kwargs)
-        await r[0].respond(content=r[1], ephemeral=r[2], view=feedback(r[0].author, func.__name__))
+
+        if r is None:
+            return r
+
+        if isinstance(r[0], discord.ApplicationContext):
+            await r[0].respond(content=r[1], ephemeral=r[2], view=feedback(r[0].author, func.__name__))
+        elif isinstance(r[0], discord.Message):
+            await r[0].channel.send(content=r[1], view=feedback(r[0].author, func.__name__))
         return r
     return wrapper
 
