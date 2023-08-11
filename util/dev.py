@@ -15,10 +15,10 @@ from time import time
 
 ALLOWED_ROLES = [  # This is ok to be harcoded
     1040358438242365490,  # pax
-    892124929590431815, # VH
-    267486666292199435, # VC
-    319948173554745345, # EC
-    410350754180890624, # Guide
+    892124929590431815,  # VH
+    267486666292199435,  # VC
+    319948173554745345,  # EC
+    410350754180890624,  # Guide
     267474828863340545  # Mod
 ]
 
@@ -28,7 +28,7 @@ class feedback(discord.ui.View):
         super().__init__()
         self.author = author
         self.func_name = func_name
-        
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.green,
@@ -80,7 +80,8 @@ class feedback(discord.ui.View):
         c = db.cursor()
         c.execute(
             "INSERT INTO feedback VALUES (?, ?, ?, ?, ?, ?)",
-            (None, time(), self.author.id, self.func_name, like, interaction.message.jump_url),
+            (None, time(), self.author.id, self.func_name,
+             like, interaction.message.jump_url),
         )
         db.commit()
         db.close()
@@ -143,5 +144,5 @@ def experimental(func):
 
 
 if 'a':
-#if __name__ != "__main__":
+    # if __name__ != "__main__":
     database()
