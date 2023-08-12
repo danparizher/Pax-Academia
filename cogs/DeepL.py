@@ -11,6 +11,11 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log, limit
 
+# Note to developers:
+# If you get an error here, it's probably because
+# you don't have a DeepL API key in your `.env`.
+# If you don't want to create a DeepL account, you can just
+# disable the cog by commenting it out in main.py
 translator = deepl.Translator(getenv("DEEPL_API_KEY", ""))
 SOURCE_LANGUAGES = {l.name: l for l in translator.get_source_languages()}
 TARGET_LANGUAGES = {l.name: l for l in translator.get_target_languages()}
