@@ -1,4 +1,6 @@
 import asyncio
+from os import getenv
+from typing import Callable
 
 import deepl
 import discord
@@ -9,53 +11,33 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log, limit
 
-LANGUAGES = [
-    "Bulgarian",
-    "Chinese",
-    "Czech",
-    "Danish",
-    "Dutch",
-    "English",
-    "Estonian",
-    "Finnish",
-    "French",
-    "German",
-    "Greek",
-    "Hungarian",
-    "Indonesian",
-    "Italian",
-    "Japanese",
-    "Korean",
-    "Latvian",
-    "Lithuanian",
-    "Norwegian",
-    "Polish",
-    "Portuguese",
-    "Romanian",
-    "Russian",
-    "Slovak",
-    "Slovenian",
-    "Spanish",
-    "Swedish",
-    "Turkish",
-    "Ukrainian",
-]
-FORMALITY_TONES = ["Formal", "Informal"]
+translator = deepl.Translator(getenv("DEEPL_API_KEY", ""))
+SOURCE_LANGUAGES = {l.name: l for l in translator.get_source_languages()}
+TARGET_LANGUAGES = {l.name: l for l in translator.get_target_languages()}
+FORMALITY_TONES = {f.value.replace("_", " ").title(): f.value for f in deepl.Formality}
 
 
-def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
-    current = ctx.value
-    if not current.strip():
-        return LANGUAGES[:25]
-    matches: list[tuple[str, int]]
-    matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
+def autocomplete_language(
+    languages: dict[str, deepl.Language],
+) -> Callable[[discord.AutocompleteContext], list[str]]:
+    language_names = list(languages.keys())
 
-    return [language for language, score in matches if score > matches[0][1] / 2]
+    def autocomplete(ctx: discord.AutocompleteContext) -> list[str]:
+        current = ctx.value
+        if not current.strip():
+            return language_names[:25]
+        matches: list[tuple[str, int]]
+        matches = thefuzz.process.extract(current, language_names, limit=25)  # type: ignore
+        highest_score = matches[0][1]
+
+        return [language for language, score in matches if score > highest_score / 2]
+
+    return autocomplete
 
 
 def translate(
     text: str,
-    source_language: str,
+    source_language: str | None,
     target_language: str,
     formality_tone: str | None = None,
 ) -> str:
@@ -73,22 +55,30 @@ def translate(
     :type formality_tone: Optional[str]
     :return: The translated text.
     """
-    if source_language not in LANGUAGES or target_language not in LANGUAGES:
-        return "Invalid Language"
+    if source_language and source_language not in SOURCE_LANGUAGES:
+        raise ValueError("Invalid Source Language")
 
-    if formality_tone is not None:
+    if target_language not in TARGET_LANGUAGES:
+        raise ValueError("Invalid Target Language")
+
+    if formality_tone:
         if formality_tone not in FORMALITY_TONES:
-            return "Invalid Formality Tone"
+            raise ValueError("Invalid Formality Tone")
 
-        # the DeepL API prefers that we use the lowercase version
-        formality_tone = formality_tone.lower()
+        if not TARGET_LANGUAGES[target_language].supports_formality:
+            raise ValueError(f"{target_language} formality tones are not supported!")
 
-    return deepl.translate(
-        text=text,
-        source_language=source_language,
-        target_language=target_language,
-        formality_tone=formality_tone,
+    result = translator.translate_text(
+        text,
+        source_lang=SOURCE_LANGUAGES[source_language] if source_language else None,
+        target_lang=TARGET_LANGUAGES[target_language],
+        formality=FORMALITY_TONES[formality_tone] if formality_tone else None,
     )
+
+    if isinstance(result, list):
+        return "\n".join(line.text for line in result)
+    else:
+        return result.text
 
 
 class Translation(commands.Cog):
@@ -103,33 +93,33 @@ class Translation(commands.Cog):
         required=True,
     )
     @option(
-        "source_language",
-        str,
-        description="The language of the text.",
-        required=True,
-        autocomplete=autocomplete_language,
-    )
-    @option(
         "target_language",
         str,
         description="The language to translate the text to.",
         required=True,
-        autocomplete=autocomplete_language,
+        autocomplete=autocomplete_language(TARGET_LANGUAGES),
+    )
+    @option(
+        "source_language",
+        str,
+        description="The language of the text.",
+        required=False,  # default = auto-detect
+        autocomplete=autocomplete_language(SOURCE_LANGUAGES),
     )
     @option(
         "formality_tone",
         str,
         description="The formality of the translation.",
         required=False,
-        choices=FORMALITY_TONES,
+        choices=FORMALITY_TONES.keys(),
     )
     @limit(2)
     async def translate(
         self,
-        ctx: commands.Context,
+        ctx: discord.ApplicationContext,
         text: str,
-        source_language: str,
         target_language: str,
+        source_language: str | None = None,
         formality_tone: str | None = None,
     ) -> None:
         """
@@ -168,18 +158,18 @@ class Translation(commands.Cog):
                 description=f"An error occurred while translating the text:\n\n{e}",
             ).build()
 
-            await ctx.send(embed=embed, ephemeral=True)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
 
         embed = EmbedBuilder(
-            title=f"Original Text ({source_language})",
+            title=f"Original Text - {source_language}",
             description=f"{text}",
         ).build()
 
         await ctx.respond(embed=embed)
 
         embed = EmbedBuilder(
-            title=f"Translated Text ({target_language})",
+            title=f"Translated Text - {target_language}",
             description=f"{translated_text}",
         ).build()
 
