@@ -1,4 +1,5 @@
 import asyncio
+from typing import Callable
 
 import deepl
 import discord
@@ -9,48 +10,93 @@ from discord.ext import commands
 from util.EmbedBuilder import EmbedBuilder
 from util.Logging import Log, limit
 
-LANGUAGES = [
-    "Bulgarian",
-    "Chinese",
-    "Czech",
-    "Danish",
-    "Dutch",
-    "English",
-    "Estonian",
-    "Finnish",
-    "French",
-    "German",
-    "Greek",
-    "Hungarian",
-    "Indonesian",
-    "Italian",
-    "Japanese",
-    "Korean",
-    "Latvian",
-    "Lithuanian",
-    "Norwegian",
-    "Polish",
-    "Portuguese",
-    "Romanian",
-    "Russian",
-    "Slovak",
-    "Slovenian",
-    "Spanish",
-    "Swedish",
-    "Turkish",
-    "Ukrainian",
-]
+# Updated 2023-08-12 based on:
+# https://github.com/DeepLcom/deepl-python/blob/77f35609d665c27aa693f8e86d291dc59eb2eeaa/deepl/api_data.py#L319-L351
+SOURCE_LANGUAGES = {
+    "Bulgarian": "bg",
+    "Czech": "cs",
+    "Danish": "da",
+    "German": "de",
+    "Greek": "el",
+    "English": "en",
+    "Spanish": "es",
+    "Estonian": "et",
+    "Finnish": "fi",
+    "French": "fr",
+    "Hungarian": "hu",
+    "Indonesian": "id",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Lithuanian": "lt",
+    "Latvian": "lv",
+    "Norwegian": "nb",
+    "Dutch": "nl",
+    "Polish": "pl",
+    "Portuguese": "pt",
+    "Romanian": "ro",
+    "Russian": "ru",
+    "Slovak": "sk",
+    "Slovenian": "sl",
+    "Swedish": "sv",
+    "Turkish": "tr",
+    "Ukrainian": "uk",
+    "Chinese": "zh",
+}
+
+TARGET_LANGUAGES = {
+    "Bulgarian": "bg",
+    "Czech": "cs",
+    "Danish": "da",
+    "German": "de",
+    "Greek": "el",
+    "English (British)": "en-GB",
+    "English (American)": "en-US",
+    "Spanish": "es",
+    "Estonian": "et",
+    "Finnish": "fi",
+    "French": "fr",
+    "Hungarian": "hu",
+    "Indonesian": "id",
+    "Italian": "it",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Lithuanian": "lt",
+    "Latvian": "lv",
+    "Norwegian": "nb",
+    "Dutch": "nl",
+    "Polish": "pl",
+    "Portuguese (Brazilian)": "pt-BR",
+    "Portuguese (European)": "pt-PT",
+    "Romanian": "ro",
+    "Russian": "ru",
+    "Slovak": "sk",
+    "Slovenian": "sl",
+    "Swedish": "sv",
+    "Turkish": "tr",
+    "Ukrainian": "uk",
+    "Chinese": "zh",
+}
+
 FORMALITY_TONES = ["Formal", "Informal"]
 
 
-def autocomplete_language(ctx: discord.AutocompleteContext) -> list[str]:
-    current = ctx.value
-    if not current.strip():
-        return LANGUAGES[:25]
-    matches: list[tuple[str, int]]
-    matches = thefuzz.process.extract(current, LANGUAGES, limit=25)  # type: ignore
+def autocomplete_language(
+    languages: dict[str, str]
+) -> Callable[[discord.AutocompleteContext], list[str]]:
+    language_names = list(languages.keys())
 
-    return [language for language, score in matches if score > matches[0][1] / 2]
+    def autocomplete(ctx: discord.AutocompleteContext) -> list[str]:
+        current = ctx.value
+        if not current.strip():
+            return language_names[:25]
+        matches: list[tuple[str, int]]
+        matches = thefuzz.process.extract(current, language_names, limit=25)  # type: ignore
+        highest_score = matches[0][1]
+
+        return [language for language, score in matches if score > highest_score / 2]
+
+    return autocomplete
 
 
 def translate(
@@ -73,8 +119,11 @@ def translate(
     :type formality_tone: Optional[str]
     :return: The translated text.
     """
-    if source_language not in LANGUAGES or target_language not in LANGUAGES:
-        return "Invalid Language"
+    if source_language not in SOURCE_LANGUAGES:
+        return "Invalid Source Language"
+
+    if source_language not in TARGET_LANGUAGES:
+        return "Invalid Source Language"
 
     if formality_tone is not None:
         if formality_tone not in FORMALITY_TONES:
@@ -85,8 +134,8 @@ def translate(
 
     return deepl.translate(
         text=text,
-        source_language=source_language,
-        target_language=target_language,
+        source_language=SOURCE_LANGUAGES[source_language],
+        target_language=TARGET_LANGUAGES[target_language],
         formality_tone=formality_tone,
     )
 
@@ -107,14 +156,14 @@ class Translation(commands.Cog):
         str,
         description="The language of the text.",
         required=True,
-        autocomplete=autocomplete_language,
+        autocomplete=autocomplete_language(SOURCE_LANGUAGES),
     )
     @option(
         "target_language",
         str,
         description="The language to translate the text to.",
         required=True,
-        autocomplete=autocomplete_language,
+        autocomplete=autocomplete_language(TARGET_LANGUAGES),
     )
     @option(
         "formality_tone",
@@ -126,7 +175,7 @@ class Translation(commands.Cog):
     @limit(2)
     async def translate(
         self,
-        ctx: commands.Context,
+        ctx: discord.ApplicationContext,
         text: str,
         source_language: str,
         target_language: str,
@@ -168,7 +217,7 @@ class Translation(commands.Cog):
                 description=f"An error occurred while translating the text:\n\n{e}",
             ).build()
 
-            await ctx.send(embed=embed, ephemeral=True)
+            await ctx.respond(embed=embed, ephemeral=True)
             return
 
         embed = EmbedBuilder(
