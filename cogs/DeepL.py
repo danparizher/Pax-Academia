@@ -44,7 +44,6 @@ SOURCE_LANGUAGES = {
     "Ukrainian": "uk",
     "Chinese": "zh",
 }
-
 TARGET_LANGUAGES = {
     "Bulgarian": "bg",
     "Czech": "cs",
@@ -132,8 +131,8 @@ def translate(
     if source_language not in SOURCE_LANGUAGES:
         return "Invalid Source Language"
 
-    if source_language not in TARGET_LANGUAGES:
-        return "Invalid Source Language"
+    if target_language not in TARGET_LANGUAGES:
+        return "Invalid Target Language"
 
     if formality_tone is not None:
         if formality_tone not in FORMALITY_TONES:
@@ -205,7 +204,9 @@ class Translation(commands.Cog):
         :type formality_tone: Optional[str]
         :return: The translated text.
         """
-        if source_language == target_language:
+        # Disallow same-language translations like
+        # "Spanish" -> "Spanish" or "English" -> "English (British)"
+        if target_language.startswith(source_language):
             embed = EmbedBuilder(
                 title="Error",
                 description="Source language and target language cannot be the same.",
@@ -224,7 +225,7 @@ class Translation(commands.Cog):
         except Exception as e:
             embed = EmbedBuilder(
                 title="Error",
-                description=f"An error occurred while translating the text:\n\n{e}",
+                description=f"An error occurred while translating the text:\n\n{e!r}",
             ).build()
 
             await ctx.respond(embed=embed, ephemeral=True)
