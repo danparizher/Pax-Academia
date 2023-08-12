@@ -2,6 +2,7 @@ import asyncio
 from typing import Callable
 
 import deepl
+import deepl.settings
 import discord
 import thefuzz.process
 from discord import option
@@ -77,8 +78,17 @@ TARGET_LANGUAGES = {
     "Ukrainian": "uk",
     "Chinese": "zh",
 }
+deepl.settings.SUPPORTED_LANGUAGES.clear()
+deepl.settings.SUPPORTED_LANGUAGES.extend(
+    {"code": code, "language": lang}
+    for lang, code in (SOURCE_LANGUAGES | TARGET_LANGUAGES).items()
+)
 
 FORMALITY_TONES = ["Formal", "Informal"]
+deepl.settings.SUPPORTED_FORMALITY_TONES.clear()
+deepl.settings.SUPPORTED_FORMALITY_TONES.extend(
+    tone.lower() for tone in FORMALITY_TONES
+)
 
 
 def autocomplete_language(
