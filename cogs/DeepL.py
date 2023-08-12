@@ -167,7 +167,7 @@ class Translation(commands.Cog):
             return
 
         embed = EmbedBuilder(
-            title=f"Original Text - {source_language}",
+            title=f"Original Text - {source_language or 'Auto Detect'}",
             description=f"{text}",
         ).build()
 
