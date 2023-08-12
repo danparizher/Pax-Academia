@@ -7,9 +7,6 @@ from dotenv import load_dotenv
 # Creates the db if it doesn't exist
 import util.db_builder
 
-# Updates the deepL lang config
-import util.deepl_update  # noqa: F401
-
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 discord_intents = discord.Intents.default()
