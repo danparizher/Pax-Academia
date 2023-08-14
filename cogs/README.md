@@ -1,71 +1,114 @@
 # Cogs
 
-Cogs are a way of organizing commands, listeners, and some state into one class. For more information about Cogs, read [the docs](https://discordpy.readthedocs.io/en/stable/ext/commands/cogs.html).
+Cogs are a way of organizing commands, listeners, and some state into one class. For more information about Cogs, read [the official docs](https://discordpy.readthedocs.io/en/stable/ext/commands/cogs.html).
 
 ## Alerts
 
-The alerts cog implements the `alerts-add`, `alerts-remove`, and `alerts-list` slash commands. Create alerts for keywords, such as when your name is mentioned.
-
-All alerts are stored in the database created by [`/util/db_builder.py`](/util/db_builder.py).
+- Commands implemented:
+  - `alerts-add`
+  - `alerts-remove`
+  - `alerts-list`
+- Description:
+  - Create alerts for keywords, such as when your name is mentioned.
+  - You can add a new alert for a particular keyword, remove a preexisting alert, and list all alerts created.
+  - All alerts are stored in the database created by [`/util/db_builder.py`](/util/db_builder.py).
 
 ## DeepL
 
-The DeepL cog implements the `translate` slash command.
-
-If you're confused as to why there are two different `translate` functions, one is to actually translate the text through the DeepL module while the other one is used to run service in a different thread. Note the use of `async`.
+- Commands implemented:
+  - `translate`
+- Description:
+  - Translate between two languages. Currently supports 29 different languages with support for formality.
+  - Translation is done asynchronously with two threads.
 
 ## DetectAI
 
-The DetectAI cog implements the `detect-ai` slash command.
-
-This command is reserved for certain roles, preferrably those with higher authority to use when needed. It is also limited to be used in any channel under a discord category with the name `help`. This is to prevent abuse by users and get the bot banned from copyleaks.
-
-Uses selenium to scrape the HTML of the live demo provided by copyleaks (no api key yet :pensive:). The bot will find the text field, enter the provided text, find the submit button and click on it. Then it will scrape the website again to find the response and return a discord embed for a user to view.
+- Commands implemented:
+  - `detect-ai`
+- Description:
+  - Reserved for roles with certain permissions.
+  - Limited to be used in any channel under a discord category with the name `help` to prevent abuse by users and get the bot banned from copyleaks.
+  - Uses selenium to scrape the HTML of the live demo provided by [copyleaks](https://copyleaks.com/) (no API key yet :pensive:).
 
 ## Dictionary
 
-The dictionary cog implements the `define` slash command, used to help define certain words. Uses more hacky HTML div element selection stuff to generate a response.
-
-Returns an markdown embed with the definition, and some links to the pronunciation.
+- Commands implemented:
+  - `define`
+- Description:
+  - Defines a word provided by the user.
+  - Uses beautiful soup to web scrape the [Oxford Learned Dictionaries](https://www.oxfordlearnersdictionaries.com) website.
+  - Creates a Discord embed with necessary information
 
 ## MessageCounter
 
-The message counter cog does not implement any slash commands but is used to keep track of how many messages a user has sent. The message count for a user is used to check eligibility for applying to be a staff member.
+- Commands implemented:
+  - None
+- Description:
+  - Used to keep track of how many messages a user has sent.
+  - Stores the information in the database.
+  - The number of messages used to check for eligibility when applying to become a staff member.
 
 ## Misc
 
-The misc cog implements the `ping` and `dump-database` slash command.
+- Commands implemented:
+  - `ping`
+  - `dump-database
+- Description:
+  - Miscellaneous commands to test the response time of the bot and a dump of the database for debugging.
 
 ## Moderation
 
-The moderation cog implements no slash commands but is used to enforce multipost warnings.
+- Commands implemented:
+  - None
+- Description:
+  - Is used to detect multiple posts by the same user in different channels.
 
 ## PubChem
 
-The PubChem cog implements the `chemsearch` slash command, used to search chemsitry databases for compunds.
-
-Builds and embed with compound details and returns an error if compound is not found.
+- Commands implemented:
+  - `chemsearch`
+- Description:
+  - Used to search chemistry databases for compounds.
+  - Creates a Discord embed with necessary information.
 
 ## Rules
 
-The rules cog implements the `rule` slash command used to display the rules.
+- Commands implemented:
+  - `rule`
+- Description:
+  - Display a rule as requested by a user.
 
 ## StaffAppsBackoffice
 
-The staff backend to see staff applications.
+- Commands implemented:
+  - `see-apps`
+- Description:
+  - Used by staff members to interact with staff applications.
 
 ## StaffAppsUser
 
-This cog implements the `apply-for-staff` slash command. Users can use this command to check eligibility and submit an application.
+- Commands implemented:
+  - `apply-for-staff`
+- Description:
+  - Used by any server member to check staff eligibility and submit an application.
 
 ## Surveys
 
-A cog to detect if a survey is sent in the wrong channel and alert the message sender to post in the dedicated channel.
+- Commands implemented:
+  - None
+- Description:
+  - A cog to detect if a survey is sent in the wrong channel and alert the message sender to post in the dedicated channel.
 
 ## Tips
 
-This cog implements the `tip` slash command to show tips to users. Users can choose from prewritten tips and ping someone (anonymously or otherwise) to read it.
+- Commands implemented:
+  - `tip`
+- Description:
+  - Used to display prewritten tips and ping someone (anonymously or otherwise) to read them.
 
 ## Wikipedia
 
-This cog implements the `wiki` slash command to query wikipedia and return the first page from wikipedia.
+- Commands implemented:
+  - `wiki`
+- Description:
+  - Query Wikipedia with a keyword(s) and display a Discord embed with the information.

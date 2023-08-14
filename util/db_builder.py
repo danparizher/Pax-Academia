@@ -1,6 +1,6 @@
 """
-Builds the database from scratch if it doesn't exist
-this file is used on import in main.py and should not be run manually
+Builds the database from scratch if it doesn't exist.
+This file is used on import in main.py and should not be run manually.
 Author: !SKA#0001
 """
 
