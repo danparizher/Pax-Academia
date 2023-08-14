@@ -34,6 +34,7 @@
    ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
    UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category ID where code-formatting tips will be sent automatically>
    AUTO_FORMAT_CODE_CHANNEL_IDS = <a comma-separated list of channel IDs where code will be auto-formatted>
+   DEEPL_API_KEY = <your deepl.com api key>
    ```
 
 5. Configure bot permissions.
