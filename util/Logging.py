@@ -8,7 +8,7 @@ from pathlib import Path
 
 import discord
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embed_builder import EmbedBuilder
 
 
 def limit(_limit_level: int) -> callable:

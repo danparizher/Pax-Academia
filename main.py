@@ -16,21 +16,21 @@ bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 
 def load() -> None:
     cogs = [
-        "Alerts",
-        "DeepL",
-        "DetectAI",
-        "DetectCode",
-        "Dictionary",
-        "MessageCounter",
-        "Misc",
-        "Moderation",
-        "PubChem",
-        "Rules",
-        "StaffAppsUser",  # v2 for users
-        "StaffAppsBackoffice",  # v2 for staff
-        "Surveys",
-        "Tips",
-        "Wikipedia",
+        "alerts",
+        "deepl",
+        "detect_ai",
+        "detect_code",
+        "dictionary",
+        "message_counter",
+        "misc",
+        "moderation",
+        "pubchem",
+        "rules",
+        "staffapps_frontend",  # v2 for users
+        "staffapps_backend",  # v2 for staff
+        "surveys",
+        "tips",
+        "wikipedia",
     ]
     for cog in cogs:
         bot.load_extension(f"cogs.{cog}")

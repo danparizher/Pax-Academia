@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embed_builder import EmbedBuilder
 from util.Logging import Log, limit
 
 

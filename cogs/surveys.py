@@ -3,7 +3,7 @@ from contextlib import suppress
 import discord
 from discord.ext import commands
 
-from util.EmbedBuilder import EmbedBuilder
+from util.embed_builder import EmbedBuilder
 from util.Logging import Log
 
 
