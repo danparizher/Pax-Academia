@@ -232,8 +232,8 @@ class Misc(commands.Cog):
     @option(
         "lines",
         int,
-        parameter_name="line_count",
-        description="The number of lines to view.",
+        parameter_name="trailing_lines_count",
+        description="The number of trailing lines to view.",
         required=True,
         default=20,
     )
@@ -242,7 +242,7 @@ class Misc(commands.Cog):
         self,
         ctx: ApplicationContext,
         filename: str,
-        line_count: int,
+        trailing_lines_count: int,
     ) -> None:
         if filename not in LOG_FILES:
             # Discord guarantees that this is impossible, but the pycord library might have issues!
@@ -253,7 +253,9 @@ class Misc(commands.Cog):
         with FileReadBackwards(filename) as log_file_backwards:
             log_lines_backwards = [
                 line
-                for _, line in zip(range(line_count), log_file_backwards, strict=False)
+                for _, line in zip(
+                    range(trailing_lines_count), log_file_backwards, strict=False
+                )
             ]
             log_lines = reversed(log_lines_backwards)
 
