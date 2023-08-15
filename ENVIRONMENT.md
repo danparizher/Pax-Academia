@@ -28,17 +28,20 @@
    ALLOW_SEE_APPS_ROLE = <a role name whose members can see applications>
    MULTIPOST_EMOJI = <optional, specify a custom emoji for multiposts e.g. ":multipost:1046975187930849280">
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
-   ALLOW_DUMP_DATABASE_GUILD = <a guild ID where the /dump_database command will be enabled>
-   ALLOW_DUMP_DATABASE_ROLE = <a role name whose members can use the /dump_database command>
+   ALLOW_VIEW_DATABASE_GUILD_ID = <a guild ID where the /view-database command will be enabled>
+   ALLOW_VIEW_DATABASE_ROLE_NAME = <a role name whose members can use the /view-database command>
    ALLOW_DETECT_AI_GUILD = <a guildID where the /detect-ai command will be enabled>
    ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
    UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category ID where code-formatting tips will be sent automatically>
    AUTO_FORMAT_CODE_CHANNEL_IDS = <a comma-separated list of channel IDs where code will be auto-formatted>
    DEEPL_API_KEY = <your deepl.com api key>
+   ALLOW_VIEW_LOGS_ROLE_NAME = <a role name whose members can use the /view-logs command>
+   STDOUT_LOG_FILE = <optionally, the file path where stdout is being redirected>
+   STDERR_LOG_FILE = <optionally, the file path where stderr is being redirected>
    ```
 
 5. Configure bot permissions.
 
-   You must specify the priveleged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
+   You must specify the privileged gateway intents for the bot through the [application portal](https://discord.com/developers/applications).
 
-   The bot requires the `message_content` priveleged gateway intent.
+   The bot requires the `message_content` privileged gateway intent.
