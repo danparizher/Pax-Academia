@@ -245,8 +245,6 @@ class Misc(commands.Cog):
         trailing_lines_count: int,
     ) -> None:
         if filename not in LOG_FILES:
-            # Discord guarantees that this is impossible, but the pycord library might have issues!
-            # The risk is low, but the consequences would be huge (reading the .env file).
             msg = f"Expected `filename` to be one of {tuple(LOG_FILES)!r} but it's actually {filename!r}"
             raise Exception(msg)
 
