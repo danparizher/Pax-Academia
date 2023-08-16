@@ -16,23 +16,22 @@ from typing import Any
 import discord
 import discord.ui
 
-ALLOWED_ROLES = [  # This is ok to be harcoded
-    1040358438242365490,  # pax
-    892124929590431815,  # VH
-    267486666292199435,  # VC
-    319948173554745345,  # EC
-    276969339901444096,  # Staff
-    639143661090766858,  # VCE
-    863101381111971860,  # Subject expert
-    627716753341808640,  # Retired staff
-]
-
 
 class feedback(discord.ui.View):
     def __init__(self, author: discord.Member, func_name: str) -> None:
         super().__init__()
         self.author = author
         self.func_name = func_name
+        self.ALLOWED_ROLES = [  # This is ok to be harcoded
+            1040358438242365490,  # pax
+            892124929590431815,  # VH
+            267486666292199435,  # VC
+            319948173554745345,  # EC
+            276969339901444096,  # Staff
+            639143661090766858,  # VCE
+            863101381111971860,  # Subject expert
+            627716753341808640,  # Retired staff
+        ]
 
     @discord.ui.button(
         label="",
@@ -82,7 +81,7 @@ class feedback(discord.ui.View):
         self,
         like: bool,
         interaction: discord.Interaction,
-    ) -> Coroutine[Any, Any, None]:
+    ) -> None:
         """Inserts the feedback into the database"""
         # Since this won't be used often, we can just open and close the db every time
         db = sqlite3.connect("util/dev.sqlite")
@@ -95,14 +94,14 @@ class feedback(discord.ui.View):
                 self.author.id,
                 self.func_name,
                 like,
-                interaction.message.jump_url,
+                interaction.message.jump_url or "Ephemeral msg",
             ),
         )
         db.commit()
         db.close()
 
     def is_allowed(self) -> bool:
-        return any(role.id in ALLOWED_ROLES for role in self.author.roles)
+        return any(role.id in self.ALLOWED_ROLES for role in self.author.roles)
 
 
 def database() -> None:
@@ -127,44 +126,6 @@ def database() -> None:
     )
     db.commit()
     db.close()
-
-
-def experimental(func: Coroutine) -> Coroutine:
-    """
-    USAGE:
-
-    @experimental
-    async def function():
-        return tuple[discord.ApplicationContext | discord.Message, embed | content, ephemeral]
-
-    Instead of responding to the user, return your response in a tuple.
-    This wrapper will send the response and add the view.
-    """
-
-    @functools.wraps(func)
-    async def wrapper(*args, **kwargs) -> Coroutine[Any, Any, None]:
-        """
-        Wrapper to add a feedback view
-        """
-        r = await func(*args, **kwargs)
-
-        if r is None:
-            return r
-
-        if isinstance(r[0], discord.ApplicationContext):
-            await r[0].respond(
-                content=r[1],
-                ephemeral=r[2],
-                view=feedback(r[0].author, func.__name__),
-            )
-        elif isinstance(r[0], discord.Message):
-            await r[0].channel.send(
-                content=r[1],
-                view=feedback(r[0].author, func.__name__),
-            )
-        return r
-
-    return wrapper
 
 
 if __name__ != "__main__":
