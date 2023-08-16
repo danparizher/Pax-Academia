@@ -169,3 +169,5 @@ log.txt
 .vscode/
 *.csv
 .idea/
+venv*
+*.log
