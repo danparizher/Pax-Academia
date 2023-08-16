@@ -1,24 +1,32 @@
 """
 Author: @sebastiaan-daniels
-This file contains wrapper functions developers can use to
-request feedback on functions that already exist in production,
-but are not yet fully tested.
+How to use:
 
-Users can give feedback to specific functions by liking or disliking. This will be stored in the database.
+from util.dev import feedback
+async def my_command(ctx: discord.ApplicationContext, arg1, arg2) -> None:
+    # Do stuff
+    await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
 """
 # Imports
-import functools
 import sqlite3
-from collections.abc import Coroutine
 from time import time
-from typing import Any
 
 import discord
 import discord.ui
 
 
 class feedback(discord.ui.View):
+    """
+    from util.dev import feedback
+    async def my_command(ctx: discord.ApplicationContext, arg1, arg2) -> None:
+    # Do stuff
+    await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
+    """
     def __init__(self, author: discord.Member, func_name: str) -> None:
+        """
+        ctx.author is the author of the command
+        func_name is the name of the command (usually ctx.command.name)
+        """
         super().__init__()
         self.author = author
         self.func_name = func_name
