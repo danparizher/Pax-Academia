@@ -38,7 +38,8 @@ class Surveys(commands.Cog):
         """
         with suppress(AttributeError):
             if (
-                message.channel.id != self.allow_survey_channel_id
+                message.channel.id
+                != self.allow_survey_channel_id
                 not in [role.id for role in message.author.roles]
                 and not message.author.bot
             ):
