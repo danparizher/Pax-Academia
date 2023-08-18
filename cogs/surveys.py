@@ -6,6 +6,8 @@ from discord.ext import commands
 from util.embed_builder import EmbedBuilder
 from util.Logging import Log
 
+from os import getenv
+
 
 def survey_list() -> list[str]:
     return [
@@ -20,6 +22,9 @@ def survey_list() -> list[str]:
 class Surveys(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
+        self.allow_survey_channel_id = int(
+            getenv("ALLOW_SURVEY_CHANNEL_ID", -1),
+        )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -33,9 +38,7 @@ class Surveys(commands.Cog):
         """
         with suppress(AttributeError):
             if (
-                message.channel.name != "surveys"
-                and "276969339901444096"  # Why is this still hardcoded?
-                # TODO: Add role to env
+                message.channel.id != self.allow_survey_channel_id
                 not in [role.id for role in message.author.roles]
                 and not message.author.bot
             ):
@@ -57,11 +60,6 @@ class Surveys(commands.Cog):
                             )
                         break
         await self.bot.process_commands(message)
-        with suppress(AttributeError):
-            Log(
-                f" $ sent a survey in {message.channel.name}, bot responded",
-                message.author,
-            )
 
 
 def setup(bot: commands.Bot) -> None:
