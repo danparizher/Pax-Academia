@@ -25,6 +25,7 @@ class Surveys(commands.Cog):
         self.allow_survey_channel_id = int(
             getenv("ALLOW_SURVEY_CHANNEL_ID", -1),
         )
+        self.staff_role = int(getenv("STAFF_ROLE", -1))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -38,9 +39,8 @@ class Surveys(commands.Cog):
         """
         with suppress(AttributeError):
             if (
-                message.channel.id
-                != self.allow_survey_channel_id
-                not in [role.id for role in message.author.roles]
+                message.channel.id != self.allow_survey_channel_id
+                and self.staff_role not in [role.id for role in message.author.roles]
                 and not message.author.bot
             ):
                 for survey in survey_list():

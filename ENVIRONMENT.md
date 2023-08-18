@@ -25,6 +25,7 @@
    ```env
    DISCORD_TOKEN = <your discord bot token>
    STAFF_CHANNEL = <the channel ID where new applications are sent>
+   STAFF_ROLE = <the role ID for staff members>
    ALLOW_SEE_APPS_ROLE = <a role name whose members can see applications>
    MULTIPOST_EMOJI = <optional, specify a custom emoji for multiposts e.g. ":multipost:1046975187930849280">
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
