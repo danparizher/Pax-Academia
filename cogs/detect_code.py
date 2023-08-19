@@ -5,8 +5,8 @@ from os import getenv
 import discord
 from discord.ext import commands
 
+import code_detection
 from cogs.tips import send_tip
-from util import code_detection
 from util.embed_builder import EmbedBuilder
 from util.logger import log
 
