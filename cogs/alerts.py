@@ -219,15 +219,11 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE",
-            (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Success",
-                description="Paused alerts.",
-            ).build()
+        embed = EmbedBuilder(
+            title="Success",
+            description="Paused alerts.",
+        ).build()
+
         await ctx.respond(embed=embed, ephemeral=True)
 
         log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
@@ -251,15 +247,10 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
-            (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Success",
-                description="Resumed alerts.",
-            ).build()
+        embed = EmbedBuilder(
+            title="Success",
+            description="Resumed alerts.",
+        ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
         log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
