@@ -1,5 +1,5 @@
-from discord import Member, option
-from discord.commands.context import ApplicationContext
+from discord import ApplicationContext, Member, User, option
+from discord.abc import Messageable
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
@@ -50,9 +50,9 @@ TIPS = {
 
 
 async def send_tip(
-    ctx: ApplicationContext,
+    ctx: Messageable,
     tip: str,
-    ping: Member | None = None,
+    ping: User | Member | None = None,
     anonymous: str = "No",
 ) -> None:
     message_content = None if ping is None else ping.mention
@@ -62,17 +62,20 @@ async def send_tip(
         color=0x32DC64,  # a nice pastel green
     ).build()
 
-    if anonymous.casefold() == "yes":
-        await ctx.send(message_content, embed=embed)
-        await ctx.respond(
-            "Thanks for the tip! It was sent anonymously.",
-            ephemeral=True,
-            delete_after=5,
-        )
-    elif anonymous.casefold() == "no":
-        await ctx.respond(message_content, embed=embed)
-    else:
-        await ctx.send(message_content, embed=embed)
+    if isinstance(ctx, ApplicationContext):
+        if anonymous.casefold() == "yes":
+            await ctx.send(message_content, embed=embed)
+            await ctx.respond(
+                "Thanks for the tip! It was sent anonymously.",
+                ephemeral=True,
+                delete_after=5,
+            )
+            return
+        elif anonymous.casefold() == "no":
+            await ctx.respond(message_content, embed=embed)
+            return
+
+    await ctx.send(message_content, embed=embed)
 
 
 class Tips(commands.Cog):
@@ -109,7 +112,15 @@ class Tips(commands.Cog):
         anonymous: str = "No",
     ) -> None:
         await send_tip(ctx, tip, ping, anonymous)
-        log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
+
+        if ctx.channel:
+            channel_name = getattr(ctx.channel, "name", f"<#{ctx.channel.id}>")
+            log(
+                f"$ used tip: {tip} | in channel {channel_name}",
+                ctx.author,
+            )
+        else:
+            log(f"$ used tip: {tip}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:
