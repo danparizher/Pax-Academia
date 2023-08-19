@@ -9,7 +9,8 @@ from discord import option
 from discord.ext import commands
 
 from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 # Note to developers:
 # If you get an error here, it's probably because
@@ -180,7 +181,7 @@ class Translation(commands.Cog):
 
         await ctx.send(embed=embed)
 
-        Log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
+        log(f"Translate command used by $ in {ctx.guild}.", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

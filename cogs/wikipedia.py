@@ -4,7 +4,8 @@ import wikipedia
 from discord.ext import commands
 
 from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 
 def get_wiki_without_logging(query: str) -> dict[str, str]:
@@ -60,7 +61,7 @@ class Wikipedia(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            Log(f"Wikipedia command used by $ in {ctx.guild}.", ctx.author)
+            log(f"Wikipedia command used by $ in {ctx.guild}.", ctx.author)
 
         except wikipedia.exceptions.DisambiguationError:
             embed = EmbedBuilder(

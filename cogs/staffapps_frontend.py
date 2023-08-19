@@ -10,7 +10,8 @@ from humanize import precisedelta
 
 import database
 from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 
 class embeds:
@@ -500,7 +501,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log("$ has completed the Staff Application", self.author)
+        log("$ has completed the Staff Application", self.author)
 
 
 class StaffAppsUser(commands.Cog):
@@ -541,7 +542,7 @@ class StaffAppsUser(commands.Cog):
         # check if user is banned
         if applicant.marked_spam:
             await ctx.respond(embed=embeds().marked_spam(), ephemeral=True)
-            Log(f"{logname} tried to apply for staff but is marked as spam")
+            log(f"{logname} tried to apply for staff but is marked as spam")
             return
 
         # check cooldown
@@ -550,7 +551,7 @@ class StaffAppsUser(commands.Cog):
                 embed=embeds().cooldown(applicant.cooldown),
                 ephemeral=True,
             )
-            Log(f"{logname} tried to apply for staff but is on cooldown")
+            log(f"{logname} tried to apply for staff but is on cooldown")
             return
 
         # check app status
@@ -559,7 +560,7 @@ class StaffAppsUser(commands.Cog):
         )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)
-            Log(
+            log(
                 f"{logname} tried to apply for staff but already has an ongoing application",
             )
             return
@@ -574,12 +575,12 @@ class StaffAppsUser(commands.Cog):
                 ),
                 ephemeral=True,
             )
-            Log(
+            log(
                 f"{logname} tried to apply for staff but does not meet the minimum requirements",
             )
             return
 
-        Log(f"{logname} is applying for staff")
+        log(f"{logname} is applying for staff")
         # user meets all requirements, send application form
         embed = EmbedBuilder(
             title="Congratulations!",

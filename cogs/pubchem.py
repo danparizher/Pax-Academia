@@ -5,7 +5,8 @@ from discord import option
 from discord.ext import commands
 
 from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 
 def get_data(name: str) -> dict[str, str]:
@@ -88,7 +89,7 @@ class PubChem(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            Log(f"Chemsearch command used by $ in {ctx.guild}.", ctx.author)
+            log(f"Chemsearch command used by $ in {ctx.guild}.", ctx.author)
 
         except IndexError:
             embed = EmbedBuilder(

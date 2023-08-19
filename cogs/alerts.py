@@ -8,7 +8,8 @@ from discord.ext import commands
 
 import database
 from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
@@ -96,7 +97,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert added by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert added by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-remove",
@@ -143,7 +144,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
     @limit(3)
@@ -185,7 +186,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-pause",
@@ -217,7 +218,7 @@ class Alerts(commands.Cog):
             ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-resume",
@@ -249,7 +250,7 @@ class Alerts(commands.Cog):
             ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:

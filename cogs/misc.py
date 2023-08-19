@@ -11,7 +11,8 @@ from discord.interactions import Interaction
 from file_read_backwards import FileReadBackwards
 
 import database
-from util.Logging import Log, limit
+from util.limiter import limit
+from util.logger import log
 
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
@@ -33,7 +34,7 @@ VIEW_LOGS_PERMISSIONS = (
 # in case multiple streams are directed to the same file
 LOG_FILES = {
     STDERR_LOG_FILE: "All standard errors are redirected here.",
-    "log.txt": "All Logging.Log() lines are saved here.",
+    "log.txt": "All Logging.log() lines are saved here.",
     STDOUT_LOG_FILE: "All standard output is redirected here.",
 }
 
@@ -81,7 +82,7 @@ class Misc(commands.Cog):
             await message.edit_original_response(content=content)
         else:
             await message.edit(content=content)
-        Log("$ used ping", ctx.author)
+        log("$ used ping", ctx.author)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -127,7 +128,7 @@ class Misc(commands.Cog):
             else:
                 await message.edit(content=text)
 
-        Log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
+        log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
 
         tables = database.grep_tables()
         await edit(f"{LOADING_EMOJI} Presented 0/{len(tables)} table(s).")
