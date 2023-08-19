@@ -1,13 +1,14 @@
 """
 Builds the database from scratch if it doesn't exist.
-This file is used on import in main.py and should not be run manually.
 Author: !SKA#0001
 """
 
 
 import sqlite3
+from pathlib import Path
 
-db = sqlite3.connect("util/database.sqlite")
+file_path = Path(__file__).parent / "database.sqlite"
+db = sqlite3.connect(file_path)
 c = db.cursor()
 
 c.execute(
@@ -109,3 +110,4 @@ if len(l) <= 1:
 
 
 db.commit()
+db.close()

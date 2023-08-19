@@ -1,5 +1,4 @@
 # imports
-import sqlite3
 from datetime import datetime
 from os import getenv
 from time import time
@@ -9,6 +8,7 @@ import discord.ui
 from discord import option
 from discord.ext import commands
 
+import database
 from util.embed_builder import EmbedBuilder
 from util.Logging import Log, limit
 
@@ -158,7 +158,7 @@ class staffAppsSeeSpam(discord.ui.View):
         self.max_page = len(data)
 
     async def repopulate(self, interaction: discord.Interaction) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         first_user_data = self.cursor.execute(
             "select * from application where uid = ?",
@@ -229,7 +229,7 @@ class staffAppsSeeSpam(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 0 where uid = ?",
@@ -269,7 +269,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 0 where uid = ?",
@@ -337,7 +337,7 @@ class staffAppsMain(discord.ui.View):
         else:
             self.children[8].disabled = True
 
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         statusname = self.cursor.execute(
             "select s.description from application a join status s on a.status = s.statusID where appId = ?;",
@@ -446,7 +446,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 1 where uid = ?",
@@ -482,7 +482,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update application set status = 2 where appId = ?",
@@ -519,7 +519,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         current_status = self.data[self.cur_page - 1][2]
         if current_status == 1:
@@ -578,7 +578,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update application set status = 3 where appId = ?",
@@ -616,7 +616,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "insert into like (appId, uid, name, likes) values (?, ?, ?, ?)",
@@ -658,7 +658,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "insert into like (appId, uid, name, likes) values (?, ?, ?, ?)",
@@ -754,7 +754,7 @@ SUBCOMMANDS = ["all", "spam", "accepted", "denied"]
 class StaffAppsBackoffice(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
 
     @SEE_PERMISSIONS

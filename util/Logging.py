@@ -3,11 +3,11 @@
 import datetime
 import functools
 import re
-import sqlite3
 from pathlib import Path
 
 import discord
 
+import database
 from util.embed_builder import EmbedBuilder
 
 
@@ -40,7 +40,7 @@ def limit(_limit_level: int) -> callable:
             if (
                 author_id is not None
             ):  # if no author exists, then we cannot limit, return func instead
-                conn = sqlite3.connect("util/database.sqlite")
+                conn = database.connect()
                 c = conn.cursor()
                 limit_level = c.execute(
                     "SELECT limitLevel from user where uid = ?",

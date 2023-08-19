@@ -1,10 +1,7 @@
 import csv
 import io
 import os
-import sqlite3
 from collections.abc import Iterable
-from dataclasses import dataclass
-from pathlib import Path
 
 import discord
 from discord.commands import OptionChoice, option
@@ -13,12 +10,9 @@ from discord.ext import commands
 from discord.interactions import Interaction
 from file_read_backwards import FileReadBackwards
 
+import database
 from util.Logging import Log, limit
 
-DATABASE_FILES = [
-    "util/database.sqlite",
-    "log.txt",
-]
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
 VIEW_DB_GUILD = os.getenv("ALLOW_VIEW_DATABASE_GUILD_ID")
@@ -44,63 +38,7 @@ LOG_FILES = {
 }
 
 
-@dataclass
-class Table:
-    database_file_path: str
-    database_name: str
-    name: str
-    column_names: list[str]
-
-
-def grep_tables() -> list[Table]:
-    """
-    It returns a list of Table objects, each of which contains the path to a database file, the name of
-    the database, the name of a table in the database, and a list of the column names in the table
-    :return: A list of Table objects.
-    """
-    tables: list[Table] = []
-    for database_file in DATABASE_FILES:
-        database_name = Path(database_file).name
-        if database_file.endswith(".txt"):
-            tables.append(
-                Table(
-                    database_file_path=database_file,
-                    database_name=database_name,
-                    name=database_name,
-                    column_names=["log"],
-                ),
-            )
-            continue
-
-        with sqlite3.connect(database_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT
-                    name
-                FROM
-                    sqlite_schema
-                WHERE
-                    type ='table'
-                    AND
-                    name NOT LIKE 'sqlite_%'
-                """,
-            )
-
-            for (table_name,) in cursor.fetchall():
-                cursor.execute(f"PRAGMA table_info({table_name})")
-                tables.append(
-                    Table(
-                        database_file_path=database_file,
-                        database_name=database_name,
-                        name=table_name,
-                        column_names=[x[1] for x in cursor.fetchall()],
-                    ),
-                )
-    return tables
-
-
-def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
+def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.File]:
     """
     It takes a list of Table objects, and returns an iterable of discord.File objects
 
@@ -108,11 +46,7 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
     :type tables: list[Table]
     """
     for table in tables:
-        if table.database_file_path.endswith(".txt"):
-            yield discord.File(table.database_file_path)
-            continue
-
-        with sqlite3.connect(table.database_file_path) as conn:
+        with database.connect() as conn:
             cursor = conn.cursor()
             cursor.execute(f"SELECT * FROM {table.name}")
 
@@ -123,7 +57,7 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
                 f.seek(0)
                 yield discord.File(
                     f,  # type: ignore (the class clearly accepts any readable, seekable IOBase)
-                    filename=f"{table.database_name}.{table.name}.csv",
+                    filename=f"{table.name}.csv",
                 )
 
 
@@ -195,14 +129,14 @@ class Misc(commands.Cog):
 
         Log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
 
-        tables = grep_tables()
+        tables = database.grep_tables()
         await edit(f"{LOADING_EMOJI} Presented 0/{len(tables)} table(s).")
 
         for i, (table, file) in enumerate(
             zip(tables, dump_tables_to_csv(tables), strict=False),
         ):
             await ctx.send_followup(
-                (f"Database: `{table.database_file_path}`\nTable: `{table.name}`"),
+                (f"Table: `{table.name}`"),
                 file=file,
                 ephemeral=True,
             )

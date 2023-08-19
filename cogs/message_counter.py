@@ -1,13 +1,13 @@
-import sqlite3
-
 import discord
 from discord.ext import commands
+
+import database
 
 
 class MessageCounter(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
 
     @commands.Cog.listener()

@@ -1,5 +1,4 @@
 import re
-import sqlite3
 from contextlib import suppress
 
 import discord
@@ -7,6 +6,7 @@ from discord.commands import option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
+import database
 from util.embed_builder import EmbedBuilder
 from util.Logging import Log, limit
 
@@ -24,7 +24,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
         return []
 
     # We no longer keep track of the name because this can change, breaking the alert.
-    conn = sqlite3.connect("util/database.sqlite")
+    conn = database.connect()
     data = [
         keyword
         for (keyword,) in conn.cursor()
@@ -38,7 +38,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(

@@ -1,5 +1,4 @@
 # imports
-import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 from time import time
@@ -9,6 +8,7 @@ import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
 
+import database
 from util.embed_builder import EmbedBuilder
 from util.Logging import Log, limit
 
@@ -109,7 +109,7 @@ class user:
         Data is accurate at the time of object creation.
         """
         # connect to database
-        db = sqlite3.connect("util/database.sqlite")
+        db = database.connect()
         cursor = db.cursor()
         # get user data from discord
         self.uid = user.id
@@ -421,7 +421,7 @@ class StaffAppModal(discord.ui.Modal):
         After all answers are given, insert the answers (also from staffAppView) into the database.
         """
         super().__init__(*args, **kwargs)
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.bot = bot
 
