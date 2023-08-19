@@ -8,7 +8,7 @@ import thefuzz.process
 from discord import option
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
+from message_formatting.embeds import EmbedBuilder
 from util.limiter import limit
 from util.logger import log
 

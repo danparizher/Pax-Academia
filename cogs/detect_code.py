@@ -7,7 +7,7 @@ from discord.ext import commands
 
 import code_detection
 from cogs.tips import send_tip
-from util.embed_builder import EmbedBuilder
+from message_formatting.embeds import EmbedBuilder
 from util.logger import log
 
 

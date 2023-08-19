@@ -1,7 +1,7 @@
 import functools
 
 import database
-from util.embed_builder import EmbedBuilder
+from message_formatting.embeds import EmbedBuilder
 from util.logger import log
 
 

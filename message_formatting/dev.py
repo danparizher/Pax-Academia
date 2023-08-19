@@ -6,6 +6,10 @@ from util.dev import feedback
 async def my_command(ctx: discord.ApplicationContext, arg1, arg2) -> None:
     # Do stuff
     await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
+
+Note from @GabeMillikan:
+    Once we're done testing this (amazing) feature, the file should be renamed to
+    `message_formatting/views/feedback.py` and should use the production database
 """
 # Imports
 import sqlite3
@@ -22,6 +26,7 @@ class feedback(discord.ui.View):
     # Do stuff
     await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
     """
+
     def __init__(self, author: discord.Member, func_name: str) -> None:
         """
         ctx.author is the author of the command
