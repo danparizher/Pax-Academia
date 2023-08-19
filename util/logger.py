@@ -7,7 +7,7 @@ from pathlib import Path
 import discord
 
 
-def log(message: str, user: discord.User | None = None) -> None:
+def log(message: str, user: discord.User | discord.Member | None = None) -> None:
     """
     Basic logging module.
     If a message and a user is given, Will replace $ in message with the user's name,
