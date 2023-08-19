@@ -26,8 +26,8 @@ class EmbedBuilder:
 
     def build(self) -> discord.Embed:
         embed = discord.Embed(
-            title=self.title[:256],
-            description=self.description[:4096],
+            title=self.title[:256] if self.title else None,
+            description=self.description[:4096] if self.description else None,
             color=self.color,
         )
 
