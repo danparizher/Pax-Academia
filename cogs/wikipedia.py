@@ -1,6 +1,7 @@
 import asyncio
 
 import wikipedia
+from discord import ApplicationContext
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
@@ -35,7 +36,7 @@ class Wikipedia(commands.Cog):
 
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
     @limit(2)
-    async def wiki(self, ctx: commands.Context, query: str) -> None:
+    async def wiki(self, ctx: ApplicationContext, query: str) -> None:
         """
         It searches Wikipedia for a query and returns the first result
 
