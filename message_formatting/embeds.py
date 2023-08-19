@@ -1,3 +1,5 @@
+from typing import Sequence
+
 import discord
 
 
@@ -8,7 +10,7 @@ class EmbedBuilder:
         description: str | None = None,
         color: int = 0xFF7900,
         image: str | None = None,
-        fields: list[tuple[str, str, bool]] | None = None,
+        fields: Sequence[tuple[str, str, bool]] | None = None,
         thumbnail: str | None = None,
         footer: str = "Powered by Homework Help",
         icon_url: str = "https://pbs.twimg.com/profile_images/988662835180797952/9fWyq5hr_400x400.jpg",
