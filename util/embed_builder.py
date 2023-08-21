@@ -27,14 +27,9 @@ class EmbedBuilder:
     def build(self) -> discord.Embed:
         embed = discord.Embed(
             title=self.title[:256],
-            description=self.description[:1024],
+            description=self.description[:4096],
             color=self.color,
         )
-
-        # Ensure the description stops at the end of a word
-        last_space_index = embed.description.rfind(" ")
-        if last_space_index != -1:
-            embed.description = embed.description[:last_space_index]
 
         if self.image:
             embed.set_image(url=self.image)
