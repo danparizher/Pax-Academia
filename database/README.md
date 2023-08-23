@@ -13,6 +13,7 @@ file and let [`schema.py`](./schema.py) create it again from scratch (losing all
 ### Making a Change to the Production Database
 - Update [`schema.py`](./schema.py) so that it can create a database in the correct state, from scratch.
 - Overwrite [`migrate.py`](./migrate.py) such that it applies your change to the previous version of your database.
+- Regenerate [`ERD.mdj`](./ERD.mdj). Reach out to @skagame on Discord if you need help with this.
 
 For example, if you wanted to add an integer column named `reputation` to the `user` table,
 you would add this line to [`schema.py`](./schema.py):
