@@ -34,7 +34,7 @@ VIEW_LOGS_PERMISSIONS = (
 # in case multiple streams are directed to the same file
 LOG_FILES = {
     STDERR_LOG_FILE: "All standard errors are redirected here.",
-    "log.txt": "All Logging.log() lines are saved here.",
+    "log.txt": "All logger.log() lines are saved here.",
     STDOUT_LOG_FILE: "All standard output is redirected here.",
 }
 
