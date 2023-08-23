@@ -45,9 +45,15 @@ class Wikipedia(commands.Cog):
         """
         try:
             page = await get_wiki(query)
+            desc = page["summary"]
+            if len(desc) > 1024:
+                # Ensure the description stops at the end of a word
+                last_space_index = desc[:1024].rfind(" ")
+                if last_space_index != -1:
+                    desc = desc[:last_space_index] + "..."
             embed = EmbedBuilder(
                 title=page["title"].title(),
-                description=page["summary"],
+                description=desc,
                 url=page["url"],
                 image=page["image"],
             ).build()

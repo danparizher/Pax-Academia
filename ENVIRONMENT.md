@@ -25,6 +25,7 @@
    ```env
    DISCORD_TOKEN = <your discord bot token>
    STAFF_CHANNEL = <the channel ID where new applications are sent>
+   STAFF_ROLE = <the role ID for staff members>
    ALLOW_SEE_APPS_ROLE = <a role name whose members can see applications>
    MULTIPOST_EMOJI = <optional, specify a custom emoji for multiposts e.g. ":multipost:1046975187930849280">
    ALLOW_MULTIPOST_FOR_ROLE = <a role name whose members are immune to multiposting rules>
@@ -32,6 +33,7 @@
    ALLOW_VIEW_DATABASE_ROLE_NAME = <a role name whose members can use the /view-database command>
    ALLOW_DETECT_AI_GUILD = <a guildID where the /detect-ai command will be enabled>
    ALLOW_DETECT_AI_ROLE = <a role name whose members can use the /detect-ai command>
+   ALLOW_SURVEY_CHANNEL_ID = <the channel ID for where members can post surveys>
    UNFORMATTED_CODE_DETECTION_CATEGORY_ID = <a category ID where code-formatting tips will be sent automatically>
    AUTO_FORMAT_CODE_CHANNEL_IDS = <a comma-separated list of channel IDs where code will be auto-formatted>
    DEEPL_API_KEY = <your deepl.com api key>

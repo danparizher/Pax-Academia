@@ -30,6 +30,7 @@ class EmbedBuilder:
             description=self.description[:4096],
             color=self.color,
         )
+
         if self.image:
             embed.set_image(url=self.image)
         if self.thumbnail:
