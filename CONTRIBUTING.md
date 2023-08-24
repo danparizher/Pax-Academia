@@ -27,7 +27,6 @@ Please name your branch as follows:
 ### 3.3 Pull Requests
 
 #### 3.3.1 Title
-
 Your title should be short and concise. It should be in the format:
 `<type>: <desc>`
 where `<type>` is one of the following:
@@ -42,7 +41,6 @@ where `<type>` is one of the following:
 and `<desc>` is a short description of the changes made.
 
 #### 3.3.2 Description
-
 Your description is where you can go into more detail about your changes.
 Please include _at least_ the following:
 - What you changed
@@ -52,7 +50,6 @@ If your PR is related to an issue, please include the issue number in the descri
 If it solves the issue, please include `Closes #<issue-number>` in the description. This will automatically close the issue when the PR is merged.
 
 #### 3.3.3 Labels
-
 Each PR MUST have at least one label. The following labels are available:
 - `bugfix` (bug fix) => PR's with this label must have a corresponding issue
 - `enhancement` (existing feature)
@@ -65,6 +62,41 @@ Each PR MUST have at least one label. The following labels are available:
 
 
 ## 4. Code Guidelines
+
+### 4.1 PEP8
+
+Please follow the PEP8 style guide. To do so, please use the [black](https://pypi.org/project/black/) python formatter.
+(All code in this repository is formatted using black)
+
+### 4.2 Documentation
+
+#### 4.2.1 Docstrings
+Please include docstrings for all functions and classes. These do not have to be long,
+but at least include the basic information (what the function does, what the parameters are, what the return value is, etc).
+
+#### 4.2.2 Comments
+Please include comments where necessary. This includes:
+- Comments explaining complex code
+- Comments explaining why you did something a certain way
+
+#### 4.2.3 Type Hints
+Please include type hints for all functions and classes.
+
+### 4.3 Complexity
+
+Please keep your code as simple as possible. We prefer longer, simpler code over shorter, more complex code.
+Avoid long list comprehensions, complex lambda functions, etc.
+
+### 4.4 Imports
+
+Please keep your imports as simple as possible. Avoid importing entire modules, and avoid importing multiple modules on one line.
+
+[!IMPORTANT]
+If you wish to use an external library, please ask first. We want to keep the number of external libraries to a minimum.
+(using external libraries already included in the requirements.txt is fine).
+
+[!WARNING]
+@skagame must review external libraries for security vulnerabilities before they can be used.
 
 
 ## 5. Reviewing Guidelines
