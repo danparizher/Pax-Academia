@@ -2,8 +2,9 @@ from discord import Member, option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 TIPS = {
     "Ask Your Question": (
@@ -108,7 +109,7 @@ class Tips(commands.Cog):
         anonymous: str = "No",
     ) -> None:
         await send_tip(ctx, tip, ping, anonymous)
-        Log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
+        log(f"$ used tip: {tip} | in channel {ctx.channel.name}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

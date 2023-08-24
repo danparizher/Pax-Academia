@@ -1,5 +1,4 @@
 # imports
-import sqlite3
 from datetime import datetime, timedelta
 from os import getenv
 from time import time
@@ -9,8 +8,10 @@ import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 class embeds:
@@ -109,7 +110,7 @@ class user:
         Data is accurate at the time of object creation.
         """
         # connect to database
-        db = sqlite3.connect("util/database.sqlite")
+        db = database.connect()
         cursor = db.cursor()
         # get user data from discord
         self.uid = user.id
@@ -421,7 +422,7 @@ class StaffAppModal(discord.ui.Modal):
         After all answers are given, insert the answers (also from staffAppView) into the database.
         """
         super().__init__(*args, **kwargs)
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.bot = bot
 
@@ -500,7 +501,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log("$ has completed the Staff Application", self.author)
+        log("$ has completed the Staff Application", self.author)
 
 
 class StaffAppsUser(commands.Cog):
@@ -541,7 +542,7 @@ class StaffAppsUser(commands.Cog):
         # check if user is banned
         if applicant.marked_spam:
             await ctx.respond(embed=embeds().marked_spam(), ephemeral=True)
-            Log(f"{logname} tried to apply for staff but is marked as spam")
+            log(f"{logname} tried to apply for staff but is marked as spam")
             return
 
         # check cooldown
@@ -550,7 +551,7 @@ class StaffAppsUser(commands.Cog):
                 embed=embeds().cooldown(applicant.cooldown),
                 ephemeral=True,
             )
-            Log(f"{logname} tried to apply for staff but is on cooldown")
+            log(f"{logname} tried to apply for staff but is on cooldown")
             return
 
         # check app status
@@ -559,7 +560,7 @@ class StaffAppsUser(commands.Cog):
         )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)
-            Log(
+            log(
                 f"{logname} tried to apply for staff but already has an ongoing application",
             )
             return
@@ -574,12 +575,12 @@ class StaffAppsUser(commands.Cog):
                 ),
                 ephemeral=True,
             )
-            Log(
+            log(
                 f"{logname} tried to apply for staff but does not meet the minimum requirements",
             )
             return
 
-        Log(f"{logname} is applying for staff")
+        log(f"{logname} is applying for staff")
         # user meets all requirements, send application form
         embed = EmbedBuilder(
             title="Congratulations!",

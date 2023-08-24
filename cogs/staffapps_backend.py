@@ -1,5 +1,4 @@
 # imports
-import sqlite3
 from datetime import datetime
 from os import getenv
 from time import time
@@ -9,8 +8,10 @@ import discord.ui
 from discord import option
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 class staffAppsSeeAll(discord.ui.View):
@@ -158,7 +159,7 @@ class staffAppsSeeSpam(discord.ui.View):
         self.max_page = len(data)
 
     async def repopulate(self, interaction: discord.Interaction) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         first_user_data = self.cursor.execute(
             "select * from application where uid = ?",
@@ -229,7 +230,7 @@ class staffAppsSeeSpam(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 0 where uid = ?",
@@ -247,7 +248,7 @@ class staffAppsSeeSpam(discord.ui.View):
             embed=embed.build(),
             view=None,
         )
-        Log(
+        log(
             f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
             self.author,
         )
@@ -269,7 +270,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 0 where uid = ?",
@@ -277,7 +278,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"$ unbanned user {self.author} from applying for staff.", interaction.user)
+        log(f"$ unbanned user {self.author} from applying for staff.", interaction.user)
         embed = EmbedBuilder(
             title="User unbanned.",
             description="This user can now apply for staff again.",
@@ -337,7 +338,7 @@ class staffAppsMain(discord.ui.View):
         else:
             self.children[8].disabled = True
 
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         statusname = self.cursor.execute(
             "select s.description from application a join status s on a.status = s.statusID where appId = ?;",
@@ -446,7 +447,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update user set markedSpam = 1 where uid = ?",
@@ -458,7 +459,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"User {self.data[self.cur_page-1][1]} marked as spam by $", self.author)
+        log(f"User {self.data[self.cur_page-1][1]} marked as spam by $", self.author)
         embed = EmbedBuilder(
             title="User marked as spam.",
             description="This user can no longer apply for staff.",
@@ -482,7 +483,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update application set status = 2 where appId = ?",
@@ -495,7 +496,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(f"Application {self.data[self.cur_page-1][0]} denied by $", self.author)
+        log(f"Application {self.data[self.cur_page-1][0]} denied by $", self.author)
         embed = EmbedBuilder(
             title="Application denied.",
             description="This application has been denied and a cooldown has been applied.",
@@ -519,7 +520,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         current_status = self.data[self.cur_page - 1][2]
         if current_status == 1:
@@ -551,7 +552,7 @@ class staffAppsMain(discord.ui.View):
             Status changed from **{status_name[0]}** -> **{status_name[1]}**."
         self.db.commit()
         self.db.close()
-        Log(
+        log(
             f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $",
             self.author,
         )
@@ -578,7 +579,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "update application set status = 3 where appId = ?",
@@ -589,7 +590,7 @@ class staffAppsMain(discord.ui.View):
             Status changed from **Application submitted** -> **Second Opinion required**."
         self.db.commit()
         self.db.close()
-        Log(
+        log(
             f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $",
             self.author,
         )
@@ -616,7 +617,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "insert into like (appId, uid, name, likes) values (?, ?, ?, ?)",
@@ -631,7 +632,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(
+        log(
             f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})",
             interaction.user,
         )
@@ -658,7 +659,7 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
             "insert into like (appId, uid, name, likes) values (?, ?, ?, ?)",
@@ -673,7 +674,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        Log(
+        log(
             f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})",
             interaction.user,
         )
@@ -754,7 +755,7 @@ SUBCOMMANDS = ["all", "spam", "accepted", "denied"]
 class StaffAppsBackoffice(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
 
     @SEE_PERMISSIONS
@@ -788,7 +789,7 @@ class StaffAppsBackoffice(commands.Cog):
             username = f"@{ctx.author.name}"
         else:
             username = f"{ctx.author.name}#{ctx.author.discriminator}"
-        Log(f"see-apps command used by {username}:({ctx.author.id})")
+        log(f"see-apps command used by {username}:({ctx.author.id})")
         if specific_id:
             data = self.cursor.execute(
                 "select a.appId, a.uid, a.discordName, a.firstName, a.timezone, a.hoursAvailableWk, a.staffReason, a.contributeReason, a.submissionTime, s.description from application a join status s on a.status = s.statusId where appId = ?;",
@@ -829,7 +830,7 @@ class StaffAppsBackoffice(commands.Cog):
                 color=0x30FFF1,
             )  # hwh green
             await ctx.respond(embed=embed.build(), ephemeral=True)
-            Log(f"{username} viewed a specific application: {specific_id}")
+            log(f"{username} viewed a specific application: {specific_id}")
 
         if subcommand == "all":
             # gather first page of applications
@@ -857,7 +858,7 @@ class StaffAppsBackoffice(commands.Cog):
                 )
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
-            Log(f"{username} viewed all applications")
+            log(f"{username} viewed all applications")
 
         elif subcommand == "denied":
             data = self.cursor.execute(
@@ -884,7 +885,7 @@ class StaffAppsBackoffice(commands.Cog):
                 )
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
-            Log(f"{username} viewed denied applications")
+            log(f"{username} viewed denied applications")
 
         elif subcommand == "accepted":
             data = self.cursor.execute(
@@ -912,7 +913,7 @@ class StaffAppsBackoffice(commands.Cog):
                 )  #
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
-            Log(f"{username} viewed accepted applications")
+            log(f"{username} viewed accepted applications")
 
         elif subcommand == "spam":
             data = self.cursor.execute(
@@ -958,7 +959,7 @@ class StaffAppsBackoffice(commands.Cog):
                     view=staffAppsSeeSpamSimple(data[0][0]),
                     ephemeral=True,
                 )
-            Log(f"{username} viewed banned users")
+            log(f"{username} viewed banned users")
 
         else:  # main command, no subcommand
             # gather all active applications
@@ -977,7 +978,7 @@ class StaffAppsBackoffice(commands.Cog):
                 view=staffAppsMain(ctx.author, data),
                 ephemeral=True,
             )
-            Log(f"{username} viewed all active applications")
+            log(f"{username} viewed all active applications")
 
 
 def setup(bot: commands.Bot) -> None:

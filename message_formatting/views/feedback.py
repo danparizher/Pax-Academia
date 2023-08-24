@@ -22,6 +22,7 @@ class feedback(discord.ui.View):
     # Do stuff
     await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
     """
+
     def __init__(self, author: discord.Member, func_name: str) -> None:
         """
         ctx.author is the author of the command

@@ -15,8 +15,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 class AuthorPredication(Enum):
@@ -357,7 +358,7 @@ class AI(commands.Cog):
             )
 
         await ctx.respond(embed=embed_builder.build(), ephemeral=True)
-        Log(f"$ used the detect-ai command in {ctx.channel.name}", ctx.author)
+        log(f"$ used the detect-ai command in {ctx.channel.name}", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:

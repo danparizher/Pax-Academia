@@ -10,8 +10,8 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log
+from message_formatting.embeds import EmbedBuilder
+from util.logger import log
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
@@ -120,7 +120,7 @@ class MessageFingerprint:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
                         # so it's fine to just log and ignore any errors
-                        Log(
+                        log(
                             f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}",
                         )
                         continue
@@ -314,7 +314,7 @@ class Moderation(commands.Cog):
                     fingerprint.author_id,
                 )
                 self.multipost_warnings[message.id] = (warning, fingerprint)
-                Log(f"First mp warning for $ in {message.channel.name}", message.author)
+                log(f"First mp warning for $ in {message.channel.name}", message.author)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
@@ -350,7 +350,7 @@ class Moderation(commands.Cog):
                     delete_after=15,
                 )
                 await message.delete()
-                Log(
+                log(
                     f"Subsequent mp warning for $ in {message.channel.name}",
                     message.author,
                 )

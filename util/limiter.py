@@ -1,14 +1,8 @@
-# !SKA#0001 24/10/2022
-
-import datetime
 import functools
-import re
-import sqlite3
-from pathlib import Path
 
-import discord
-
-from util.embed_builder import EmbedBuilder
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.logger import log
 
 
 def limit(_limit_level: int) -> callable:
@@ -40,7 +34,7 @@ def limit(_limit_level: int) -> callable:
             if (
                 author_id is not None
             ):  # if no author exists, then we cannot limit, return func instead
-                conn = sqlite3.connect("util/database.sqlite")
+                conn = database.connect()
                 c = conn.cursor()
                 limit_level = c.execute(
                     "SELECT limitLevel from user where uid = ?",
@@ -64,7 +58,7 @@ def limit(_limit_level: int) -> callable:
                         color=0xFF0000,
                     ).build()
                     await ctx.respond(embed=embed, ephemeral=True)
-                    Log(
+                    log(
                         f"$ tried to use {ctx.command.name}. But is limited from using it.",
                         ctx.author,
                     )
@@ -75,32 +69,3 @@ def limit(_limit_level: int) -> callable:
         return wrapper
 
     return decorator
-
-
-class Log:
-    def __init__(self, message: str, user: discord.User | None = None) -> None:
-        """
-        Basic logging module.
-        If a message and a user is given, Will replace $ in message with the user's name,
-        depending on whether it is an old or new username.
-        If no user given, will just log the message.
-        """
-        with Path("log.txt").open("a", encoding="utf-8") as log_file:
-            # get current time
-            now = datetime.datetime.now(tz=datetime.timezone.utc)
-            now_str: str = now.strftime("%Y-%m-%d %H:%M:%S")
-
-            # Check if user is given
-            if user is not None:
-                if str(user.discriminator) == "0":
-                    user_name = f"@{user.name}"
-                else:
-                    user_name = f"{user.name}#{user.discriminator}"
-
-                message = re.sub(
-                    r"(?<!\/)\$",
-                    user_name,
-                    message,
-                )  # replaces $ in string to new username
-
-            log_file.write(f"{now_str} - {message}\n")

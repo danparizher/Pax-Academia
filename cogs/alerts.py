@@ -1,5 +1,4 @@
 import re
-import sqlite3
 from contextlib import suppress
 
 import discord
@@ -7,8 +6,10 @@ from discord.commands import option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
@@ -24,7 +25,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
         return []
 
     # We no longer keep track of the name because this can change, breaking the alert.
-    conn = sqlite3.connect("util/database.sqlite")
+    conn = database.connect()
     data = [
         keyword
         for (keyword,) in conn.cursor()
@@ -38,7 +39,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -96,7 +97,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert added by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert added by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-remove",
@@ -143,7 +144,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
     @limit(3)
@@ -185,7 +186,7 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-pause",
@@ -217,7 +218,7 @@ class Alerts(commands.Cog):
             ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-resume",
@@ -249,7 +250,7 @@ class Alerts(commands.Cog):
             ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:

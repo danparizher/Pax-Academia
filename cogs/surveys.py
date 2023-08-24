@@ -1,12 +1,11 @@
 from contextlib import suppress
+from os import getenv
 
 import discord
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log
-
-from os import getenv
+from message_formatting.embeds import EmbedBuilder
+from util.logger import log
 
 
 def survey_list() -> list[str]:
@@ -55,7 +54,7 @@ class Surveys(commands.Cog):
                                 embed=embed,
                             )
                         with suppress(AttributeError):
-                            Log(
+                            log(
                                 f" $ sent a survey in {message.channel.name}, bot responded",
                                 message.author,
                             )

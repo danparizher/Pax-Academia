@@ -10,8 +10,9 @@ from discord import option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 @dataclass
@@ -528,7 +529,7 @@ class Dictionary(commands.Cog):
             view = None
 
         await ctx.edit(embed=word_info.build_embed(), view=view)
-        Log("$ used the dictionary command", ctx.author)
+        log("$ used the dictionary command", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:
