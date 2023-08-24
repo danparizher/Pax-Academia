@@ -1,5 +1,9 @@
 # Contributing to Pax-Academia
 
+Pax Academia is an open source project, and we welcome contributions of all kinds from anyone. As this project has grown to become a large project, we have had to implement some guidelines to ensure that the project remains maintainable and that contributions are of high quality, since this bot is used by well over 150.000 people.
+
+This document outlines the process for contributing to the project. Please read it carefully before making a contribution so that you know what to expect and what is expected of you.
+
 ## 1. Non Contributors
 
 If you are not listed as a contributor, you are still welcome to help out!
@@ -57,8 +61,17 @@ Each PR MUST have at least one label. The following labels are available:
 - `dependencies` (Updates a dependency) 
 - `feature` (new feature) 
 - `hotfix` (very small bugfix/typo fix)
+- `refactor` (refactoring production code)
 
 (PR's with no label will be rejected)
+
+#### 3.3.4 Content
+A PR may not contain code and commits not related to the issue it is solving or feature it is completing.
+F.ex. 
+- a PR solving issue #1 may not contain code or commits related to issue #2.
+- Do not include a commit that changes something in the docs when working on a discord command (unless the docs are related to the command)
+- Do not refacter code in cog A when working on cog B
+- ...
 
 
 ## 4. Code Guidelines
@@ -96,7 +109,39 @@ If you wish to use an external library, please ask first. We want to keep the nu
 (using external libraries already included in the requirements.txt is fine).
 
 [!WARNING]
-@skagame must review external libraries for security vulnerabilities before they can be used.
+@sebastiaan-daniels must review external libraries for security vulnerabilities before they can be used.
 
 
 ## 5. Reviewing Guidelines
+
+### 5.1 Code Reviews from contributors
+
+Each contributor, regardless of their role, is allowed to review code.
+However, requested changes or comments made by contributors do not have to be followed by the author of the PR. They are merely suggestions.
+
+### 5.2 Code Reviews from maintainers (Code Owners)
+
+#### 5.2.1 General
+Each PR, depending on its complexity, must be reviewed by at least n maintainers. (see 5.2.3 for the number of maintainers required for each type of PR)
+No code may be merged without the approval of those code owners. All code owners must be requested to review the PR. (this should be done automatically by github)
+
+#### 5.2.2 Code Owners
+The project maintainers (owners), are the people listed under `.github/CODEOWNERS`.
+
+#### 5.2.3 Reviewing
+For each type of PR, the following amount of code owners must approve the PR before merging:
+- `hotfix` => 1
+- `documentation` => 1
+- `dependencies` => 1 + @sebastiaan-daniels
+- `bugfix` => 2
+- `enhancement` => 3
+- `refactor` => 3
+- `feature` => 4
+
+#### 5.2.4 Accepted code
+If the required number of code owners have approved the PR, the PR may be merged by any code owner.
+
+#### 5.2.5 Changes requested by a code owner
+If any code owner requests changes, (regardless whether or not the required number of code owners have approved the PR), the PR may not be merged until those changes have been either made or discussed and agreed upon.
+
+The code owner that requested changes must re-review the PR and approve it before it can be merged.
