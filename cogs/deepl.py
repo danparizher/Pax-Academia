@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from os import getenv
 from typing import Callable
@@ -83,8 +85,7 @@ def translate(
 
     if isinstance(result, list):
         return "\n".join(line.text for line in result)
-    else:
-        return result.text
+    return result.text
 
 
 class Translation(commands.Cog):

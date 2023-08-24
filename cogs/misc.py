@@ -1,11 +1,12 @@
+from __future__ import annotations
+
 import csv
 import io
 import os
-from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 import discord
 from discord.commands import OptionChoice, option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 from discord.interactions import Interaction
 from file_read_backwards import FileReadBackwards
@@ -13,6 +14,11 @@ from file_read_backwards import FileReadBackwards
 import database
 from util.limiter import limit
 from util.logger import log
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from discord.commands.context import ApplicationContext
 
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
@@ -187,7 +193,9 @@ class Misc(commands.Cog):
             log_lines_backwards = [
                 line
                 for _, line in zip(
-                    range(trailing_lines_count), log_file_backwards, strict=False
+                    range(trailing_lines_count),
+                    log_file_backwards,
+                    strict=False,
                 )
             ]
             log_lines = reversed(log_lines_backwards)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.commands import option
 from discord.ext import commands

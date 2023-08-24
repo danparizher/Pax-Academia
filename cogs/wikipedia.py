@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 
 import wikipedia
@@ -51,7 +53,7 @@ class Wikipedia(commands.Cog):
                 # Ensure the description stops at the end of a word
                 last_space_index = desc[:1024].rfind(" ")
                 if last_space_index != -1:
-                    desc = desc[:last_space_index] + "..."
+                    desc = f"{desc[:last_space_index]}..."
             embed = EmbedBuilder(
                 title=page["title"].title(),
                 description=desc,

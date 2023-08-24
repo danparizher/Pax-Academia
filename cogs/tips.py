@@ -1,10 +1,16 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from discord import Member, option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
 from util.limiter import limit
 from util.logger import log
+
+if TYPE_CHECKING:
+    from discord.commands.context import ApplicationContext
 
 TIPS = {
     "Ask Your Question": (

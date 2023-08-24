@@ -1,18 +1,23 @@
+from __future__ import annotations
+
 import asyncio
 import re
 import urllib.parse
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import aiohttp
 import bs4
 import discord
 from discord import option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
 from util.limiter import limit
 from util.logger import log
+
+if TYPE_CHECKING:
+    from discord.commands.context import ApplicationContext
 
 
 @dataclass
