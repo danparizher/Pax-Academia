@@ -145,3 +145,14 @@ If the required number of code owners have approved the PR, the PR may be merged
 If any code owner requests changes, (regardless whether or not the required number of code owners have approved the PR), the PR may not be merged until those changes have been either made or discussed and agreed upon.
 
 The code owner that requested changes must re-review the PR and approve it before it can be merged.
+
+### 5.3 PR's from code owners
+
+#### 5.3.1 General
+If a code owner makes a PR, the same rules apply as for any other contributor. The PR must be reviewed by the required number of code owners, and may not be merged until the required number of code owners have approved the PR.
+
+#### 5.3.2 Special cases
+
+Since a user cannot review their own PR, there are some cases in which more code owners must review the PR than there are existing.
+In these cases, if all code owners have approved the PR, the PR may be merged by any code owner.
+I.e if a code owner creates a feature, only 3 code owners must add a review. (since there are only 4 owners.)
