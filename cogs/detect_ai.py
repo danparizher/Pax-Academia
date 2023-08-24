@@ -11,8 +11,7 @@ import discord
 import undetected_chromedriver as uc
 from discord import option
 from discord.ext import commands
-from selenium.common.exceptions import \
-    TimeoutException as SeleniumTimeoutException
+from selenium.common.exceptions import TimeoutException as SeleniumTimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait

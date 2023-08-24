@@ -10,7 +10,8 @@ DETECTOR_CLASSES: list[type[DetectorBase]] = [
 def detect(text: str) -> tuple[str, tuple[DetectedSection, ...]] | None:
     detectors = [detector_class(text) for detector_class in DETECTOR_CLASSES]
     best_match = max(
-        detectors, key=lambda d: (d.probable_lines_of_code, d.lines_of_code)
+        detectors,
+        key=lambda d: (d.probable_lines_of_code, d.lines_of_code),
     )
 
     if best_match.lines_of_code == 0:

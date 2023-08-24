@@ -38,9 +38,9 @@ class Pronunciation:
 
     @classmethod
     def parse_from_oxford_phonetic_element(
-        cls: type["Pronunciation"],
+        cls: type[Pronunciation],
         element: bs4.Tag,
-    ) -> "Pronunciation | None":
+    ) -> Pronunciation | None:
         """
         Tries to parse a pronunciation element on an Oxford dictionary page.
 
@@ -106,7 +106,7 @@ class SimilarWord:
     url: str
     part_of_speech: str | None
 
-    async def fetch(self) -> "WordInformation":
+    async def fetch(self) -> WordInformation:
         """
         Fetches the word information based on the URL.
 
@@ -389,9 +389,7 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
 
     if not senses:
         msg = "Failed to find a single definition on the page via selector `.sense`"
-        raise ValueError(
-            msg,
-        )
+        raise ValueError(msg)
 
     return WordInformation(
         url=url,
@@ -421,9 +419,7 @@ async def search(word: str) -> WordInformation | list[str]:
         return parse_oxford_definition_page(url, soup)
 
     msg = f"Unexpected status code {status_code} while searching for word {word!r}"
-    raise Exception(
-        msg,
-    )
+    raise Exception(msg)
 
 
 def ChooseSimilarWordView(
