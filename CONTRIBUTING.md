@@ -8,21 +8,21 @@ This document outlines the process for contributing to the project. Please read 
 
 If you are not listed as a contributor, you are still welcome to help out!
 Please fork the repository and make a pull request with your changes.
-Follow the guidelines below to ensure your pull request correct. Incorrect pull requests will be rejected.
+Follow the guidelines below to ensure your pull request is correct. Incorrect pull requests will be rejected.
 
 ## 2. Contributors
 
 Please create your own branch and make a pull request to the master branch.
-Follow the guidelines below to ensure your pull request correct. Incorrect pull requests will be rejected.
+Follow the guidelines below to ensure your pull request is correct. Incorrect pull requests will be rejected.
 
-## 3. PR Guidelines
+## 3. Pull Request Guidelines
 
 ### 3.1 Branch Names
 
 Please name your branch as follows:
 `<your-name>.<feature-name>`
 
-### 3.2 Commit Messages/ commits
+### 3.2 Commit Messages/ Commits
 
 - Use the present tense ("Add feature" not "Added feature")
 - Keep messages short and concise
@@ -134,8 +134,8 @@ For each type of PR, the following amount of code owners must approve the PR bef
 - `documentation` => 1
 - `dependencies` => 1 + @sebastiaan-daniels
 - `bugfix` => 2
+- `refactor` => 2
 - `enhancement` => 3
-- `refactor` => 3
 - `feature` => 4
 
 #### 5.2.4 Accepted code
