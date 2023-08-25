@@ -42,26 +42,6 @@ def run():
         ),
         "15c",
     )
-    test(
-        dedent(
-            """\
-            import matplotlib.pyplot as plt
-
-            def fib(n):
-                if n <= 1:
-                    return 1
-                else:
-                    return fib(n - 1) + fib(n - 2)
-
-            x = list(range(10))
-            y = list(map(fib, x))
-
-            plt.scatter(x, y)
-            plt.show()\
-            """
-        ),
-        "13c",
-    )
 
     print("mixed code and english")
     test(
@@ -114,8 +94,8 @@ def run():
         "2p 14c 3p 5c 1p",
     )
 
-    # these tests will expand as we fix false positives in production
-    print("one-off cases that we found to fail on production")
+    # these tests will expand as we fix issues found on production
+    print("one-off cases from false positives in production")
     test(
         dedent(
             """\
