@@ -1,7 +1,7 @@
 from textwrap import dedent
 
 from ..python import PythonDetector
-from .helper import create_tester
+from .helpers import create_tester
 
 test = create_tester(PythonDetector)
 

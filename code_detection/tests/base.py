@@ -1,5 +1,5 @@
 from ..base import DetectorBase
-from .helper import create_tester
+from .helpers import create_tester
 
 
 class SimpleDetector(DetectorBase):
