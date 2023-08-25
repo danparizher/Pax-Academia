@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import time
-from typing import Callable, Type
+from typing import TYPE_CHECKING, Callable
 
-from ..base import DetectorBase
+if TYPE_CHECKING:
+    from code_detection.base import DetectorBase
 
 
-def create_tester(detector: Type[DetectorBase]) -> Callable[[str, str], None]:
+def create_tester(detector: type[DetectorBase]) -> Callable[[str, str], None]:
     test_counter = 0
 
     def test(text: str, expected_result: str) -> None:
@@ -18,13 +21,13 @@ def create_tester(detector: Type[DetectorBase]) -> Callable[[str, str], None]:
 
         if actual_result != expected_result:
             print(
-                f"TEST #{test_counter} FAILED in {execution_time_ms:.4f} milliseconds"
+                f"TEST #{test_counter} FAILED in {execution_time_ms:.4f} milliseconds",
             )
             print(f"    - Expected: {expected_result!r}")
             print(f"    -   Actual: {actual_result!r}")
         else:
             print(
-                f"TEST #{test_counter} SUCCEEDED in {execution_time_ms:.4f} milliseconds"
+                f"TEST #{test_counter} SUCCEEDED in {execution_time_ms:.4f} milliseconds",
             )
 
     return test

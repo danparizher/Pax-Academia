@@ -1,4 +1,5 @@
-from ..base import DetectorBase
+from code_detection.base import DetectorBase
+
 from .helpers import create_tester
 
 
@@ -20,7 +21,7 @@ test_counter = 0
 test = create_tester(SimpleDetector)
 
 
-def run():
+def run() -> None:
     print("Testing code-only scenarios...")
 
     test(
@@ -185,7 +186,7 @@ def run():
         """\
         text
 
-        
+
 
 
 
@@ -193,7 +194,7 @@ def run():
 
         text
 
-        
+
 
 
 
@@ -226,8 +227,8 @@ def run():
         """\
         code
 
-        
-        
+
+
         code
         text
         text
@@ -301,7 +302,7 @@ def run():
         code
         code
         code
-        
+
         text
 
         code
@@ -319,7 +320,7 @@ def run():
         text
         text
 
-        
+
         code
         code
         code

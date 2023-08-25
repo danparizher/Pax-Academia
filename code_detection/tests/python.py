@@ -1,12 +1,13 @@
 from textwrap import dedent
 
-from ..python import PythonDetector
+from code_detection.python import PythonDetector
+
 from .helpers import create_tester
 
 test = create_tester(PythonDetector)
 
 
-def run():
+def run() -> None:
     print("code-only")
     test(
         dedent(
@@ -16,7 +17,7 @@ def run():
                 print("You're old enough to vote in the US")
             else:
                 print("You're too young to vote in the US")\
-            """
+            """,
         ),
         "5c",
     )
@@ -38,7 +39,7 @@ def run():
 
             plt.scatter(x, y)
             plt.show()\
-            """
+            """,
         ),
         "15c",
     )
@@ -53,10 +54,10 @@ def run():
             age = input("How old are you?")
             if age >= 18:
                 print("You can vote!")
-            
+
             i get this error for no reason, my code is fine
             TypeError: '>=' not supported between instances of 'str' and 'int'\
-            """
+            """,
         ),
         "3p 3c 3p",
     )
@@ -80,7 +81,7 @@ def run():
                         return json.load(f)
                 else:
                     return []
-            
+
             specifically I'm wondering if there's a better way deal with the file not existing
             is this better?
             try:
@@ -89,7 +90,7 @@ def run():
             except FileNotFoundError:
                 return []
             please ping me to reply, thanks!\
-            """
+            """,
         ),
         "2p 14c 3p 5c 1p",
     )
@@ -103,7 +104,7 @@ def run():
 
             i havent yet added the persistent storage and im not home and asking in advance - for sqlite, do i need like an external server or smth (im not too well-versed with DBs, i only know this from working with mysql)
             cause my intention is just to start my python app without additional servers or anything\
-            """
+            """,
         ),
         "4p",
     )
