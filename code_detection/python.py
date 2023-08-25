@@ -45,6 +45,8 @@ NAME = rf"[a-zA-Z_][a-zA-Z_0-9]*{NOT_KEYWORD_LOOKBEHIND}"
 COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
 CONTAINER_OPENER = r"(\(|\[|\{)"
 CONTAINER_CLOSER = r"(\)|\]|\})"
+NAME_OR_CONTAINER = rf"(({NAME})|{CONTAINER_OPENER}|{CONTAINER_CLOSER})"
+COMMA_SEP_TOKEN = rf"({NAME_OR_CONTAINER}\s*,\s*)*{NAME_OR_CONTAINER}"
 OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
 CLAUSE_END = r"(\(|\[|:)$"
 
@@ -61,14 +63,14 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"^except.*{CLAUSE_END}"),
     re.compile(r"^finally\s*:$"),
     re.compile(r"^from\b"),
-    re.compile(rf"for\b.+{COMMA_SEP_NAMES}.+in.+(\(|\[|\{{|{NAME})"),
+    re.compile(rf"for\b\s*{COMMA_SEP_TOKEN}\s*in.+(\(|\[|\{{|{NAME})$"),
     re.compile(rf"^(global|nonlocal)\s+{COMMA_SEP_NAMES}"),
     re.compile(rf"^if.*{CLAUSE_END}"),
     re.compile(r"^import\b"),
     re.compile(r"\blambda.*:"),
     re.compile(r"^raise\b"),
     re.compile(r"^return\b"),
-    re.compile(r"^try\s+:$"),
+    re.compile(r"^try\s*:$"),
     re.compile(rf"^while.*{CLAUSE_END}"),
     re.compile(rf"^with.*{CLAUSE_END}"),
     re.compile(r"^yield\b"),
