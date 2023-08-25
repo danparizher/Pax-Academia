@@ -11,5 +11,5 @@ python-dotenv==1.0.0
 python-Levenshtein==0.21.1 # part of thefuzz, imported to remove warning message
 selenium==4.11.2
 thefuzz==0.20.0
-undetected-chromedriver==3.5.2
+undetected-chromedriver==3.5.3
 wikipedia==1.4.0
