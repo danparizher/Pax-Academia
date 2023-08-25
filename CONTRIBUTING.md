@@ -1,6 +1,6 @@
 # Contributing to Pax-Academia
 
-Pax Academia is an open source project, and we welcome contributions of all kinds from anyone. As this project has grown to become a large project, we have had to implement some guidelines to ensure that the project remains maintainable and that contributions are of high quality, since this bot is used by well over 150.000 people.
+Pax Academia is an open source project, and we welcome contributions of all kinds from anyone. As this project has grown to become a large project, we have implemented some guidelines to ensure that the project remains maintainable and that contributions are of high quality.
 
 This document outlines the process for contributing to the project. Please read it carefully before making a contribution so that you know what to expect and what is expected of you.
 
