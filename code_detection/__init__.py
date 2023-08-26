@@ -1,5 +1,11 @@
-from .base import DetectedSection, DetectorBase
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from .python import PythonDetector
+
+if TYPE_CHECKING:
+    from .base import DetectedSection, DetectorBase
 
 DETECTOR_CLASSES: list[type[DetectorBase]] = [
     PythonDetector,
