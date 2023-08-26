@@ -70,7 +70,7 @@ A PR may not contain code and commits not related to the issue it is solving or 
 F.ex. 
 - a PR solving issue #1 may not contain code or commits related to issue #2.
 - Do not include a commit that changes something in the docs when working on a discord command (unless the docs are related to the command)
-- Do not refacter code in cog A when working on cog B
+- Do not refactor code in cog A when working on cog B
 - ...
 
 
