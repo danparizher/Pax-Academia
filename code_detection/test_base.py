@@ -201,7 +201,7 @@ test(
     """\
     text
 
-    
+
 
 
 
@@ -209,7 +209,7 @@ test(
 
     text
 
-    
+
 
 
 
@@ -242,8 +242,8 @@ test(
     """\
     code
 
-    
-    
+
+
     code
     text
     text
@@ -317,7 +317,7 @@ test(
     code
     code
     code
-    
+
     text
 
     code
@@ -336,7 +336,7 @@ test(
     text
     text
 
-    
+
     code
     code
     code

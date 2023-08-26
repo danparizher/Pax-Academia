@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 import re
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 import discord
 from discord.commands import option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
 import database
 from message_formatting.embeds import EmbedBuilder
 from util.limiter import limit
 from util.logger import log
+
+if TYPE_CHECKING:
+    from discord.commands.context import ApplicationContext
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:

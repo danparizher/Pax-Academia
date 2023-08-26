@@ -1,10 +1,12 @@
-# !SKA#0001 24/10/2022
+from __future__ import annotations
 
 import datetime
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import discord
+if TYPE_CHECKING:
+    import discord
 
 
 def log(message: str, user: discord.User | None = None) -> None:

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import re
 import string
@@ -43,9 +45,9 @@ class MessageFingerprint:
     # shortcut to build a fingerprint given a message
     @classmethod
     def build(
-        cls: type["MessageFingerprint"],
+        cls: type[MessageFingerprint],
         message: discord.Message,
-    ) -> "MessageFingerprint":
+    ) -> MessageFingerprint:
         filtered_content = cls.filter_content(message.content)
 
         return cls(
@@ -132,7 +134,7 @@ class MessageFingerprint:
     # returns True if two message fingerprints are similar
     # specifically, if at least one of the attachments are identical
     # or if the message body is identical and not blank
-    async def matches(self, other: "MessageFingerprint") -> bool:
+    async def matches(self, other: MessageFingerprint) -> bool:
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
@@ -148,7 +150,7 @@ class MessageFingerprint:
     # - were sent in the same guild
     # - were sent in different channels
     # - the fingerprints match (see `matches`)
-    async def is_multipost_of(self, other: "MessageFingerprint") -> bool:
+    async def is_multipost_of(self, other: MessageFingerprint) -> bool:
         if self.author_id != other.author_id:
             return False
 

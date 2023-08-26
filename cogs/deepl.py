@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 from os import getenv
 from typing import Callable
@@ -62,17 +64,21 @@ def translate(
     :return: The translated text.
     """
     if source_language and source_language not in SOURCE_LANGUAGES:
-        raise ValueError("Invalid Source Language")
+        msg = "Invalid Source Language"
+        raise ValueError(msg)
 
     if target_language not in TARGET_LANGUAGES:
-        raise ValueError("Invalid Target Language")
+        msg = "Invalid Target Language"
+        raise ValueError(msg)
 
     if formality_tone:
         if formality_tone not in FORMALITY_TONES:
-            raise ValueError("Invalid Formality Tone")
+            msg = "Invalid Formality Tone"
+            raise ValueError(msg)
 
         if not TARGET_LANGUAGES[target_language].supports_formality:
-            raise ValueError(f"{target_language} formality tones are not supported!")
+            msg = f"{target_language} formality tones are not supported!"
+            raise ValueError(msg)
 
     result = translator.translate_text(
         text,
@@ -83,8 +89,7 @@ def translate(
 
     if isinstance(result, list):
         return "\n".join(line.text for line in result)
-    else:
-        return result.text
+    return result.text
 
 
 class Translation(commands.Cog):
