@@ -53,7 +53,8 @@ class PubChem(commands.Cog):
         description="Searches the database for a compound.",
     )
     @option(
-        name="name",
+        "name",
+        str,
         description="The name of the compound to be searched.",
         required=True,
     )
