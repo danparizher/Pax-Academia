@@ -104,12 +104,12 @@ Avoid long list comprehensions, complex lambda functions, etc.
 
 Please keep your imports as simple as possible. Avoid importing entire modules, and avoid importing multiple modules on one line.
 
-[!IMPORTANT]
-If you wish to use an external library, please ask first. We want to keep the number of external libraries to a minimum.
+> [!IMPORTANT]
+> If you wish to use an external library, please ask first. We want to keep the number of external libraries to a minimum.
 (using external libraries already included in the requirements.txt is fine).
 
-[!WARNING]
-@sebastiaan-daniels must review external libraries for security vulnerabilities before they can be used.
+> [!WARNING]
+> @sebastiaan-daniels must review external libraries for security vulnerabilities before they can be used.
 
 
 ## 5. Reviewing Guidelines
