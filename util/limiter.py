@@ -41,12 +41,13 @@ def limit(
             Wrapper to determine if the user is limited or not.
             """
 
-            # Get the author id
+            ctx = None
             for arg in args:
                 if isinstance(arg, ApplicationContext):
                     ctx = arg
                     break
-            else:
+
+            if ctx is None:
                 log(
                     f"@limit() decorator was applied to non-slash-command {func!r}! "
                     "Permitting function call without checking permissions!",
