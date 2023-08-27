@@ -3,10 +3,6 @@ from discord.ext import commands
 
 import database
 
-CHANNEL_TYPES_WITH_CATEGORIES = (
-    discord.TextChannel | discord.VoiceChannel | discord.Thread
-)
-
 
 class MessageCounter(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -53,10 +49,10 @@ class MessageCounter(commands.Cog):
         if (
             category := getattr(message.channel, "category")
         ) and "help" in category.name:
-            self.update_help_user(message.author.id, messages_sent[1] + 100)
+            self.update_help_user(message.author.id, messages_sent[1] + 1)
 
         # Update the messagesSent column
-        self.update_user(message.author.id, messages_sent[0] + 100)
+        self.update_user(message.author.id, messages_sent[0] + 1)
 
         # commit changes
         self.db.commit()
