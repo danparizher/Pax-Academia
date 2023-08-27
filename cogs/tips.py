@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from discord import ApplicationContext, Member, User, option
+from discord.abc import Messageable
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
@@ -10,7 +11,6 @@ from util.limiter import limit
 from util.logger import log
 
 if TYPE_CHECKING:
-    from discord.abc import Messageable
     from discord.commands.context import ApplicationContext
 
 TIPS = {

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import functools
 from typing import Awaitable, Callable, ParamSpec, TypeVar
 
@@ -49,7 +47,7 @@ def limit(
             else:
                 log(
                     f"@limit() decorator was applied to non-slash-command {func!r}! "
-                    "Permitting function call without checking permissions!",
+                    "Permitting function call without checking permissions!"
                 )
                 return await func(*args, **kwargs)
 
