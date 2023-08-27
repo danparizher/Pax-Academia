@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import wikipedia
+from discord import option
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
@@ -36,6 +37,12 @@ class Wikipedia(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
+    @option(
+        "query",
+        str,
+        description="The term or phrase to search.",
+        required=True,
+    )
     @limit(2)
     async def wiki(self, ctx: commands.Context, query: str) -> None:
         """
