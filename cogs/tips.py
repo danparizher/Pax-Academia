@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord import ApplicationContext, Member, User, option
+from discord import Member, User, option
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
