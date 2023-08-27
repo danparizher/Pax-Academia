@@ -107,7 +107,7 @@ class embeds:
 
 
 class Applicant:
-    def __init__(self, user: discord.User | discord.Member) -> None:
+    def __init__(self, user: discord.Member) -> None:
         """
         This class represents a read-only user who is applying for staff.
         Data is accurate at the time of object creation.
@@ -119,8 +119,14 @@ class Applicant:
         cursor = db.cursor()
         # get user data from discord
         self.uid = user.id
-        self.joined_at = getattr(user, "joined_at") or datetime.now()
+        self.joined_at = user.joined_at
         self.created_at = user.created_at
+
+        # pycord states "In certain cases, this can be ``None``."
+        # without explaining what those cases are...
+        # We're not aware of any time that joined_at will be blank, so just assert.
+        assert self.joined_at is not None, "Required property `joined_at` is None"
+
         # get user data from database
         # check if user exists, else add
         messages_sent = (
@@ -566,6 +572,8 @@ class StaffAppsUser(commands.Cog):
             logname = f"@{ctx.author.name}:{ctx.author.id}"
         else:
             logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
+
+        assert isinstance(ctx.author, discord.Member), "We already checked for DMs."
         applicant = Applicant(ctx.author)
 
         # check if user is banned
