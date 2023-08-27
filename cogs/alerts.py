@@ -51,6 +51,12 @@ class Alerts(commands.Cog):
         name="alerts-add",
         description="Adds an alert for a keyword.",
     )
+    @option(
+        "keyword",
+        str,
+        description="The keyword to be alerted on. Regex is supported.",
+        required=True,
+    )
     @limit(1)
     async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
@@ -109,7 +115,8 @@ class Alerts(commands.Cog):
         description="Removes an alert for a keyword.",
     )
     @option(
-        name="keyword",
+        "keyword",
+        str,
         description="The keyword to remove.",
         autocomplete=get_keywords,
     )
