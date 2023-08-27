@@ -1,4 +1,5 @@
-# imports
+from __future__ import annotations
+
 from datetime import datetime
 from os import getenv
 from time import time
@@ -96,7 +97,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
     """
 
     def __init__(
-        self, author: discord.Member | discord.User, data: list, da: str
+        self,
+        author: discord.Member | discord.User,
+        data: list,
+        da: str,
     ) -> None:
         super().__init__()
         self.author = author

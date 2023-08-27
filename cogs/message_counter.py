@@ -47,7 +47,7 @@ class MessageCounter(commands.Cog):
 
         # If the message was sent in a help channel, update the helpMessagesSent column
         if (
-            category := getattr(message.channel, "category")
+            category := message.channel.category
         ) and "help" in category.name:
             self.update_help_user(message.author.id, messages_sent[1] + 1)
 

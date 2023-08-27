@@ -518,7 +518,7 @@ class StaffAppModal(discord.ui.Modal):
         self.db.close()
         # Send message to staff channel
         staff_channel = self.bot.get_channel(
-            STAFF_CHANNEL_ID
+            STAFF_CHANNEL_ID,
         ) or await self.bot.fetch_channel(STAFF_CHANNEL_ID)
         text = f"{self.applicant.user} has submitted a new staff application!"
         if isinstance(staff_channel, discord.abc.Messageable):
