@@ -96,7 +96,10 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
     """
 
     def __init__(
-        self, author: discord.Member | discord.User, data: list, da: str
+        self,
+        author: discord.Member | discord.User,
+        data: list,
+        da: str,
     ) -> None:
         super().__init__()
         self.author = author
