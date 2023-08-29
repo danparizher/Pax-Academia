@@ -1,7 +1,7 @@
 from . import base, python
 
 
-def run():
+def run() -> None:
     print("Running tests for code_detection.base")
     base.run()
 

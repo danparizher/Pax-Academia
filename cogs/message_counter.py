@@ -11,7 +11,7 @@ class MessageCounter(commands.Cog):
         self.cursor = self.db.cursor()
 
     @commands.Cog.listener()
-    async def on_message(self, message: commands.Context) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         """
         It adds a user to the database if they don't exist, and updates their message count if they do
 
@@ -38,9 +38,6 @@ class MessageCounter(commands.Cog):
             else sent
         )
 
-        # Fetch the category name of the channel the message was sent in
-        category_name = message.channel.category.name.lower()
-
         # If a user is not in db, add them
         if messages_sent is None:
             self.add_user(message.author.id)
@@ -49,7 +46,8 @@ class MessageCounter(commands.Cog):
             messages_sent = messages_sent[0]
 
         # If the message was sent in a help channel, update the helpMessagesSent column
-        if "help" in category_name:
+        category = getattr(message.channel, "category", None)
+        if category and "help" in category.name:
             self.update_help_user(message.author.id, messages_sent[1] + 1)
 
         # Update the messagesSent column

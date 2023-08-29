@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import wikipedia
-from discord import option
+from discord import ApplicationContext, option
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
@@ -44,7 +44,7 @@ class Wikipedia(commands.Cog):
         required=True,
     )
     @limit(2)
-    async def wiki(self, ctx: commands.Context, query: str) -> None:
+    async def wiki(self, ctx: ApplicationContext, query: str) -> None:
         """
         It searches Wikipedia for a query and returns the first result
 
