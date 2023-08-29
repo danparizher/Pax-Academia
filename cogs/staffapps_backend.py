@@ -19,7 +19,7 @@ class staffAppsSeeAll(discord.ui.View):
     A discord view for the staffAppsSeeAll command
     """
 
-    def __init__(self, author: discord.Member, data: list) -> None:
+    def __init__(self, author: discord.Member | discord.User, data: list) -> None:
         super().__init__()
         self.author = author
         self.data = data
@@ -36,7 +36,7 @@ class staffAppsSeeAll(discord.ui.View):
             f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
             for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
         )
-        fields = [[field_title, field_content, False]]
+        fields = [(field_title, field_content, False)]
         embed = EmbedBuilder(
             title=title,
             description="",
@@ -45,22 +45,32 @@ class staffAppsSeeAll(discord.ui.View):
         )  # hwh blue
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
+    @property
+    def back_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="⬅️",
         disabled=True,
     )
-    async def button_callback(
+    async def back_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[1].disabled = False
+        self.forward_button_child.disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def forward_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[1], discord.ui.Button)
+        return self.children[1]
 
     @discord.ui.button(
         label="",
@@ -68,12 +78,12 @@ class staffAppsSeeAll(discord.ui.View):
         emoji="➡️",
         disabled=False,
     )
-    async def button2_callback(
+    async def forward_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[0].disabled = False
+        self.back_button_child.disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
             button.disabled = True
@@ -85,7 +95,12 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
     A discord view for the denied and accepted commands
     """
 
-    def __init__(self, author: discord.Member, data: list, da: str) -> None:
+    def __init__(
+        self,
+        author: discord.Member | discord.User,
+        data: list,
+        da: str,
+    ) -> None:
         super().__init__()
         self.author = author
         self.data = data
@@ -103,7 +118,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
             f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
             for row in self.data[self.cur_page * 10 - 10 : self.cur_page * 10]
         )
-        fields = [[field_title, field_content, False]]
+        fields = [(field_title, field_content, False)]
         embed = EmbedBuilder(
             title=title,
             description="",
@@ -112,22 +127,32 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         )  # soft red or hwh green
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
+    @property
+    def back_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="⬅️",
         disabled=True,
     )
-    async def button_callback(
+    async def back_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[1].disabled = False
+        self.forward_button_child.disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def forward_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[1], discord.ui.Button)
+        return self.children[1]
 
     @discord.ui.button(
         label="",
@@ -135,12 +160,12 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
         emoji="➡️",
         disabled=False,
     )
-    async def button2_callback(
+    async def forward_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[0].disabled = False
+        self.back_button_child.disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
             button.disabled = True
@@ -148,7 +173,7 @@ class staffAppsSeeDeniedAccepted(discord.ui.View):
 
 
 class staffAppsSeeSpam(discord.ui.View):
-    def __init__(self, author: discord.Member, data: list) -> None:
+    def __init__(self, author: discord.Member | discord.User, data: list) -> None:
         """
         A discord view for the spam command
         """
@@ -174,7 +199,7 @@ class staffAppsSeeSpam(discord.ui.View):
 
         title = f"Banned users / Marked as spam page {self.cur_page}/{len(self.data)}"
         field_content = f"Application count: **{count}**\nMost recent application: **{most_recent}**\n"
-        fields = [[name, field_content, False]]
+        fields = [(name, field_content, False)]
         embed = EmbedBuilder(
             title=title,
             description="",
@@ -183,41 +208,54 @@ class staffAppsSeeSpam(discord.ui.View):
         )  # red
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
+    @property
+    def back_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="⬅️",
         disabled=True,
-        row=0,
     )
-    async def button_callback(
+    async def back_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[1].disabled = False
+        self.forward_button_child.disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def forward_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[1], discord.ui.Button)
+        return self.children[1]
 
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="➡️",
         disabled=False,
-        row=0,
     )
-    async def button2_callback(
+    async def forward_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[0].disabled = False
+        self.back_button_child.disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def unban_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[2], discord.ui.Button)
+        return self.children[2]
 
     @discord.ui.button(
         label="Unban",
@@ -225,7 +263,7 @@ class staffAppsSeeSpam(discord.ui.View):
         emoji="❗",
         row=1,
     )
-    async def button3_callback(
+    async def unban_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -259,13 +297,18 @@ class staffAppsSeeSpamSimple(discord.ui.View):
         super().__init__()
         self.author = author
 
+    @property
+    def unban_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="Unban",
         style=discord.ButtonStyle.danger,
         emoji="❗",
         row=1,
     )
-    async def button3_callback(
+    async def unban_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -292,7 +335,7 @@ class staffAppsSeeSpamSimple(discord.ui.View):
 
 
 class staffAppsMain(discord.ui.View):
-    def __init__(self, author: discord.Member, data: list) -> None:
+    def __init__(self, author: discord.Member | discord.User, data: list) -> None:
         """
         The main view for the staff applications command
         """
@@ -317,26 +360,24 @@ class staffAppsMain(discord.ui.View):
         """
         Repopulates the view with the next page of data, enables and disables buttons as needed
         """
-        self.children[2].disabled = False  # enables the "mark as spam" button
-        self.children[3].disabled = False  # enables the "deny" button
-        self.children[4].disabled = False  # enables the "advance to next stage" button
-        # page one back button check
+        self.spam_button_child.disabled = False
+        self.deny_button_child.disabled = False
+        self.advance_button_child.disabled = False
         if self.cur_page != 1:
-            self.children[0].disabled = False
-        # second opinion check
+            self.back_button_child.disabled = False
         if self.data[self.cur_page - 1][2] == 1:
-            self.children[5].disabled = False
+            self.second_opinion_button_child.disabled = False
         else:
-            self.children[5].disabled = True
+            self.second_opinion_button_child.disabled = True
 
         # long application check
         if (
             len(self.data[self.cur_page - 1][8]) > 1024
             or len(self.data[self.cur_page - 1][9]) > 1024
         ):
-            self.children[8].disabled = False
+            self.edit_button_child.disabled = False
         else:
-            self.children[8].disabled = True
+            self.edit_button_child.disabled = True
 
         self.db = database.connect()
         self.cursor = self.db.cursor()
@@ -362,35 +403,35 @@ class staffAppsMain(discord.ui.View):
         likes = like_list.count(1)
         dislikes = like_list.count(0)
         if like_amount > 0:
-            self.children[6].disabled = True
-            self.children[7].disabled = True
+            self.like_button_child.disabled = True
+            self.dislike_button_child.disabled = True
         else:
-            self.children[6].disabled = False
-            self.children[7].disabled = False
+            self.like_button_child.disabled = False
+            self.dislike_button_child.disabled = False
         self.db.close()
         title = f"Staff applications page {self.cur_page}/{len(self.data)}"
         description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant Name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
         fields = [
-            ["Status", statusname, False],
-            ["First Name", self.data[self.cur_page - 1][4], False],
-            ["Time Zone", self.data[self.cur_page - 1][6], False],
-            ["Hours available per Week", self.data[self.cur_page - 1][7], False],
-            [
+            ("Status", statusname, False),
+            ("First Name", self.data[self.cur_page - 1][4], False),
+            ("Time Zone", self.data[self.cur_page - 1][6], False),
+            ("Hours available per Week", self.data[self.cur_page - 1][7], False),
+            (
                 "Why do you want to become a staff member?",
                 self.data[self.cur_page - 1][8][:1024],
                 False,
-            ],
-            [
+            ),
+            (
                 "How will you contribute if you become a staff member?",
                 self.data[self.cur_page - 1][9][:1024],
                 False,
-            ],
-            [
+            ),
+            (
                 "Submission Time",
                 str(datetime.fromtimestamp(int(self.data[self.cur_page - 1][10]))),
                 False,
-            ],
-            ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
+            ),
+            ("Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False),
         ]
         embed = EmbedBuilder(
             title=title,
@@ -400,40 +441,54 @@ class staffAppsMain(discord.ui.View):
         )  # hwh green
         await interaction.response.edit_message(embed=embed.build(), view=self)
 
+    @property
+    def back_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="⬅️",
         disabled=True,
-        row=0,
     )
-    async def button0_callback(
+    async def back_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        self.children[1].disabled = False
+        self.forward_button_child.disabled = False
         self.cur_page -= 1
         if self.cur_page == 1:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def forward_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[1], discord.ui.Button)
+        return self.children[1]
 
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.primary,
         emoji="➡️",
         disabled=False,
-        row=0,
     )
-    async def button1_callback(
+    async def forward_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
+        self.back_button_child.disabled = False
         self.cur_page += 1
         if self.cur_page == self.max_page:
             button.disabled = True
         await self.repopulate(interaction)
+
+    @property
+    def spam_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[2], discord.ui.Button)
+        return self.children[2]
 
     @discord.ui.button(
         label="Mark as spam",
@@ -442,7 +497,7 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=1,
     )
-    async def button2_callback(
+    async def spam_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -471,6 +526,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def deny_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[3], discord.ui.Button)
+        return self.children[3]
+
     @discord.ui.button(
         label="Deny",
         style=discord.ButtonStyle.danger,
@@ -478,7 +538,7 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=1,
     )
-    async def button3_callback(
+    async def deny_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -508,6 +568,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def advance_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[4], discord.ui.Button)
+        return self.children[4]
+
     @discord.ui.button(
         label="Advance to next stage",
         style=discord.ButtonStyle.success,
@@ -515,7 +580,7 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=2,
     )
-    async def button4_callback(
+    async def advance_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -567,6 +632,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def second_opinion_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[5], discord.ui.Button)
+        return self.children[5]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.secondary,
@@ -574,7 +644,7 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=2,
     )
-    async def button5_callback(
+    async def second_opinion_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -605,6 +675,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def like_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[6], discord.ui.Button)
+        return self.children[6]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.secondary,
@@ -612,11 +687,15 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button6_callback(
+    async def like_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
+        assert (
+            interaction.user is not None
+        ), "Our Discord server must be haunted! Every interaction must be paired with a user."
+
         self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -647,6 +726,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def dislike_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[7], discord.ui.Button)
+        return self.children[7]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.secondary,
@@ -654,11 +738,15 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button7_callback(
+    async def dislike_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
+        assert (
+            interaction.user is not None
+        ), "Our Discord server must be haunted! Every interaction must be paired with a user."
+
         self.db = database.connect()
         self.cursor = self.db.cursor()
         self.cursor.execute(
@@ -689,6 +777,11 @@ class staffAppsMain(discord.ui.View):
             view=None,
         )
 
+    @property
+    def edit_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[8], discord.ui.Button)
+        return self.children[8]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.secondary,
@@ -696,7 +789,7 @@ class staffAppsMain(discord.ui.View):
         disabled=True,
         row=3,
     )
-    async def button8_callback(
+    async def edit_button_callback(
         self,
         button: discord.ui.Button,
         interaction: discord.Interaction,
@@ -781,7 +874,7 @@ class StaffAppsBackoffice(commands.Cog):
     @limit(1)
     async def see_apps(
         self,
-        ctx: commands.Context,
+        ctx: discord.ApplicationContext,
         subcommand: str,
         specific_id: int,
     ) -> None:
@@ -796,7 +889,7 @@ class StaffAppsBackoffice(commands.Cog):
                 (specific_id,),
             ).fetchone()
             if not data:
-                await ctx.send("Application not found.", ephemeral=True)
+                await ctx.respond("Application not found.", ephemeral=True)
                 return
             like_list = [
                 x[0]
@@ -810,18 +903,18 @@ class StaffAppsBackoffice(commands.Cog):
             title = "Staff application"
             description = f"Application ID: **{data[0]}**\nApplicant name: **{data[2]}**\nApplicant ID: **{data[1]}**\n"
             fields = [
-                ["Status", data[9], False],
-                ["first name", data[3], False],
-                ["Time Zone", data[4], False],
-                ["Hours available per Week", data[5], False],
-                ["Why do you want to become a staff member?", data[6][:1024], False],
-                [
+                ("Status", data[9], False),
+                ("first name", data[3], False),
+                ("Time Zone", data[4], False),
+                ("Hours available per Week", data[5], False),
+                ("Why do you want to become a staff member?", data[6][:1024], False),
+                (
                     "How will you contribute if you become a staff member?",
                     data[7][:1024],
                     False,
-                ],
-                ["Submission Time", datetime.fromtimestamp(int(data[8])), False],
-                ["Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False],
+                ),
+                ("Submission Time", datetime.fromtimestamp(int(data[8])), False),
+                ("Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False),
             ]
             embed = EmbedBuilder(
                 title=title,
@@ -843,7 +936,7 @@ class StaffAppsBackoffice(commands.Cog):
                 f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
                 for row in data[:10]
             )
-            fields = [[field_title, field_content, False]]
+            fields = [(field_title, field_content, False)]
             embed = EmbedBuilder(
                 title=title,
                 description="",
@@ -870,7 +963,7 @@ class StaffAppsBackoffice(commands.Cog):
                 f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
                 for row in data[:10]
             )
-            fields = [[field_title, field_content, False]]
+            fields = [(field_title, field_content, False)]
             embed = EmbedBuilder(
                 title=title,
                 description="",
@@ -898,7 +991,7 @@ class StaffAppsBackoffice(commands.Cog):
                 field_content += (
                     f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
                 )
-            fields = [[field_title, field_content, False]]
+            fields = [(field_title, field_content, False)]
             embed = EmbedBuilder(
                 title=title,
                 description="",
@@ -939,7 +1032,7 @@ class StaffAppsBackoffice(commands.Cog):
 
             title = f"Banned users / Marked as spam page 1/{len(data)}"
             field_content = f"Application count: **{count}**\nMost recent application: **{most_recent}**\n"
-            fields = [[name, field_content, False]]
+            fields = [(name, field_content, False)]
             embed = EmbedBuilder(
                 title=title,
                 description="",
