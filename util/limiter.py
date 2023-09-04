@@ -122,7 +122,23 @@ def server(
                 "Permitting function call without checking permissions!",
             )
             return await func(*args, **kwargs)
-
+        
+        used_guild_id = ctx.guild_id
+        if used_guild_id is None:
+            log(
+                f"$ tried to use {ctx.command.name}. But is not in a guild.",
+                ctx.author,
+            )
+            await ctx.respond("Sorry, you cannot use this command in dms.", ephemeral=True)
+            return None
+        elif used_guild_id != GUILD_ID: # This should not happen as the bot should only be in one guild.
+            log(
+                f"$ tried to use {ctx.command.name}. But is not in the correct guild.",
+                ctx.author,
+            )
+            await ctx.respond("Sorry, you cannot use this command in this guild.", ephemeral=True)
+            return None
+        
         return await func(*args, **kwargs)
 
     return wrapper
