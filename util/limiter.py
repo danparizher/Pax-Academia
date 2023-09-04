@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import functools
 from typing import Awaitable, Callable, ParamSpec, TypeVar
+from os import getenv
 
 from discord import ApplicationContext
 
@@ -12,6 +13,8 @@ from util.logger import log
 LimitedCommandParams = ParamSpec("LimitedCommandParams")
 LimitedCommandReturnValue = TypeVar("LimitedCommandReturnValue")
 
+GUILD_ID = int(getenv("GUILD_ID", "-1"))
+assert GUILD_ID != -1, "GUILD_ID is not set in .env"
 
 def limit(
     limit_level_requirement: int,  # users at this `limitLevel` or higher are banned from using the command
