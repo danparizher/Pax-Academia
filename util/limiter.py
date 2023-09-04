@@ -99,7 +99,8 @@ def server(
     func: Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]],
 ) -> Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue | None]]:
     """
-    Placeholder text
+    ! This decorator only works on slash commands. !
+    use @server to wrap a slash command to make sure it is only used in the correct guild.
     """
     @functools.wraps(func)
     async def wrapper(
