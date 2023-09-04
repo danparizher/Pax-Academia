@@ -92,3 +92,38 @@ def limit(
         return wrapper
 
     return decorator
+
+
+
+def server(
+    func: Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]],
+) -> Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue | None]]:
+    """
+    Placeholder text
+    """
+    @functools.wraps(func)
+    async def wrapper(
+        *args: LimitedCommandParams.args,
+        **kwargs: LimitedCommandParams.kwargs,
+    ) -> LimitedCommandReturnValue | None:
+        """
+        Wrapper to determine if the command is used in the correct guild.
+        """
+
+        ctx = None
+        for arg in args:
+            if isinstance(arg, ApplicationContext):
+                ctx = arg
+                break
+
+        if ctx is None:
+            log(
+                f"@limit() decorator was applied to non-slash-command {func!r}! "
+                "Permitting function call without checking permissions!",
+            )
+            return await func(*args, **kwargs)
+
+        return await func(*args, **kwargs)
+
+    return wrapper
+
