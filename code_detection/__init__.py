@@ -4,12 +4,14 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .python import PythonDetector
+from .python_traceback import PythonTracebackDetector
 
 if TYPE_CHECKING:
     from .base import DetectedSection, DetectorBase
 
 DETECTOR_CLASSES: list[type[DetectorBase]] = [
     PythonDetector,
+    PythonTracebackDetector,
     # More languages coming soon!
 ]
 
