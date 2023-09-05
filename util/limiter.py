@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import functools
-from typing import Awaitable, Callable, ParamSpec, TypeVar
 from os import getenv
+from typing import Awaitable, Callable, ParamSpec, TypeVar
 
 from discord import ApplicationContext
 
@@ -15,6 +15,7 @@ LimitedCommandReturnValue = TypeVar("LimitedCommandReturnValue")
 
 GUILD_ID = int(getenv("GUILD_ID", "-1"))
 assert GUILD_ID != -1, "GUILD_ID is not set in .env"
+
 
 def limit(
     limit_level_requirement: int,  # users at this `limitLevel` or higher are banned from using the command
@@ -94,7 +95,6 @@ def limit(
     return decorator
 
 
-
 def server(
     func: Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue]],
 ) -> Callable[LimitedCommandParams, Awaitable[LimitedCommandReturnValue | None]]:
@@ -102,6 +102,7 @@ def server(
     ! This decorator only works on slash commands. !
     use @server to wrap a slash command to make sure it is only used in the correct guild.
     """
+
     @functools.wraps(func)
     async def wrapper(
         *args: LimitedCommandParams.args,
@@ -123,24 +124,30 @@ def server(
                 "Permitting function call without checking permissions!",
             )
             return await func(*args, **kwargs)
-        
+
         used_guild_id = ctx.guild_id
         if used_guild_id is None:
             log(
                 f"$ tried to use {ctx.command.name}. But is not in a guild.",
                 ctx.author,
             )
-            await ctx.respond("Sorry, you cannot use this command in dms.", ephemeral=True)
+            await ctx.respond(
+                "Sorry, you cannot use this command in dms.",
+                ephemeral=True,
+            )
             return None
-        elif used_guild_id != GUILD_ID: # This should not happen as the bot should only be in one guild.
+        if used_guild_id != GUILD_ID:
+            # This should not happen as the bot should only be in one guild.
             log(
                 f"$ tried to use {ctx.command.name}. But is not in the correct guild.",
                 ctx.author,
             )
-            await ctx.respond("Sorry, you cannot use this command in this guild.", ephemeral=True)
+            await ctx.respond(
+                "Sorry, you cannot use this command in this guild.",
+                ephemeral=True,
+            )
             return None
-        
+
         return await func(*args, **kwargs)
 
     return wrapper
-
