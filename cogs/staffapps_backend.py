@@ -913,7 +913,7 @@ class StaffAppsBackoffice(commands.Cog):
                     data[7][:1024],
                     False,
                 ),
-                ("Submission Time", datetime.fromtimestamp(int(data[8])), False),
+                ("Submission Time", str(datetime.fromtimestamp(int(data[8]))), False),
                 ("Likes / dislikes", f"👍 {likes} / {dislikes} 👎", False),
             ]
             embed = EmbedBuilder(
@@ -924,6 +924,7 @@ class StaffAppsBackoffice(commands.Cog):
             )  # hwh green
             await ctx.respond(embed=embed.build(), ephemeral=True)
             log(f"{username} viewed a specific application: {specific_id}")
+            return
 
         if subcommand == "all":
             # gather first page of applications
