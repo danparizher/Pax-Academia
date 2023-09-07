@@ -10,7 +10,7 @@ from discord.ext import commands
 
 import database
 from message_formatting.embeds import EmbedBuilder
-from util.limiter import limit
+from util.limiter import limit, server
 from util.logger import log
 
 if TYPE_CHECKING:
@@ -58,6 +58,7 @@ class Alerts(commands.Cog):
         required=True,
     )
     @limit(1)
+    @server
     async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         Checks if the keyword is already in the database, if it is, sends an error message, if it
@@ -121,6 +122,7 @@ class Alerts(commands.Cog):
         autocomplete=get_keywords,
     )
     @limit(1)
+    @server
     async def remove_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         It removes an alert from the database.
@@ -159,8 +161,9 @@ class Alerts(commands.Cog):
         log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
-    @limit(3)
     # User should still be allowed to remove their alerts if they have too many
+    @limit(3)
+    @server
     async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
@@ -181,6 +184,7 @@ class Alerts(commands.Cog):
 
     @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
     @limit(3)
+    @server
     async def clear_alerts(self, ctx: ApplicationContext) -> None:
         """
         It clears all alerts from the database.
@@ -205,6 +209,7 @@ class Alerts(commands.Cog):
         description="Pauses alerts.",
     )
     @limit(1)
+    @server
     async def pause_alerts(self, ctx: ApplicationContext) -> None:
         """
         It pauses alerts for the user who is currently using the command.
@@ -233,6 +238,7 @@ class Alerts(commands.Cog):
         description="Resumes alerts.",
     )
     @limit(1)
+    @server
     async def resume_alerts(self, ctx: ApplicationContext) -> None:
         """
         It resumes alerts for the user who is currently using the command.

@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
-VIEW_DB_GUILD = os.getenv("ALLOW_VIEW_DATABASE_GUILD_ID")
+VIEW_DB_GUILD = os.getenv("GUILD_ID")
 VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
 STDOUT_LOG_FILE = os.getenv("STDOUT_LOG_FILE", "log.txt")
