@@ -34,13 +34,13 @@ class MessageFingerprint:
     attachment_urls: list[
         str
     ]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: set[
-        Hash
-    ] | None = None  # populated on the first call to `get_attachment_hashes`
+    cached_attachment_hashes: (
+        set[Hash] | None
+    ) = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Hash | None = (
-        None  # hash of the message body, after being passed through `filter_content`
-    )
+    content_hash: (
+        Hash | None
+    ) = None  # hash of the message body, after being passed through `filter_content`
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -166,11 +166,8 @@ class MessageFingerprint:
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.fingerprints: list[
-            MessageFingerprint
-        ] = (
-            []
-        )  # stores all user messages sent in the last minute (recent messages near the end)
+        # stores all user messages sent in the last minute (recent messages near the end)
+        self.fingerprints: list[MessageFingerprint] = []
         self.multipost_warnings: dict[
             Annotated[int, "Multiposted Message ID"],
             tuple[
