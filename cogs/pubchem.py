@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import string
 
 import pubchempy as pcp
 from discord import ApplicationContext, option
@@ -49,7 +50,7 @@ class PubChem(commands.Cog):
         :type number: int
         :return: The subscripted version of the number.
         """
-        return number.translate(str.maketrans("0123456789", "₀₁₂₃₄₅₆₇₈₉"))
+        return number.translate(str.maketrans(string.digits, "₀₁₂₃₄₅₆₇₈₉"))
 
     @commands.slash_command(
         name="chemsearch",
