@@ -1,27 +1,28 @@
+from __future__ import annotations
+
 import csv
 import io
 import os
-import sqlite3
-from collections.abc import Iterable
-from dataclasses import dataclass
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import discord
 from discord.commands import OptionChoice, option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 from discord.interactions import Interaction
 from file_read_backwards import FileReadBackwards
 
-from util.Logging import Log, limit
+import database
+from util.limiter import limit
+from util.logger import log
 
-DATABASE_FILES = [
-    "util/database.sqlite",
-    "log.txt",
-]
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from discord.commands.context import ApplicationContext
+
 LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
 COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
-VIEW_DB_GUILD = os.getenv("ALLOW_VIEW_DATABASE_GUILD_ID")
+VIEW_DB_GUILD = os.getenv("GUILD_ID")
 VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
 STDOUT_LOG_FILE = os.getenv("STDOUT_LOG_FILE", "log.txt")
@@ -39,68 +40,12 @@ VIEW_LOGS_PERMISSIONS = (
 # in case multiple streams are directed to the same file
 LOG_FILES = {
     STDERR_LOG_FILE: "All standard errors are redirected here.",
-    "log.txt": "All Logging.Log() lines are saved here.",
+    "log.txt": "All logger.log() lines are saved here.",
     STDOUT_LOG_FILE: "All standard output is redirected here.",
 }
 
 
-@dataclass
-class Table:
-    database_file_path: str
-    database_name: str
-    name: str
-    column_names: list[str]
-
-
-def grep_tables() -> list[Table]:
-    """
-    It returns a list of Table objects, each of which contains the path to a database file, the name of
-    the database, the name of a table in the database, and a list of the column names in the table
-    :return: A list of Table objects.
-    """
-    tables: list[Table] = []
-    for database_file in DATABASE_FILES:
-        database_name = Path(database_file).name
-        if database_file.endswith(".txt"):
-            tables.append(
-                Table(
-                    database_file_path=database_file,
-                    database_name=database_name,
-                    name=database_name,
-                    column_names=["log"],
-                ),
-            )
-            continue
-
-        with sqlite3.connect(database_file) as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT
-                    name
-                FROM
-                    sqlite_schema
-                WHERE
-                    type ='table'
-                    AND
-                    name NOT LIKE 'sqlite_%'
-                """,
-            )
-
-            for (table_name,) in cursor.fetchall():
-                cursor.execute(f"PRAGMA table_info({table_name})")
-                tables.append(
-                    Table(
-                        database_file_path=database_file,
-                        database_name=database_name,
-                        name=table_name,
-                        column_names=[x[1] for x in cursor.fetchall()],
-                    ),
-                )
-    return tables
-
-
-def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
+def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.File]:
     """
     It takes a list of Table objects, and returns an iterable of discord.File objects
 
@@ -108,11 +53,7 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
     :type tables: list[Table]
     """
     for table in tables:
-        if table.database_file_path.endswith(".txt"):
-            yield discord.File(table.database_file_path)
-            continue
-
-        with sqlite3.connect(table.database_file_path) as conn:
+        with database.connect() as conn:
             cursor = conn.cursor()
             cursor.execute(f"SELECT * FROM {table.name}")
 
@@ -123,7 +64,7 @@ def dump_tables_to_csv(tables: list[Table]) -> Iterable[discord.File]:
                 f.seek(0)
                 yield discord.File(
                     f,  # type: ignore (the class clearly accepts any readable, seekable IOBase)
-                    filename=f"{table.database_name}.{table.name}.csv",
+                    filename=f"{table.name}.csv",
                 )
 
 
@@ -147,7 +88,7 @@ class Misc(commands.Cog):
             await message.edit_original_response(content=content)
         else:
             await message.edit(content=content)
-        Log("$ used ping", ctx.author)
+        log("$ used ping", ctx.author)
 
     @commands.Cog.listener()
     async def on_ready(self) -> None:
@@ -193,16 +134,16 @@ class Misc(commands.Cog):
             else:
                 await message.edit(content=text)
 
-        Log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
+        log(f"$ viewed the database in {ctx.channel}, {ctx.guild}.", ctx.author)
 
-        tables = grep_tables()
+        tables = database.grep_tables()
         await edit(f"{LOADING_EMOJI} Presented 0/{len(tables)} table(s).")
 
         for i, (table, file) in enumerate(
             zip(tables, dump_tables_to_csv(tables), strict=False),
         ):
             await ctx.send_followup(
-                (f"Database: `{table.database_file_path}`\nTable: `{table.name}`"),
+                (f"Table: `{table.name}`"),
                 file=file,
                 ephemeral=True,
             )
@@ -252,7 +193,9 @@ class Misc(commands.Cog):
             log_lines_backwards = [
                 line
                 for _, line in zip(
-                    range(trailing_lines_count), log_file_backwards, strict=False
+                    range(trailing_lines_count),
+                    log_file_backwards,
+                    strict=False,
                 )
             ]
             log_lines = reversed(log_lines_backwards)

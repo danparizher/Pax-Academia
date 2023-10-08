@@ -22,6 +22,7 @@ class feedback(discord.ui.View):
     # Do stuff
     await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
     """
+
     def __init__(self, author: discord.Member, func_name: str) -> None:
         """
         ctx.author is the author of the command
@@ -41,6 +42,11 @@ class feedback(discord.ui.View):
             627716753341808640,  # Retired staff
         ]
 
+    @property
+    def like_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[0], discord.ui.Button)
+        return self.children[0]
+
     @discord.ui.button(
         label="",
         style=discord.ButtonStyle.green,
@@ -58,10 +64,15 @@ class feedback(discord.ui.View):
                 ephemeral=True,
             )
             return
-        self.children[0].disabled = True
-        self.children[1].disabled = True
+        self.like_button_child.disabled = True
+        self.dislike_button_child.disabled = True
         await self.insert(True, interaction)
         await interaction.response.edit_message(view=self)
+
+    @property
+    def dislike_button_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[1], discord.ui.Button)
+        return self.children[1]
 
     @discord.ui.button(
         label="False positive",
@@ -80,8 +91,8 @@ class feedback(discord.ui.View):
                 ephemeral=True,
             )
             return
-        self.children[0].disabled = True
-        self.children[1].disabled = True
+        self.like_button_child.disabled = True
+        self.dislike_button_child.disabled = True
         await self.insert(False, interaction)
         await interaction.response.edit_message(view=self)
 
@@ -102,7 +113,7 @@ class feedback(discord.ui.View):
                 self.author.id,
                 self.func_name,
                 like,
-                interaction.message.jump_url or "Ephemeral msg",
+                getattr(interaction.message, "jump_url", "Ephemeral msg"),
             ),
         )
         db.commit()

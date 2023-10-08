@@ -1,14 +1,20 @@
+from __future__ import annotations
+
 import re
-import sqlite3
 from contextlib import suppress
+from typing import TYPE_CHECKING
 
 import discord
 from discord.commands import option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit, server
+from util.logger import log
+
+if TYPE_CHECKING:
+    from discord.commands.context import ApplicationContext
 
 
 def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
@@ -24,7 +30,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
         return []
 
     # We no longer keep track of the name because this can change, breaking the alert.
-    conn = sqlite3.connect("util/database.sqlite")
+    conn = database.connect()
     data = [
         keyword
         for (keyword,) in conn.cursor()
@@ -38,14 +44,21 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
 class Alerts(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
         name="alerts-add",
         description="Adds an alert for a keyword.",
     )
+    @option(
+        "keyword",
+        str,
+        description="The keyword to be alerted on. Regex is supported.",
+        required=True,
+    )
     @limit(1)
+    @server
     async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         Checks if the keyword is already in the database, if it is, sends an error message, if it
@@ -96,18 +109,20 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert added by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert added by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-remove",
         description="Removes an alert for a keyword.",
     )
     @option(
-        name="keyword",
+        "keyword",
+        str,
         description="The keyword to remove.",
         autocomplete=get_keywords,
     )
     @limit(1)
+    @server
     async def remove_alert(self, ctx: ApplicationContext, keyword: str) -> None:
         """
         It removes an alert from the database.
@@ -143,11 +158,12 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alert removed by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(name="alerts-list", description="Lists all alerts.")
-    @limit(3)
     # User should still be allowed to remove their alerts if they have too many
+    @limit(3)
+    @server
     async def list_alerts(self, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
@@ -168,6 +184,7 @@ class Alerts(commands.Cog):
 
     @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
     @limit(3)
+    @server
     async def clear_alerts(self, ctx: ApplicationContext) -> None:
         """
         It clears all alerts from the database.
@@ -185,13 +202,14 @@ class Alerts(commands.Cog):
         ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts cleared by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-pause",
         description="Pauses alerts.",
     )
     @limit(1)
+    @server
     async def pause_alerts(self, ctx: ApplicationContext) -> None:
         """
         It pauses alerts for the user who is currently using the command.
@@ -206,24 +224,21 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = TRUE",
-            (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Success",
-                description="Paused alerts.",
-            ).build()
+        embed = EmbedBuilder(
+            title="Success",
+            description="Paused alerts.",
+        ).build()
+
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts paused by $ in {ctx.guild}.", ctx.author)
 
     @commands.slash_command(
         name="alerts-resume",
         description="Resumes alerts.",
     )
     @limit(1)
+    @server
     async def resume_alerts(self, ctx: ApplicationContext) -> None:
         """
         It resumes alerts for the user who is currently using the command.
@@ -238,18 +253,13 @@ class Alerts(commands.Cog):
         )
         self.db.commit()
 
-        c.execute(
-            "SELECT * FROM alert WHERE uid = ? AND paused = FALSE",
-            (ctx.author.id,),
-        )
-        if c.fetchone():
-            embed = EmbedBuilder(
-                title="Success",
-                description="Resumed alerts.",
-            ).build()
+        embed = EmbedBuilder(
+            title="Success",
+            description="Resumed alerts.",
+        ).build()
         await ctx.respond(embed=embed, ephemeral=True)
 
-        Log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
+        log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:

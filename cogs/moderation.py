@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import re
 import string
@@ -10,8 +12,8 @@ import aiohttp
 import discord
 from discord.ext import commands, tasks
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log
+from message_formatting.embeds import EmbedBuilder
+from util.logger import log
 
 # hashlib just returns a bytes object, so this allows for slightly stricter typing
 Hash: TypeAlias = bytes
@@ -32,20 +34,20 @@ class MessageFingerprint:
     attachment_urls: list[
         str
     ]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: set[
-        Hash
-    ] | None = None  # populated on the first call to `get_attachment_hashes`
+    cached_attachment_hashes: (
+        set[Hash] | None
+    ) = None  # populated on the first call to `get_attachment_hashes`
 
-    content_hash: Hash | None = (
-        None  # hash of the message body, after being passed through `filter_content`
-    )
+    content_hash: (
+        Hash | None
+    ) = None  # hash of the message body, after being passed through `filter_content`
 
     # shortcut to build a fingerprint given a message
     @classmethod
     def build(
-        cls: type["MessageFingerprint"],
+        cls: type[MessageFingerprint],
         message: discord.Message,
-    ) -> "MessageFingerprint":
+    ) -> MessageFingerprint:
         filtered_content = cls.filter_content(message.content)
 
         return cls(
@@ -120,7 +122,7 @@ class MessageFingerprint:
                         # it's possible that Discord may have deleted the attachment, and so we would get a 404
                         # furthermore, it's not super important that this function is 100% perfectly accurate
                         # so it's fine to just log and ignore any errors
-                        Log(
+                        log(
                             f"Error occurred while downloading attachment for message fingerprinting. Attachment URL: `{attachment_url}`, Error: {e}",
                         )
                         continue
@@ -132,7 +134,7 @@ class MessageFingerprint:
     # returns True if two message fingerprints are similar
     # specifically, if at least one of the attachments are identical
     # or if the message body is identical and not blank
-    async def matches(self, other: "MessageFingerprint") -> bool:
+    async def matches(self, other: MessageFingerprint) -> bool:
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
@@ -148,7 +150,7 @@ class MessageFingerprint:
     # - were sent in the same guild
     # - were sent in different channels
     # - the fingerprints match (see `matches`)
-    async def is_multipost_of(self, other: "MessageFingerprint") -> bool:
+    async def is_multipost_of(self, other: MessageFingerprint) -> bool:
         if self.author_id != other.author_id:
             return False
 
@@ -164,11 +166,8 @@ class MessageFingerprint:
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        self.fingerprints: list[
-            MessageFingerprint
-        ] = (
-            []
-        )  # stores all user messages sent in the last minute (recent messages near the end)
+        # stores all user messages sent in the last minute (recent messages near the end)
+        self.fingerprints: list[MessageFingerprint] = []
         self.multipost_warnings: dict[
             Annotated[int, "Multiposted Message ID"],
             tuple[
@@ -314,7 +313,7 @@ class Moderation(commands.Cog):
                     fingerprint.author_id,
                 )
                 self.multipost_warnings[message.id] = (warning, fingerprint)
-                Log(f"First mp warning for $ in {message.channel.name}", message.author)
+                log(f"First mp warning for $ in {message.channel.name}", message.author)
             except discord.errors.HTTPException as e:
                 if "unknown message".casefold() in repr(e).casefold():
                     # The multipost has already been deleted, take no action
@@ -350,7 +349,7 @@ class Moderation(commands.Cog):
                     delete_after=15,
                 )
                 await message.delete()
-                Log(
+                log(
                     f"Subsequent mp warning for $ in {message.channel.name}",
                     message.author,
                 )

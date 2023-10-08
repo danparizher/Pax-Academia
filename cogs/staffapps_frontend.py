@@ -1,5 +1,5 @@
-# imports
-import sqlite3
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from os import getenv
 from time import time
@@ -9,8 +9,12 @@ import discord.ui
 from discord.ext import commands
 from humanize import precisedelta
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+import database
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
+
+STAFF_CHANNEL_ID = int(getenv("STAFF_CHANNEL", -1))
 
 
 class embeds:
@@ -35,19 +39,19 @@ class embeds:
         time_since_join = datetime.now(tz=join_time.tzinfo) - join_time
 
         fields = [
-            [
+            (
                 "Created",
                 f"""{created_at.strftime('%B %d, %Y')}
                 {precisedelta(time_since_creation, minimum_unit='days', format="%.0F")} ago""",
                 True,
-            ],
-            [
+            ),
+            (
                 "Joined",
                 f"""{join_time.strftime('%B %d, %Y')}
                 {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
                 True,
-            ],
-            ["Messages", f"{msg_count} messages", True],
+            ),
+            ("Messages", f"{msg_count} messages", True),
         ]
 
         wait_time = max(
@@ -77,7 +81,7 @@ class embeds:
             color=0xFF0000,  # RED
         ).build()
 
-    def cooldown(self, cooldown: int) -> discord.Embed:
+    def cooldown(self, cooldown: float) -> discord.Embed:
         """
         User has recently applied for staff and was denied.
         A cooldown is in place to prevent a user from immediatly re-applying.
@@ -102,19 +106,27 @@ class embeds:
         ).build()
 
 
-class user:
+class Applicant:
     def __init__(self, user: discord.Member) -> None:
         """
         This class represents a read-only user who is applying for staff.
         Data is accurate at the time of object creation.
         """
+        self.user = user
+
         # connect to database
-        db = sqlite3.connect("util/database.sqlite")
+        db = database.connect()
         cursor = db.cursor()
         # get user data from discord
         self.uid = user.id
         self.joined_at = user.joined_at
         self.created_at = user.created_at
+
+        # pycord states "In certain cases, this can be ``None``."
+        # without explaining what those cases are...
+        # We're not aware of any time that joined_at will be blank, so just assert.
+        assert self.joined_at is not None, "Required property `joined_at` is None"
+
         # get user data from database
         # check if user exists, else add
         messages_sent = (
@@ -171,21 +183,18 @@ class user:
         return f"User: {self.uid}, Joined: {self.joined_at}, Messages: {self.messages_sent}, Marked Spam: {self.marked_spam}, Cooldown: {self.cooldown}"
 
     def add_user(self, uid: int) -> None:
-        self.cursor.execute(
-            "INSERT INTO user VALUES (?, ?, ?, ?, ?)",
-            (uid, 0, False, None, 0),
-        )  # See ERD.mdj
+        with database.connect() as db:
+            db.cursor().execute(
+                "INSERT INTO user VALUES (?, ?, ?, ?, ?)",
+                (uid, 0, False, None, 0),
+            )  # See ERD.mdj
 
-    def min_reqs(self) -> tuple[bool, int, datetime]:
+    def min_reqs(self) -> tuple[bool, int, timedelta]:
         """
-        Returns a tuple of (bool, int, datetime) where bool is True if the user meets the minimum requirements to apply for staff.
+        Returns a tuple of (bool, int, timedelta) where bool is True if the user meets the minimum requirements to apply for staff.
         """
         time_since_join = datetime.now(tz=self.joined_at.tzinfo) - self.joined_at
-        if (
-            self.joined_at
-            <= (datetime.now(tz=self.joined_at.tzinfo) - timedelta(days=30))
-            and self.messages_sent >= 500
-        ):
+        if time_since_join >= timedelta(days=30) and self.messages_sent >= 500:
             return (True, self.messages_sent, time_since_join)
         return (False, self.messages_sent, time_since_join)
 
@@ -197,7 +206,7 @@ class user:
 
 
 class StaffAppView(discord.ui.View):
-    def __init__(self, author: user, bot: commands.Bot) -> None:
+    def __init__(self, applicant: Applicant, bot: commands.Bot) -> None:
         """
         A discord view for the staff application.
         Includes a select menu for:
@@ -206,8 +215,13 @@ class StaffAppView(discord.ui.View):
             - Hours Available
         """
         super().__init__()
-        self.author = author
+        self.applicant = applicant
         self.bot = bot
+
+    @property
+    def nda_agreement_child(self) -> discord.ui.Select:
+        assert isinstance(self.children[0], discord.ui.Select)
+        return self.children[0]
 
     @discord.ui.select(
         placeholder="Do you agree to the Non-Disclosure Agreement?",
@@ -245,9 +259,14 @@ class StaffAppView(discord.ui.View):
             await interaction.response.edit_message(embed=embed, view=None)
             return
         self.nda = True
-        self.children[1].disabled = False
+        self.timezone_selection_child.disabled = False
         select.disabled = True
         await interaction.response.edit_message(view=self)
+
+    @property
+    def timezone_selection_child(self) -> discord.ui.Select:
+        assert isinstance(self.children[1], discord.ui.Select)
+        return self.children[1]
 
     @discord.ui.select(
         placeholder="What is your timezone?",
@@ -331,10 +350,16 @@ class StaffAppView(discord.ui.View):
         select: discord.ui.Select,
         interaction: discord.Interaction,
     ) -> None:
+        assert isinstance(select.values[0], str)
         self.timezone = select.values[0]
         select.disabled = True
-        self.children[2].disabled = False
+        self.time_selection_child.disabled = False
         await interaction.response.edit_message(view=self)
+
+    @property
+    def time_selection_child(self) -> discord.ui.Select:
+        assert isinstance(self.children[2], discord.ui.Select)
+        return self.children[2]
 
     @discord.ui.select(
         placeholder="How many hours a week can you commit to the server?",
@@ -374,10 +399,16 @@ class StaffAppView(discord.ui.View):
         select: discord.ui.Select,
         interaction: discord.Interaction,
     ) -> None:
+        assert isinstance(select.values[0], str)
         self.time_per_wk = select.values[0]
-        self.children[3].disabled = False
+        self.next_questions_child.disabled = False
         select.disabled = True
         await interaction.response.edit_message(view=self)
+
+    @property
+    def next_questions_child(self) -> discord.ui.Button:
+        assert isinstance(self.children[3], discord.ui.Button)
+        return self.children[3]
 
     @discord.ui.button(
         label="Next Questions",
@@ -395,7 +426,7 @@ class StaffAppView(discord.ui.View):
         """
         await interaction.response.send_modal(
             StaffAppModal(
-                self.author,
+                self.applicant,
                 self.nda,
                 self.timezone,
                 self.time_per_wk,
@@ -408,7 +439,7 @@ class StaffAppView(discord.ui.View):
 class StaffAppModal(discord.ui.Modal):
     def __init__(
         self,
-        author: discord.Member,
+        applicant: Applicant,
         nda: bool,
         timezone: str,
         hours_per_wk: str,
@@ -421,11 +452,11 @@ class StaffAppModal(discord.ui.Modal):
         After all answers are given, insert the answers (also from staffAppView) into the database.
         """
         super().__init__(*args, **kwargs)
-        self.db = sqlite3.connect("util/database.sqlite")
+        self.db = database.connect()
         self.cursor = self.db.cursor()
         self.bot = bot
 
-        self.author = author
+        self.applicant = applicant
         self.nda = nda
         self.timezone = timezone
         self.hours_per_wk = hours_per_wk
@@ -451,10 +482,12 @@ class StaffAppModal(discord.ui.Modal):
 
     async def callback(self, interaction: discord.Interaction) -> None:
         # New discord names
-        if str(self.author.discriminator) == "0":
-            self.discord_name = f"@{self.author.name}"
+        if str(self.applicant.user.discriminator) == "0":
+            self.discord_name = f"@{self.applicant.user.name}"
         else:
-            self.discord_name = f"{self.author.name}#{self.author.discriminator}"
+            self.discord_name = (
+                f"{self.applicant.user.name}#{self.applicant.user.discriminator}"
+            )
 
         self.cursor.execute(
             """
@@ -475,7 +508,7 @@ class StaffAppModal(discord.ui.Modal):
         )
         """,
             (
-                self.author.id,
+                self.applicant.user.id,
                 1,
                 self.discord_name,
                 self.children[0].value,
@@ -490,9 +523,12 @@ class StaffAppModal(discord.ui.Modal):
         self.db.commit()
         self.db.close()
         # Send message to staff channel
-        staff_channel = self.bot.get_channel(int(getenv("STAFF_CHANNEL")))
-        text = f"{self.author.mention} has submitted a new staff application!"
-        await staff_channel.send(text)
+        staff_channel = self.bot.get_channel(
+            STAFF_CHANNEL_ID,
+        ) or await self.bot.fetch_channel(STAFF_CHANNEL_ID)
+        text = f"{self.applicant.user} has submitted a new staff application!"
+        if isinstance(staff_channel, discord.abc.Messageable):
+            await staff_channel.send(text)
         # Send message to user
         embed = discord.Embed(
             title="Staff Application successfully submitted",
@@ -500,7 +536,7 @@ class StaffAppModal(discord.ui.Modal):
             color=0xFFD700,
         )
         await interaction.response.edit_message(embed=embed, content="", view=None)
-        Log("$ has completed the Staff Application", self.author)
+        log("$ has completed the Staff Application", self.applicant.user)
 
 
 class StaffAppsUser(commands.Cog):
@@ -516,7 +552,7 @@ class StaffAppsUser(commands.Cog):
         description="Apply for a staff position if your account meets the requirements!",
     )
     @limit(1)
-    async def apply(self, ctx: commands.Context) -> None:
+    async def apply(self, ctx: discord.ApplicationContext) -> None:
         """
         Lets users apply for staff positions
         """
@@ -536,12 +572,14 @@ class StaffAppsUser(commands.Cog):
             logname = f"@{ctx.author.name}:{ctx.author.id}"
         else:
             logname = f"{ctx.author.name}#{ctx.author.discriminator}:{ctx.author.id}"
-        applicant = user(ctx.author)
+
+        assert isinstance(ctx.author, discord.Member), "We already checked for DMs."
+        applicant = Applicant(ctx.author)
 
         # check if user is banned
         if applicant.marked_spam:
             await ctx.respond(embed=embeds().marked_spam(), ephemeral=True)
-            Log(f"{logname} tried to apply for staff but is marked as spam")
+            log(f"{logname} tried to apply for staff but is marked as spam")
             return
 
         # check cooldown
@@ -550,16 +588,16 @@ class StaffAppsUser(commands.Cog):
                 embed=embeds().cooldown(applicant.cooldown),
                 ephemeral=True,
             )
-            Log(f"{logname} tried to apply for staff but is on cooldown")
+            log(f"{logname} tried to apply for staff but is on cooldown")
             return
 
         # check app status
         status = any(
-            x in [1, 3, 4, 5, 6, 7, 8] for x in applicant.status
+            x in (1, 3, 4, 5, 6, 7, 8) for x in applicant.status
         )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)
-            Log(
+            log(
                 f"{logname} tried to apply for staff but already has an ongoing application",
             )
             return
@@ -574,12 +612,12 @@ class StaffAppsUser(commands.Cog):
                 ),
                 ephemeral=True,
             )
-            Log(
+            log(
                 f"{logname} tried to apply for staff but does not meet the minimum requirements",
             )
             return
 
-        Log(f"{logname} is applying for staff")
+        log(f"{logname} is applying for staff")
         # user meets all requirements, send application form
         embed = EmbedBuilder(
             title="Congratulations!",
@@ -601,7 +639,7 @@ class StaffAppsUser(commands.Cog):
         await ctx.respond(
             embed=embed,
             ephemeral=True,
-            view=StaffAppView(ctx.author, self.bot),
+            view=StaffAppView(applicant, self.bot),
         )
 
 

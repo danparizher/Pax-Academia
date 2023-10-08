@@ -1,10 +1,14 @@
+from __future__ import annotations
+
 import asyncio
 
 import wikipedia
+from discord import ApplicationContext, option
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
 
 
 def get_wiki_without_logging(query: str) -> dict[str, str]:
@@ -33,8 +37,14 @@ class Wikipedia(commands.Cog):
         self.bot = bot
 
     @commands.slash_command(name="wiki", description="Searches Wikipedia for a topic.")
+    @option(
+        "query",
+        str,
+        description="The term or phrase to search.",
+        required=True,
+    )
     @limit(2)
-    async def wiki(self, ctx: commands.Context, query: str) -> None:
+    async def wiki(self, ctx: ApplicationContext, query: str) -> None:
         """
         It searches Wikipedia for a query and returns the first result
 
@@ -50,7 +60,7 @@ class Wikipedia(commands.Cog):
                 # Ensure the description stops at the end of a word
                 last_space_index = desc[:1024].rfind(" ")
                 if last_space_index != -1:
-                    desc = desc[:last_space_index] + "..."
+                    desc = f"{desc[:last_space_index]}..."
             embed = EmbedBuilder(
                 title=page["title"].title(),
                 description=desc,
@@ -60,7 +70,7 @@ class Wikipedia(commands.Cog):
 
             await ctx.respond(embed=embed)
 
-            Log(f"Wikipedia command used by $ in {ctx.guild}.", ctx.author)
+            log(f"Wikipedia command used by $ in {ctx.guild}.", ctx.author)
 
         except wikipedia.exceptions.DisambiguationError:
             embed = EmbedBuilder(

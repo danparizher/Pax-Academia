@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from contextlib import suppress
 from itertools import islice
 from os import getenv
@@ -5,10 +7,10 @@ from os import getenv
 import discord
 from discord.ext import commands
 
+import code_detection
 from cogs.tips import send_tip
-from util import code_detection
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log
+from message_formatting.embeds import EmbedBuilder
+from util.logger import log
 
 
 class DetectCode(commands.Cog):
@@ -159,7 +161,7 @@ class DetectCode(commands.Cog):
         elif send_tips and self.likely_contains_code(message.content):
             await send_tip(message.channel, "Format Your Code", message.author, "bot")
             with suppress(AttributeError):
-                Log(
+                log(
                     f" $ sent potential code in {message.channel.name}, bot responded with tip",
                     message.author,
                 )

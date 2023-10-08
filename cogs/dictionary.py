@@ -1,17 +1,23 @@
+from __future__ import annotations
+
 import asyncio
 import re
 import urllib.parse
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 import aiohttp
 import bs4
 import discord
 from discord import option
-from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
-from util.embed_builder import EmbedBuilder
-from util.Logging import Log, limit
+from message_formatting.embeds import EmbedBuilder
+from util.limiter import limit
+from util.logger import log
+
+if TYPE_CHECKING:
+    from discord.commands.context import ApplicationContext
 
 
 @dataclass
@@ -32,9 +38,9 @@ class Pronunciation:
 
     @classmethod
     def parse_from_oxford_phonetic_element(
-        cls: type["Pronunciation"],
+        cls: type[Pronunciation],
         element: bs4.Tag,
-    ) -> "Pronunciation | None":
+    ) -> Pronunciation | None:
         """
         Tries to parse a pronunciation element on an Oxford dictionary page.
 
@@ -100,7 +106,7 @@ class SimilarWord:
     url: str
     part_of_speech: str | None
 
-    async def fetch(self) -> "WordInformation":
+    async def fetch(self) -> WordInformation:
         """
         Fetches the word information based on the URL.
 
@@ -383,9 +389,7 @@ def parse_oxford_definition_page(url: str, soup: bs4.BeautifulSoup) -> WordInfor
 
     if not senses:
         msg = "Failed to find a single definition on the page via selector `.sense`"
-        raise ValueError(
-            msg,
-        )
+        raise ValueError(msg)
 
     return WordInformation(
         url=url,
@@ -415,9 +419,7 @@ async def search(word: str) -> WordInformation | list[str]:
         return parse_oxford_definition_page(url, soup)
 
     msg = f"Unexpected status code {status_code} while searching for word {word!r}"
-    raise Exception(
-        msg,
-    )
+    raise Exception(msg)
 
 
 def ChooseSimilarWordView(
@@ -528,7 +530,7 @@ class Dictionary(commands.Cog):
             view = None
 
         await ctx.edit(embed=word_info.build_embed(), view=view)
-        Log("$ used the dictionary command", ctx.author)
+        log("$ used the dictionary command", ctx.author)
 
 
 def setup(bot: commands.Bot) -> None:
