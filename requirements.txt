@@ -21,7 +21,7 @@ beautifulsoup4==4.12.2
     # via
     #   -r requirements.in
     #   wikipedia
-black==23.7.0
+black==23.9.1
     # via -r requirements.in
 build==1.0.3
     # via pip-tools
@@ -29,8 +29,6 @@ certifi==2023.7.22
     # via
     #   requests
     #   selenium
-cffi==1.16.0
-    # via trio
 charset-normalizer==3.3.0
     # via
     #   aiohttp
@@ -39,10 +37,6 @@ click==8.1.7
     # via
     #   black
     #   pip-tools
-colorama==0.4.6
-    # via
-    #   build
-    #   click
 deepl==1.15.0
     # via -r requirements.in
 file-read-backwards==3.0.0
@@ -86,8 +80,6 @@ pubchempy==1.0.4
     # via -r requirements.in
 py-cord==2.4.1
     # via -r requirements.in
-pycparser==2.21
-    # via cffi
 pyproject-hooks==1.0.0
     # via build
 pysocks==1.7.1
