@@ -206,7 +206,10 @@ class DetectorBase(ABC):
             return len(section.lines) < self.min_code_lines_in_a_row
         return len(section.lines) < self.min_plain_text_lines_in_a_row
 
-    def reduce_section_group(self: DetectorBase, sections: list[DetectedSection]) -> DetectedSection:
+    def reduce_section_group(
+        self: DetectorBase,
+        sections: list[DetectedSection],
+    ) -> DetectedSection:
         """
         Simply merges a group of sections into a single section.
         The resultant `classification` is a simple MODE of the input sections' lines.
