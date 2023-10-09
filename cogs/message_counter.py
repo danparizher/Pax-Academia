@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import discord
 from discord.ext import commands
 
@@ -5,13 +7,13 @@ import database
 
 
 class MessageCounter(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: MessageCounter, bot: commands.Bot) -> None:
         self.bot = bot
         self.db = database.connect()
         self.cursor = self.db.cursor()
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self: MessageCounter, message: discord.Message) -> None:
         """
         It adds a user to the database if they don't exist, and updates their message count if they do
 
@@ -56,19 +58,19 @@ class MessageCounter(commands.Cog):
         # commit changes
         self.db.commit()
 
-    def add_user(self, uid: int) -> None:
+    def add_user(self: MessageCounter, uid: int) -> None:
         self.cursor.execute(
             "INSERT INTO user VALUES (?, ?, ?, ?, ?, ?)",
             (uid, 0, False, None, 0, None),
         )  # See ERD.mdj
 
-    def update_user(self, uid: int, amount: int) -> None:
+    def update_user(self: MessageCounter, uid: int, amount: int) -> None:
         self.cursor.execute(
             "UPDATE user SET messagesSent = ? WHERE uid = ?",
             (amount, uid),
         )
 
-    def update_help_user(self, uid: int, amount: int) -> None:
+    def update_help_user(self: MessageCounter, uid: int, amount: int) -> None:
         self.cursor.execute(
             "UPDATE user SET helpMessagesSent = ? WHERE uid = ?",
             (amount, uid),

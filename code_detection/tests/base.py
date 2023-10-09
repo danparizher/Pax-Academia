@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from code_detection.base import DetectorBase
 
 from .helpers import create_tester
@@ -8,10 +10,10 @@ class SimpleDetector(DetectorBase):
     def language(self) -> str:
         return "test"
 
-    def line_is_probably_code(self, line: str) -> bool:
+    def line_is_probably_code(self: SimpleDetector, line: str) -> bool:
         return "code" in line
 
-    def line_is_plausibly_code(self, line: str) -> bool:
+    def line_is_plausibly_code(self: SimpleDetector, line: str) -> bool:
         return not line or line.isspace()
 
 

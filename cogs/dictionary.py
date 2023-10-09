@@ -495,13 +495,13 @@ def ChooseSimilarWordView(
 
 
 class Dictionary(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: Dictionary, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(name="define", description="Defines a word.")
     @option("word", str, description="The word to define.", required=True)
     @limit(2)
-    async def define(self, ctx: ApplicationContext, word: str) -> None:
+    async def define(self: Dictionary, ctx: ApplicationContext, word: str) -> None:
         """
         It takes a word as an argument, and returns the definition of that word
 

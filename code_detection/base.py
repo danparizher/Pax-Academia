@@ -48,7 +48,7 @@ class DetectedSection:
 
 
 class DetectorBase(ABC):
-    def __init__(self, text: str) -> None:
+    def __init__(self: DetectorBase, text: str) -> None:
         self.text = text
 
     @property
@@ -81,14 +81,14 @@ class DetectorBase(ABC):
         return 2
 
     @abstractmethod
-    def line_is_probably_code(self, line: str) -> bool:
+    def line_is_probably_code(self: DetectorBase, line: str) -> bool:
         """
         Returns True if an only if the line of text is most likely code, with high certainty.
         For example, the line "class DetectorBase(ABC):" is 'probably code'.
         This method is used to tell when plain text stops and code begins.
         """
 
-    def block_is_probably_code(self, block: str) -> bool:
+    def block_is_probably_code(self: DetectorBase, block: str) -> bool:
         """
         Same as `line_is_probably_code` except processes multiple lines at once.
         This is called at the end with all of the plain-text sections, and if True,
@@ -96,7 +96,7 @@ class DetectorBase(ABC):
         """
         return False
 
-    def line_is_plausibly_code(self, line: str) -> bool:
+    def line_is_plausibly_code(self: DetectorBase, line: str) -> bool:
         """
         Returns True if an only if the line of text _could_ be code (but could also not be).
         For example, a blank line is 'plausibly code'.
@@ -107,7 +107,7 @@ class DetectorBase(ABC):
         return not line or line.isspace() or line.startswith("  ")
 
     def classify_line(
-        self,
+        self: DetectorBase,
         previous_classification: Classification,
         line: str,
     ) -> tuple[Classification, bool]:
@@ -198,7 +198,7 @@ class DetectorBase(ABC):
 
         return sections
 
-    def section_too_short(self, section: DetectedSection) -> bool:
+    def section_too_short(self: DetectorBase, section: DetectedSection) -> bool:
         """
         Utility method to check if the section is shorter than the required minimums.
         """
@@ -206,7 +206,7 @@ class DetectorBase(ABC):
             return len(section.lines) < self.min_code_lines_in_a_row
         return len(section.lines) < self.min_plain_text_lines_in_a_row
 
-    def reduce_section_group(self, sections: list[DetectedSection]) -> DetectedSection:
+    def reduce_section_group(self: DetectorBase, sections: list[DetectedSection]) -> DetectedSection:
         """
         Simply merges a group of sections into a single section.
         The resultant `classification` is a simple MODE of the input sections' lines.
@@ -227,7 +227,7 @@ class DetectorBase(ABC):
         )
 
     def merge_short_sections(
-        self,
+        self: DetectorBase,
         sections: list[DetectedSection],
     ) -> list[DetectedSection]:
         """
@@ -410,7 +410,7 @@ class DetectorBase(ABC):
         return merged_sections
 
     def convert_plain_text_to_code(
-        self,
+        self: DetectorBase,
         sections: list[DetectedSection],
     ) -> list[DetectedSection]:
         """

@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 # Note: this file is currently unused
 # TODO: update it to use regex like python.py
-
 from .base import DetectorBase
 
 # unique starting keywords for java that don't appear in other languages
@@ -64,7 +65,7 @@ class JavaDetector(DetectorBase):
     def language(self) -> str:
         return "java"
 
-    def line_is_probably_code(self, line: str) -> bool:
+    def line_is_probably_code(self: JavaDetector, line: str) -> bool:
         return (
             (line.startswith(("  ", "\t")) and not line.isspace())
             or line.rstrip().endswith((";", "{", "}"))
