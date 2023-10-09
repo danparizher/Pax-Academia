@@ -286,6 +286,7 @@ class Alerts(commands.Cog):
                 "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)",
             )
 
+            alerts = {}
             for keyword, uid in c.fetchall():
                 if not re.search(keyword, message.content, re.IGNORECASE):
                     continue
@@ -301,9 +302,24 @@ class Alerts(commands.Cog):
                 if not message.channel.permissions_for(member).view_channel:
                     continue
 
+                if uid not in alerts:
+                    alerts[uid] = []
+
+                alerts[uid].append(keyword)
+
+            for uid, keywords in alerts.items():
+                member = message.channel.guild.get_member(uid)
+                if member is None:
+                    try:
+                        member = await message.channel.guild.fetch_member(uid)
+                    except discord.NotFound:
+                        # If the member is not found, skip to the next iteration
+                        continue
+
+                # At this point, member should not be None
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"Your keyword `{keyword}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    description=f"Your {'keyword' if len(keywords) == 1 else 'keywords'} {', '.join([f'`{keyword}`' for keyword in keywords])} was mentioned in {message.channel.mention} by {message.author.mention}.",
                     fields=[
                         ("Message", message.content, False),
                         (
