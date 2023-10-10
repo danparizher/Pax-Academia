@@ -302,8 +302,7 @@ class Alerts(commands.Cog):
                 if not message.channel.permissions_for(member).view_channel:
                     continue
 
-                if uid not in alerts:
-                    alerts[uid] = []
+                alerts.setdefault(uid, [])
 
                 alerts[uid].append(keyword)
 
