@@ -72,7 +72,7 @@ mypy-extensions==1.0.0
     # via black
 outcome==1.2.0
     # via trio
-packaging==23.1
+packaging==23.2
     # via
     #   black
     #   build
@@ -80,7 +80,7 @@ pathspec==0.11.2
     # via black
 pip-tools==7.3.0
     # via -r requirements.in
-platformdirs==3.10.0
+platformdirs==3.11.0
     # via black
 pubchempy==1.0.4
     # via -r requirements.in
@@ -96,7 +96,7 @@ python-dotenv==1.0.0
     # via -r requirements.in
 python-levenshtein==0.21.1
     # via -r requirements.in
-rapidfuzz==3.3.1
+rapidfuzz==3.4.0
     # via
     #   levenshtein
     #   thefuzz
@@ -125,7 +125,7 @@ trio-websocket==0.11.1
     # via selenium
 undetected-chromedriver==3.5.3
     # via -r requirements.in
-urllib3[socks]==2.0.5
+urllib3[socks]==2.0.6
     # via
     #   requests
     #   selenium

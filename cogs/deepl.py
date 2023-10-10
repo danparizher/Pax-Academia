@@ -93,7 +93,7 @@ def translate(
 
 
 class Translation(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: Translation, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(name="translate", description="Translates a given text.")
@@ -126,7 +126,7 @@ class Translation(commands.Cog):
     )
     @limit(2)
     async def translate(
-        self,
+        self: Translation,
         ctx: discord.ApplicationContext,
         text: str,
         target_language: str,

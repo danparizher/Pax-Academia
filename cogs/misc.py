@@ -69,12 +69,12 @@ def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.Fil
 
 
 class Misc(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: Misc, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(name="ping", description="Pings the bot.")
     @limit(3)
-    async def ping(self, ctx: ApplicationContext) -> None:
+    async def ping(self: Misc, ctx: ApplicationContext) -> None:
         """
         It sends a message, then edits that message to say "Pong!" and the latency of the bot
 
@@ -113,7 +113,7 @@ class Misc(commands.Cog):
         guild_only=VIEW_DB_GUILD is not None,
     )
     @limit(1)  # db access
-    async def view_database(self, ctx: ApplicationContext) -> None:
+    async def view_database(self: Misc, ctx: ApplicationContext) -> None:
         """
         It provides the database in a CSV format
 
@@ -180,7 +180,7 @@ class Misc(commands.Cog):
     )
     @limit(1)
     async def view_logs(
-        self,
+        self: Misc,
         ctx: ApplicationContext,
         filename: str,
         trailing_lines_count: int,

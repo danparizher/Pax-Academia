@@ -29,7 +29,9 @@ class MessageFingerprint:
     guild_id: int | None  # will be None for DMs
     channel_id: int
     message_id: int
-    jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
+    jump_url: (
+        str
+    )  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[
         str
@@ -58,14 +60,14 @@ class MessageFingerprint:
             message_id=message.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.hash(filtered_content)
+            content_hash=cls.sha256_hash(filtered_content)
             if filtered_content is not None
             else None,
         )
 
     # performs a SHA256 hash
     @staticmethod
-    def hash(data: str | bytes) -> Hash:
+    def sha256_hash(data: str | bytes) -> Hash:
         if isinstance(data, str):
             data = data.encode()
 
@@ -127,14 +129,14 @@ class MessageFingerprint:
                         )
                         continue
 
-                    self.cached_attachment_hashes.add(self.hash(attachment_data))
+                    self.cached_attachment_hashes.add(self.sha256_hash(attachment_data))
 
         return self.cached_attachment_hashes
 
     # returns True if two message fingerprints are similar
     # specifically, if at least one of the attachments are identical
     # or if the message body is identical and not blank
-    async def matches(self, other: MessageFingerprint) -> bool:
+    async def matches(self: MessageFingerprint, other: MessageFingerprint) -> bool:
         # if there is content and it matches, then the fingerprint matches
         if self.content_hash is not None and (self.content_hash == other.content_hash):
             return True
@@ -150,7 +152,10 @@ class MessageFingerprint:
     # - were sent in the same guild
     # - were sent in different channels
     # - the fingerprints match (see `matches`)
-    async def is_multipost_of(self, other: MessageFingerprint) -> bool:
+    async def is_multipost_of(
+        self: MessageFingerprint,
+        other: MessageFingerprint,
+    ) -> bool:
         if self.author_id != other.author_id:
             return False
 
@@ -179,7 +184,7 @@ class Moderation(commands.Cog):
 
     # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
     async def record_fingerprint(
-        self,
+        self: Moderation,
         message: discord.Message,
     ) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
         fingerprint = MessageFingerprint.build(message)
@@ -224,7 +229,7 @@ class Moderation(commands.Cog):
             del self.multipost_warnings[message_id]
 
     async def delete_previous_multipost_warnings(
-        self,
+        self: Moderation,
         channel_id: int,
         author_id: int,
     ) -> None:
@@ -253,7 +258,7 @@ class Moderation(commands.Cog):
     #   - Author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
     #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
     #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
-    async def check_multipost(self, message: discord.Message) -> None:
+    async def check_multipost(self: Moderation, message: discord.Message) -> None:
         # author not a bot
         if message.author.bot:
             return
@@ -361,12 +366,12 @@ class Moderation(commands.Cog):
                 raise
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self: Moderation, message: discord.Message) -> None:
         await self.check_multipost(message)
 
     @commands.Cog.listener()
     async def on_raw_message_delete(
-        self,
+        self: Moderation,
         payload: discord.RawMessageDeleteEvent,
     ) -> None:
         if payload.message_id in self.multipost_warnings:

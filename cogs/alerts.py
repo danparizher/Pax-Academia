@@ -42,7 +42,7 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
 
 
 class Alerts(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: Alerts, bot: commands.Bot) -> None:
         self.bot = bot
         self.db = database.connect()
 
@@ -59,7 +59,7 @@ class Alerts(commands.Cog):
     )
     @limit(1)
     @server
-    async def add_alert(self, ctx: ApplicationContext, keyword: str) -> None:
+    async def add_alert(self: Alerts, ctx: ApplicationContext, keyword: str) -> None:
         """
         Checks if the keyword is already in the database, if it is, sends an error message, if it
         isn't, adds the keyword to the database and sends a success message.
@@ -123,7 +123,7 @@ class Alerts(commands.Cog):
     )
     @limit(1)
     @server
-    async def remove_alert(self, ctx: ApplicationContext, keyword: str) -> None:
+    async def remove_alert(self: Alerts, ctx: ApplicationContext, keyword: str) -> None:
         """
         It removes an alert from the database.
 
@@ -164,7 +164,7 @@ class Alerts(commands.Cog):
     # User should still be allowed to remove their alerts if they have too many
     @limit(3)
     @server
-    async def list_alerts(self, ctx: ApplicationContext) -> None:
+    async def list_alerts(self: Alerts, ctx: ApplicationContext) -> None:
         """
         It gets all alerts from the database and responds with a list of them
 
@@ -185,7 +185,7 @@ class Alerts(commands.Cog):
     @commands.slash_command(name="alerts-clear", description="Clears all alerts.")
     @limit(3)
     @server
-    async def clear_alerts(self, ctx: ApplicationContext) -> None:
+    async def clear_alerts(self: Alerts, ctx: ApplicationContext) -> None:
         """
         It clears all alerts from the database.
 
@@ -210,7 +210,7 @@ class Alerts(commands.Cog):
     )
     @limit(1)
     @server
-    async def pause_alerts(self, ctx: ApplicationContext) -> None:
+    async def pause_alerts(self: Alerts, ctx: ApplicationContext) -> None:
         """
         It pauses alerts for the user who is currently using the command.
 
@@ -239,7 +239,7 @@ class Alerts(commands.Cog):
     )
     @limit(1)
     @server
-    async def resume_alerts(self, ctx: ApplicationContext) -> None:
+    async def resume_alerts(self: Alerts, ctx: ApplicationContext) -> None:
         """
         It resumes alerts for the user who is currently using the command.
 
@@ -262,7 +262,7 @@ class Alerts(commands.Cog):
         log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self: Alerts, message: discord.Message) -> None:
         async def user_alerts() -> None:
             """
             If a message contains a keyword, send a DM to the user who added the keyword
@@ -286,6 +286,7 @@ class Alerts(commands.Cog):
                 "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)",
             )
 
+            alerts = {}
             for keyword, uid in c.fetchall():
                 if not re.search(keyword, message.content, re.IGNORECASE):
                     continue
@@ -301,9 +302,23 @@ class Alerts(commands.Cog):
                 if not message.channel.permissions_for(member).view_channel:
                     continue
 
+                alerts.setdefault(uid, [])
+
+                alerts[uid].append(keyword)
+
+            for uid, keywords in alerts.items():
+                member = message.channel.guild.get_member(uid)
+                if member is None:
+                    try:
+                        member = await message.channel.guild.fetch_member(uid)
+                    except discord.NotFound:
+                        # If the member is not found, skip to the next iteration
+                        continue
+
+                # At this point, member should not be None
                 embed = EmbedBuilder(
                     title="Alert",
-                    description=f"Your keyword `{keyword}` was mentioned in {message.channel.mention} by {message.author.mention}.",
+                    description=f"Your {'keyword' if len(keywords) == 1 else 'keywords'} {', '.join([f'`{keyword}`' for keyword in keywords])} was mentioned in {message.channel.mention} by {message.author.mention}.",
                     fields=[
                         ("Message", message.content, False),
                         (

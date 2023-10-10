@@ -14,7 +14,7 @@ from util.logger import log
 
 
 class DetectCode(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: DetectCode, bot: commands.Bot) -> None:
         self.bot = bot
         self.send_tip_in_category_id = int(
             getenv("UNFORMATTED_CODE_DETECTION_CATEGORY_ID", -1),
@@ -118,7 +118,7 @@ class DetectCode(commands.Cog):
         return percentage_code_like >= minimum_code_probability
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self: DetectCode, message: discord.Message) -> None:
         if (
             message.author.bot
             or not isinstance(message.channel, discord.TextChannel)

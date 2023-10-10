@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 
 from .base import DetectorBase
@@ -109,13 +111,13 @@ class PythonDetector(DetectorBase):
     def language(self) -> str:
         return "python"
 
-    def block_is_probably_code(self, block: str) -> bool:
+    def block_is_probably_code(self: PythonDetector, block: str) -> bool:
         return (
             re.match("^[brf]*('''|\"\"\").*('''|\"\"\")", block.strip(), re.DOTALL)
             is not None
         )
 
-    def line_is_probably_code(self, line: str) -> bool:
+    def line_is_probably_code(self: PythonDetector, line: str) -> bool:
         if any(pattern.search(line) for pattern in LINE_PATTERNS_NO_STRIP):
             return True
 

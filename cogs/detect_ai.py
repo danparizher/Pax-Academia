@@ -278,7 +278,7 @@ def detect_ai(text: str) -> AIDetectionResult:
 
 
 class AI(commands.Cog):
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self: AI, bot: commands.Bot) -> None:
         self.bot = bot
 
     @commands.slash_command(
@@ -292,7 +292,7 @@ class AI(commands.Cog):
         required=True,
     )
     @limit(2)
-    async def ai(self, ctx: ApplicationContext, text: str) -> None:
+    async def ai(self: AI, ctx: ApplicationContext, text: str) -> None:
         """
         Runs a given text through an AI detector and returns the result as an image.
 
