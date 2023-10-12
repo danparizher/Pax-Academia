@@ -23,6 +23,7 @@ class DetectCode(commands.Cog):
             int(channel_id)
             for channel_id in getenv("AUTO_FORMAT_CODE_CHANNEL_IDS", "-1").split(",")
         ]
+        print(self.auto_format_in_channel_ids)
 
     @staticmethod
     def format_detected_code(
@@ -49,41 +50,6 @@ class DetectCode(commands.Cog):
             if section.is_code and line and not line.isspace()
         )
         return "\n".join(islice(code_generator, n))
-
-    @classmethod
-    def get_formatting_example(
-        cls,
-        language: str,
-        sections: tuple[code_detection.DetectedSection, ...],
-    ) -> tuple[str, str]:
-        r"""
-        Returns two versions of a string. The first has all special characters escaped, like so:
-        \`\`\`py
-        variable\_name = 1 + 2 \* 3
-        print("variable\_name")
-        \`\`\`
-
-        and the second will have working formatting, like so:
-        ```py
-        variable_name = 1 + 2 * 3
-        print("variable_name")
-        ```
-
-        such that the first string can be copy/pasted out of discord to create the second string
-        """
-        code = cls.get_first_lines_of_code(sections)
-        escaped_code = (
-            code.replace("\\", "\\\\")
-            .replace("*", "\\*")
-            .replace("_", "\\_")
-            .replace("#", "\\#")
-            .replace("<", "\\<")
-            .replace(">", "\\>")
-        )
-        return (
-            f"\\`\\`\\`{language}\n{escaped_code}\n\\`\\`\\`",
-            f"```{language}\n{code}\n```",
-        )
 
     @staticmethod
     def likely_contains_code(text: str) -> bool:
@@ -132,7 +98,6 @@ class DetectCode(commands.Cog):
 
         if autoformat and (detection_result := code_detection.detect(message.content)):
             language, sections = detection_result
-            escaped, unescaped = self.get_formatting_example(language, sections)
 
             embed = EmbedBuilder(
                 title="Auto-Formatted Code",
@@ -141,19 +106,9 @@ class DetectCode(commands.Cog):
             ).build()
 
             await message.reply(
-                (
-                    "It looks like you have some unformatted code, which is difficult to read.\n"
-                    "You can format code by surrounding it with backticks `` ``` `` (not quotes `'''`).\n"
-                    "\n"
-                    "For example, this message:\n"
-                    f"{escaped}\n"
-                    "\n"
-                    "will look like this:\n"
-                    f"{unescaped}\n"
-                    "\n"
-                    "Below, I have automatically applied that formatting for you."
-                ),
+                "[How to format code on Discord?](<https://www.wikihow.com/Format-Text-as-Code-in-Discord>)",
                 embed=embed,
+                file=discord.File(code_detection.formatting_example_image_path),
             )
 
         # if language-specific algorithms fail, use a generic algorithm
