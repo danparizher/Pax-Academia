@@ -152,9 +152,7 @@ class DetectCode(commands.Cog):
         payload: discord.RawMessageDeleteEvent,
     ) -> None:
         uuid = (payload.channel_id, payload.message_id)
-        sent_tip_message = self.sent_tip_messages.pop(uuid, None)
-
-        if sent_tip_message:
+        if sent_tip_message := self.sent_tip_messages.pop(uuid, None):
             await sent_tip_message.delete()
 
     @commands.Cog.listener()
@@ -168,8 +166,7 @@ class DetectCode(commands.Cog):
 
         if "```" in new_content:
             uuid = (payload.channel_id, payload.message_id)
-            sent_tip_message = self.sent_tip_messages.pop(uuid, None)
-            if sent_tip_message:
+            if sent_tip_message := self.sent_tip_messages.pop(uuid, None):
                 await sent_tip_message.delete()
 
 

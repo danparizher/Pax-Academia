@@ -116,21 +116,24 @@ class PythonDetector(DetectorBase):
     def language(self) -> str:
         return "python"
 
-    def block_is_probably_code(self: PythonDetector, block: str) -> bool:
+    @staticmethod
+    def block_is_probably_code(block: str) -> bool:
         return (
             re.match("^[brf]*('''|\"\"\").*('''|\"\"\")", block.strip(), re.DOTALL)
             is not None
         )
 
-    def line_is_probably_code(self: PythonDetector, line: str) -> bool:
+    @staticmethod
+    def line_is_probably_code(line: str) -> bool:
         if any(pattern.search(line) for pattern in LINE_PATTERNS_NO_STRIP):
             return True
 
         line = line.strip()
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
 
-    def line_is_plausibly_code(self: PythonDetector, line: str) -> bool:
-        if super().line_is_plausibly_code(line):
+    @staticmethod
+    def line_is_plausibly_code(line: str) -> bool:
+        if PythonDetector.line_is_plausibly_code(line):
             return True
 
         line = line.strip()
