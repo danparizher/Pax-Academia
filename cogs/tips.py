@@ -108,9 +108,9 @@ class Tips(commands.Cog):
         choices=["Yes", "No"],
         required=False,
     )
-    @staticmethod
     @limit(3)
     async def tip(
+        self: Tips,  # noqa
         ctx: ApplicationContext,
         tip: str,
         ping: Member | None = None,
