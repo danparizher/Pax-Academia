@@ -13,7 +13,7 @@ DETECTOR_CLASSES: list[type[DetectorBase]] = [
     # More languages coming soon!
 ]
 
-formatting_example_image_path = Path(__file__).parent / "formatting-example.png"
+formatting_example_image_path = Path(__file__).parent / "formatting-example.gif"
 
 
 def detect(text: str) -> tuple[str, tuple[DetectedSection, ...]] | None:
