@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import suppress
 from itertools import islice
 from os import getenv
+from typing import ClassVar
 
 import discord
 from discord.ext import commands
@@ -14,6 +16,11 @@ from util.logger import log
 
 
 class DetectCode(commands.Cog):
+    # maps (channel id, message id) -> message
+    # for all tip messages sent in the last hour
+    # (useful so that we can delete the tip if they fix their message)
+    sent_tip_messages: ClassVar[dict[tuple[int, int], discord.Message]] = {}
+
     def __init__(self: DetectCode, bot: commands.Bot) -> None:
         self.bot = bot
         self.send_tip_in_category_id = int(
@@ -49,41 +56,6 @@ class DetectCode(commands.Cog):
             if section.is_code and line and not line.isspace()
         )
         return "\n".join(islice(code_generator, n))
-
-    @classmethod
-    def get_formatting_example(
-        cls,
-        language: str,
-        sections: tuple[code_detection.DetectedSection, ...],
-    ) -> tuple[str, str]:
-        r"""
-        Returns two versions of a string. The first has all special characters escaped, like so:
-        \`\`\`py
-        variable\_name = 1 + 2 \* 3
-        print("variable\_name")
-        \`\`\`
-
-        and the second will have working formatting, like so:
-        ```py
-        variable_name = 1 + 2 * 3
-        print("variable_name")
-        ```
-
-        such that the first string can be copy/pasted out of discord to create the second string
-        """
-        code = cls.get_first_lines_of_code(sections)
-        escaped_code = (
-            code.replace("\\", "\\\\")
-            .replace("*", "\\*")
-            .replace("_", "\\_")
-            .replace("#", "\\#")
-            .replace("<", "\\<")
-            .replace(">", "\\>")
-        )
-        return (
-            f"\\`\\`\\`{language}\n{escaped_code}\n\\`\\`\\`",
-            f"```{language}\n{code}\n```",
-        )
 
     @staticmethod
     def likely_contains_code(text: str) -> bool:
@@ -132,7 +104,6 @@ class DetectCode(commands.Cog):
 
         if autoformat and (detection_result := code_detection.detect(message.content)):
             language, sections = detection_result
-            escaped, unescaped = self.get_formatting_example(language, sections)
 
             embed = EmbedBuilder(
                 title="Auto-Formatted Code",
@@ -140,31 +111,63 @@ class DetectCode(commands.Cog):
                 color=0x32DC64,  # same green as tips
             ).build()
 
-            await message.reply(
-                (
-                    "It looks like you have some unformatted code, which is difficult to read.\n"
-                    "You can format code by surrounding it with backticks `` ``` `` (not quotes `'''`).\n"
-                    "\n"
-                    "For example, this message:\n"
-                    f"{escaped}\n"
-                    "\n"
-                    "will look like this:\n"
-                    f"{unescaped}\n"
-                    "\n"
-                    "Below, I have automatically applied that formatting for you."
-                ),
+            tip_message = await message.reply(
+                "[How to format code on Discord?](<https://www.wikihow.com/Format-Text-as-Code-in-Discord>)",
                 embed=embed,
+                file=discord.File(code_detection.formatting_example_image_path),
             )
 
         # if language-specific algorithms fail, use a generic algorithm
         # TODO: maybe remove this once we're confident w/ our language-specific algorithms
         elif send_tips and self.likely_contains_code(message.content):
-            await send_tip(message.channel, "Format Your Code", message.author, "bot")
+            tip_message = await send_tip(
+                message.channel,
+                "Format Your Code",
+                message.author,
+                "bot",
+            )
+            assert isinstance(
+                tip_message,
+                discord.Message,
+            ), "channel.send() always returns `Message`s"
+
             with suppress(AttributeError):
                 log(
                     f" $ sent potential code in {message.channel.name}, bot responded with tip",
                     message.author,
                 )
+        else:
+            return
+
+        # keep record of this tip being sent for 1 hour
+        uuid = (message.channel.id, message.id)
+        self.sent_tip_messages[uuid] = tip_message
+        await asyncio.sleep(60 * 60)
+        with suppress(KeyError):
+            del self.sent_tip_messages[uuid]
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(
+        self: DetectCode,
+        payload: discord.RawMessageDeleteEvent,
+    ) -> None:
+        uuid = (payload.channel_id, payload.message_id)
+        if sent_tip_message := self.sent_tip_messages.pop(uuid, None):
+            await sent_tip_message.delete()
+
+    @commands.Cog.listener()
+    async def on_raw_message_edit(
+        self: DetectCode,
+        payload: discord.RawMessageUpdateEvent,
+    ) -> None:
+        changes = dict(payload.data)
+        if not isinstance(new_content := changes.get("content"), str):
+            return
+
+        if "```" in new_content:
+            uuid = (payload.channel_id, payload.message_id)
+            if sent_tip_message := self.sent_tip_messages.pop(uuid, None):
+                await sent_tip_message.delete()
 
 
 def setup(bot: commands.Bot) -> None:

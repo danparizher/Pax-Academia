@@ -48,7 +48,7 @@ COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
 CONTAINER_OPENER = r"(\(|\[|\{)"
 CONTAINER_CLOSER = r"(\)|\]|\})"
 NAME_OR_CONTAINER = rf"(({NAME})|{CONTAINER_OPENER}|{CONTAINER_CLOSER})"
-COMMA_SEP_TOKEN = rf"({NAME_OR_CONTAINER}\s*,\s*)*{NAME_OR_CONTAINER}"
+COMMA_SEP_TOKEN = rf"({NAME_OR_CONTAINER}+\s*,\s*)*{NAME_OR_CONTAINER}+"
 OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
 CLAUSE_END = r"(\(|\[|:)$"
 
@@ -65,7 +65,9 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"^except.*{CLAUSE_END}"),
     re.compile(r"^finally\s*:$"),
     re.compile(r"^from\b"),
-    re.compile(rf"for\b\s*{COMMA_SEP_TOKEN}\s*in.+(\(|\[|\{{|{NAME})$"),
+    re.compile(
+        rf"for\b\s*{COMMA_SEP_TOKEN}\s*\bin\b\s*(({NAME})|.+{CONTAINER_CLOSER}):?$",
+    ),
     re.compile(rf"^(global|nonlocal)\s+{COMMA_SEP_NAMES}"),
     re.compile(rf"^if.*{CLAUSE_END}"),
     re.compile(r"^import\b"),
@@ -83,7 +85,6 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"\.\s*{NAME}\s*{OPERATOR}?="),
     re.compile(rf"\.\s*{NAME}\s*\("),
     re.compile(rf"^{NAME}\s*\("),
-    re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
     re.compile(rf"^({CONTAINER_CLOSER}|{CONTAINER_OPENER}|\s)+$"),
     re.compile(rf"^@{NAME}"),
     re.compile(r"\).*:$"),
@@ -105,21 +106,35 @@ LINE_PATTERNS_NO_STRIP = [  # text will NOT be stripped before testing these pat
     ),
 ]
 
+PLAUSIBLE_LINE_PATTERNS = [
+    re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
+]
+
 
 class PythonDetector(DetectorBase):
     @property
     def language(self) -> str:
         return "python"
 
-    def block_is_probably_code(self: PythonDetector, block: str) -> bool:
+    @staticmethod
+    def block_is_probably_code(block: str) -> bool:
         return (
             re.match("^[brf]*('''|\"\"\").*('''|\"\"\")", block.strip(), re.DOTALL)
             is not None
         )
 
-    def line_is_probably_code(self: PythonDetector, line: str) -> bool:
+    @staticmethod
+    def line_is_probably_code(line: str) -> bool:
         if any(pattern.search(line) for pattern in LINE_PATTERNS_NO_STRIP):
             return True
 
         line = line.strip()
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
+
+    @staticmethod
+    def line_is_plausibly_code(line: str) -> bool:
+        if PythonDetector.line_is_plausibly_code(line):
+            return True
+
+        line = line.strip()
+        return any(pattern.search(line) for pattern in PLAUSIBLE_LINE_PATTERNS)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from .python import PythonDetector
@@ -11,6 +12,8 @@ DETECTOR_CLASSES: list[type[DetectorBase]] = [
     PythonDetector,
     # More languages coming soon!
 ]
+
+formatting_example_image_path = Path(__file__).parent / "formatting-example.gif"
 
 
 def detect(text: str) -> tuple[str, tuple[DetectedSection, ...]] | None:

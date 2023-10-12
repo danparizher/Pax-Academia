@@ -108,3 +108,35 @@ def run() -> None:
         ),
         "4p",
     )
+
+    test(
+        dedent(
+            """\
+            Example 1:
+            Number of ones? 1
+            Number of twos? 1
+            Number of threes? 1
+            Number of fours? 1
+            Answer: 1 0 0 1
+
+            Explanation: One team has a student with strength 1 and one with strength 4, while the other team has a student with strength 2 and one with strength 3. Both teams have the same total strength, namely 5, and are of the same size, each consisting of 2 students.\
+            """,
+        ),
+        "8p",
+    )
+
+    test(
+        dedent(
+            """\
+            for i in range(32,128):
+                print(chr(i) ,end=' ')
+                if (i-1) % 10 ==0:
+                    print()
+            print()
+
+
+            Using this code I am going to get the characters and the symbols. I am making a cipher that asks for user input and encrypts and decrypts it. How do I access what is in the code provided as far as it comes to encryption\
+            """,
+        ),
+        "5c 3p",
+    )
