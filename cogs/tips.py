@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from discord import Member, User, option
+from discord import Interaction, Member, Message, User, WebhookMessage, option
 from discord.commands.context import ApplicationContext
 from discord.ext import commands
 
@@ -61,7 +61,7 @@ async def send_tip(
     tip: str,
     ping: User | Member | None = None,
     anonymous: str = "No",
-) -> None:
+) -> Message | Interaction | WebhookMessage:
     message_content = None if ping is None else ping.mention
     embed = EmbedBuilder(
         title=f"Tip: {tip.capitalize()}.",
@@ -77,12 +77,10 @@ async def send_tip(
                 ephemeral=True,
                 delete_after=5,
             )
-            return
         if anonymous.casefold() == "no":
-            await ctx.respond(message_content, embed=embed)
-            return
+            return await ctx.respond(message_content, embed=embed)
 
-    await ctx.send(message_content, embed=embed)
+    return await ctx.send(message_content, embed=embed)
 
 
 class Tips(commands.Cog):
