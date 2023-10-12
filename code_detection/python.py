@@ -48,7 +48,7 @@ COMMA_SEP_NAMES = rf"({NAME}\s*,\s*)*{NAME}"
 CONTAINER_OPENER = r"(\(|\[|\{)"
 CONTAINER_CLOSER = r"(\)|\]|\})"
 NAME_OR_CONTAINER = rf"(({NAME})|{CONTAINER_OPENER}|{CONTAINER_CLOSER})"
-COMMA_SEP_TOKEN = rf"({NAME_OR_CONTAINER}\s*,\s*)*{NAME_OR_CONTAINER}"
+COMMA_SEP_TOKEN = rf"({NAME_OR_CONTAINER}+\s*,\s*)*{NAME_OR_CONTAINER}+"
 OPERATOR = r"(\+|\-|\/|\*|\/\/|\@|\&|\||\~|\^)"
 CLAUSE_END = r"(\(|\[|:)$"
 
@@ -65,7 +65,9 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"^except.*{CLAUSE_END}"),
     re.compile(r"^finally\s*:$"),
     re.compile(r"^from\b"),
-    re.compile(rf"for\b\s*{COMMA_SEP_TOKEN}\s*in.+(\(|\[|\{{|{NAME})$"),
+    re.compile(
+        rf"for\b\s*{COMMA_SEP_TOKEN}\s*\bin\b\s*(({NAME})|.+{CONTAINER_CLOSER}):?$",
+    ),
     re.compile(rf"^(global|nonlocal)\s+{COMMA_SEP_NAMES}"),
     re.compile(rf"^if.*{CLAUSE_END}"),
     re.compile(r"^import\b"),
@@ -125,6 +127,10 @@ class PythonDetector(DetectorBase):
             return True
 
         line = line.strip()
+        for i, pattern in enumerate(LINE_PATTERNS):
+            if pattern.search(line):
+                print(repr(line), i, pattern)
+
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
 
     def line_is_plausibly_code(self: PythonDetector, line: str) -> bool:
