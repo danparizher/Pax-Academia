@@ -23,7 +23,6 @@ class DetectCode(commands.Cog):
             int(channel_id)
             for channel_id in getenv("AUTO_FORMAT_CODE_CHANNEL_IDS", "-1").split(",")
         ]
-        print(self.auto_format_in_channel_ids)
 
     @staticmethod
     def format_detected_code(

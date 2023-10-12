@@ -126,11 +126,6 @@ class PythonDetector(DetectorBase):
         if any(pattern.search(line) for pattern in LINE_PATTERNS_NO_STRIP):
             return True
 
-        line = line.strip()
-        for i, pattern in enumerate(LINE_PATTERNS):
-            if pattern.search(line):
-                print(repr(line), i, pattern)
-
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
 
     def line_is_plausibly_code(self: PythonDetector, line: str) -> bool:
