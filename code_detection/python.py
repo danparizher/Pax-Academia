@@ -83,7 +83,6 @@ LINE_PATTERNS = [  # note that lines will first be stripped!
     re.compile(rf"\.\s*{NAME}\s*{OPERATOR}?="),
     re.compile(rf"\.\s*{NAME}\s*\("),
     re.compile(rf"^{NAME}\s*\("),
-    re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
     re.compile(rf"^({CONTAINER_CLOSER}|{CONTAINER_OPENER}|\s)+$"),
     re.compile(rf"^@{NAME}"),
     re.compile(r"\).*:$"),
@@ -105,6 +104,10 @@ LINE_PATTERNS_NO_STRIP = [  # text will NOT be stripped before testing these pat
     ),
 ]
 
+PLAUSIBLE_LINE_PATTERNS = [
+    re.compile(rf"""((?<!'')'|(?<!"")"|,|\d|{OPERATOR})$"""),
+]
+
 
 class PythonDetector(DetectorBase):
     @property
@@ -123,3 +126,10 @@ class PythonDetector(DetectorBase):
 
         line = line.strip()
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
+
+    def line_is_plausibly_code(self: PythonDetector, line: str) -> bool:
+        if super().line_is_plausibly_code(line):
+            return True
+
+        line = line.strip()
+        return any(pattern.search(line) for pattern in PLAUSIBLE_LINE_PATTERNS)
