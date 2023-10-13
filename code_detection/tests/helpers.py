@@ -21,13 +21,13 @@ def create_tester(detector: type[DetectorBase]) -> Callable[[str, str], None]:
 
         if actual_result != expected_result:
             print(
-                f"TEST #{test_counter} FAILED in {execution_time_ms:.4f} milliseconds",
+                f"  TEST #{test_counter} FAILED in {execution_time_ms:.4f} milliseconds",
             )
             print(f"    - Expected: {expected_result!r}")
             print(f"    -   Actual: {actual_result!r}")
         else:
             print(
-                f"TEST #{test_counter} SUCCEEDED in {execution_time_ms:.4f} milliseconds",
+                f"  TEST #{test_counter} SUCCEEDED in {execution_time_ms:.4f} milliseconds",
             )
 
     return test

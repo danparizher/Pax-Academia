@@ -64,3 +64,27 @@ def run() -> None:
         ),
         "3p 3c 2p",
     )
+
+    print("chained traceback")
+    test(
+        dedent(
+            r"""\
+                Traceback (most recent call last):
+                File "C:\...\test.py", line 6, in another_function
+                    function()
+                File "C:\...\test.py", line 2, in function
+                    raise TypeError("No good!")
+                TypeError: No good!
+
+                The above exception was the direct cause of the following exception:
+
+                Traceback (most recent call last):
+                File "C:\...\test.py", line 10, in <module>
+                    another_function()
+                File "C:\...\test.py", line 8, in another_function
+                    raise ValueError("Really no good!") from e
+                ValueError: Really no good!\
+            """,
+        ),
+        "15c",
+    )
