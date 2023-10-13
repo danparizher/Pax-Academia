@@ -50,12 +50,17 @@ COMMON_ERROR_CLASSES = [
 ]
 
 LINE_PATTERNS = [
-    re.compile(rf"^Traceback\s*\(\s*most\s*recent\s*call\s*last\s*\)", re.IGNORECASE),
+    re.compile(r"^Traceback\s*\(\s*most\s*recent\s*call\s*last\s*\)", re.IGNORECASE),
     re.compile(
         rf"^File.*,\s*line\s*\d+(,\s*in\s*(?:<[^<>]+>|{NAME}))?$:",
         re.IGNORECASE,
     ),
+    re.compile(r"^File.*,\s*line\s*\d+,\s*in\s*.*$"),
     re.compile(rf"^({'|'.join(COMMON_ERROR_CLASSES)})(:|$)"),
+    re.compile(r"^During handling of the above exception, another exception occurred$"),
+    re.compile(
+        r"^The above exception was the direct cause of the following exception$",
+    ),
 ]
 
 
@@ -64,7 +69,7 @@ class PythonTracebackDetector(PythonDetector):
     def language(self) -> str:
         return "text"
 
-    def line_is_probably_code(self, line: str) -> bool:
+    def line_is_probably_code(self, line: str) -> bool:  # noqa
         if super().line_is_probably_code(line):
             return True
 
