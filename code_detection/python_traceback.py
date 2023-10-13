@@ -52,10 +52,9 @@ COMMON_ERROR_CLASSES = [
 LINE_PATTERNS = [
     re.compile(r"^Traceback\s*\(\s*most\s*recent\s*call\s*last\s*\)", re.IGNORECASE),
     re.compile(
-        rf"^File.*,\s*line\s*\d+(,\s*in\s*(?:<[^<>]+>|{NAME}))?$:",
+        rf"^File.*,\s*line\s*\d+(,\s*in\s*(?:<[^<>]+>|{NAME}))?$",
         re.IGNORECASE,
     ),
-    re.compile(r"^File.*,\s*line\s*\d+,\s*in\s*.*$"),
     re.compile(rf"^({'|'.join(COMMON_ERROR_CLASSES)})(:|$)"),
     re.compile(r"^During handling of the above exception, another exception occurred$"),
     re.compile(
