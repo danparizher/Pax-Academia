@@ -56,10 +56,14 @@ LINE_PATTERNS = [
         re.IGNORECASE,
     ),
     re.compile(rf"^({'|'.join(COMMON_ERROR_CLASSES)})(:|$)"),
-    re.compile(r"^During handling of the above exception, another exception occurred$"),
     re.compile(
-        r"^The above exception was the direct cause of the following exception$",
+        r"^During handling of the above exception, another exception occurred:?$"
     ),
+    re.compile(
+        r"^The above exception was the direct cause of the following exception:?$",
+    ),
+    re.compile(r"^\[Previous line repeated \d+ more times\]$"),
+    re.compile(r"^\^+$"),
 ]
 
 
