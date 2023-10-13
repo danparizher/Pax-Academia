@@ -66,7 +66,9 @@ LINE_PATTERNS = [
 class PythonTracebackDetector(PythonDetector):
     @property
     def language(self) -> str:
-        return "text"
+        # no idea what language "1c" is, but it correctly highlights paths + numbers
+        # https://highlightjs.org/demo
+        return "1c"
 
     def line_is_probably_code(self, line: str) -> bool:  # noqa
         if super().line_is_probably_code(line):
