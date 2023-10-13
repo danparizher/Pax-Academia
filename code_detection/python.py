@@ -131,9 +131,8 @@ class PythonDetector(DetectorBase):
         line = line.strip()
         return any(pattern.search(line) for pattern in LINE_PATTERNS)
 
-    @staticmethod
-    def line_is_plausibly_code(line: str) -> bool:
-        if PythonDetector.line_is_plausibly_code(line):
+    def line_is_plausibly_code(self: PythonDetector, line: str) -> bool:  # noqa
+        if super().line_is_plausibly_code(line):
             return True
 
         line = line.strip()
