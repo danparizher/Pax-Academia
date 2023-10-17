@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import asyncio
 from contextlib import suppress
 from os import getenv
+from typing import ClassVar
 
 import discord
 from discord.ext import commands
@@ -19,6 +21,11 @@ SURVEY_SITES = [
 
 
 class Surveys(commands.Cog):
+    # maps (channel id, message id) -> message
+    # for all "survey detected" messages sent in the last hour
+    # (useful so that we can delete the tip if they fix their message)
+    survey_detected_messages: ClassVar[dict[tuple[int, int], discord.Message]] = {}
+
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
         self.allow_survey_channel_id = int(
@@ -64,8 +71,9 @@ class Surveys(commands.Cog):
             ),
         ).build()
 
+        survey_detected_message = None
         with suppress(discord.errors.Forbidden):
-            await message.channel.send(
+            survey_detected_message = await message.channel.send(
                 content=f"<@{message.author.id}>",
                 embed=embed,
             )
@@ -75,6 +83,22 @@ class Surveys(commands.Cog):
             f" $ sent a survey in {channel_name}, bot responded",
             message.author,
         )
+
+        if survey_detected_message:
+            uuid = (message.channel.id, message.id)
+            self.survey_detected_messages[uuid] = survey_detected_message
+            await asyncio.sleep(60 * 60)
+            with suppress(KeyError):
+                del self.survey_detected_messages[uuid]
+
+    @commands.Cog.listener()
+    async def on_raw_message_delete(
+        self: Surveys,
+        payload: discord.RawMessageDeleteEvent,
+    ) -> None:
+        uuid = (payload.channel_id, payload.message_id)
+        if survey_detected_message := self.survey_detected_messages.pop(uuid, None):
+            await survey_detected_message.delete()
 
 
 def setup(bot: commands.Bot) -> None:
