@@ -23,7 +23,6 @@ SURVEY_SITES = [
 class Surveys(commands.Cog):
     # maps (channel id, message id) -> message
     # for all "survey detected" messages sent in the last hour
-    # (useful so that we can delete the tip if they fix their message)
     survey_detected_messages: ClassVar[dict[tuple[int, int], discord.Message]] = {}
 
     def __init__(self, bot: commands.Bot) -> None:
