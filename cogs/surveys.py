@@ -71,10 +71,10 @@ class Surveys(commands.Cog):
         ).build()
 
         survey_detected_message = None
-        with suppress(discord.errors.Forbidden):
-            survey_detected_message = await message.channel.send(
-                content=f"<@{message.author.id}>",
+        with suppress(discord.errors.Forbidden, discord.errors.NotFound):
+            survey_detected_message = await message.reply(
                 embed=embed,
+                mention_author=True,
             )
 
         channel_name = getattr(message.channel, "name", f"<#{message.channel.id}>")
