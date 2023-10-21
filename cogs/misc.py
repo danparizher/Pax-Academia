@@ -45,9 +45,17 @@ LOG_FILES = {
     STDOUT_LOG_FILE: "All standard output is redirected here.",
 }
 
+GITHUB_REPO_URL = "https://github.com/danparizher/Pax-Academia"
+
+
 def get_git_revision_short_hash() -> str:
     # https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
-    return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).decode('ascii').strip()
+    return (
+        subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+        .decode("ascii")
+        .strip()
+    )
+
 
 def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.File]:
     """
@@ -86,8 +94,18 @@ class Misc(commands.Cog):
         :type ctx: commands.Context
         """
         commit = get_git_revision_short_hash()
+        commit_url = f"{GITHUB_REPO_URL}/commit/{commit}"
+
+        # Check if the commit is up-to-date
+        latest_commit = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa
+            .decode("ascii")
+            .strip()
+        )
+        is_up_to_date = "Yes" if commit == latest_commit else "No"
+
         message = await ctx.respond("Pinging...")
-        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: `{commit}`"
+        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: [`{commit}`]({commit_url})\nIs up-to-date: `{is_up_to_date}`"
 
         if isinstance(message, Interaction):
             await message.edit_original_response(content=content)
