@@ -105,7 +105,7 @@ class Misc(commands.Cog):
         is_up_to_date = "Yes" if commit == latest_commit else "No"
 
         message = await ctx.respond("Pinging...")
-        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: [`{commit}`]({commit_url})\nIs up-to-date: `{is_up_to_date}`"
+        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: [`{commit}`](<{commit_url}>)\nIs up-to-date: `{is_up_to_date}`"
 
         if isinstance(message, Interaction):
             await message.edit_original_response(content=content)
