@@ -56,6 +56,13 @@ def get_git_revision_short_hash() -> str:
         .strip()
     )
 
+def get_origin_revision_short_hash() -> str:
+    return (
+        subprocess.check_output(["git", "rev-parse", "--short", "origin/main"])
+        .decode("ascii")
+        .strip()
+    )
+
 
 def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.File]:
     """
@@ -97,11 +104,7 @@ class Misc(commands.Cog):
         commit_url = f"{GITHUB_REPO_URL}/commit/{commit}"
 
         # Check if the commit is up-to-date
-        latest_commit = (
-            subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa
-            .decode("ascii")
-            .strip()
-        )
+        latest_commit = get_origin_revision_short_hash()
         is_up_to_date = "Yes" if commit == latest_commit else "No"
 
         message = await ctx.respond("Pinging...")
