@@ -87,7 +87,7 @@ class Misc(commands.Cog):
         """
         commit = get_git_revision_short_hash()
         message = await ctx.respond("Pinging...")
-        content = f"Pong! {round(self.bot.latency * 1000)}ms\nCommit: {commit}"
+        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: `{commit}`"
 
         if isinstance(message, Interaction):
             await message.edit_original_response(content=content)
