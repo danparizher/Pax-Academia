@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import os
+import subprocess
 from typing import TYPE_CHECKING
 
 import discord
@@ -44,6 +45,25 @@ LOG_FILES = {
     STDOUT_LOG_FILE: "All standard output is redirected here.",
 }
 
+GITHUB_REPO_URL = "https://github.com/danparizher/Pax-Academia"
+
+
+def get_git_revision_short_hash() -> str:
+    # https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
+    return (
+        subprocess.check_output(["git", "rev-parse", "--short", "HEAD"])
+        .decode("ascii")
+        .strip()
+    )
+
+
+def get_origin_revision_short_hash() -> str:
+    return (
+        subprocess.check_output(["git", "rev-parse", "--short", "origin/main"])
+        .decode("ascii")
+        .strip()
+    )
+
 
 def dump_tables_to_csv(tables: list[database.TableInfo]) -> Iterable[discord.File]:
     """
@@ -81,8 +101,15 @@ class Misc(commands.Cog):
         :param ctx: The context of the command
         :type ctx: commands.Context
         """
+        commit = get_git_revision_short_hash()
+        commit_url = f"{GITHUB_REPO_URL}/commit/{commit}"
+
+        # Check if the commit is up-to-date
+        latest_commit = get_origin_revision_short_hash()
+        is_up_to_date = "Yes" if commit == latest_commit else "No"
+
         message = await ctx.respond("Pinging...")
-        content = f"Pong! {round(self.bot.latency * 1000)}ms"
+        content = f"Ping: `{round(self.bot.latency * 1000)}ms`\nCommit ID: [`{commit}`](<{commit_url}>)\nIs up-to-date: `{is_up_to_date}`"
 
         if isinstance(message, Interaction):
             await message.edit_original_response(content=content)
