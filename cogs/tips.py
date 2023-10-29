@@ -72,7 +72,7 @@ async def send_tip(
     if isinstance(ctx, ApplicationContext):
         if anonymous.casefold() == "yes":
             await ctx.send(message_content, embed=embed)
-            await ctx.respond(
+            return await ctx.respond(
                 "Thanks for the tip! It was sent anonymously.",
                 ephemeral=True,
                 delete_after=5,
