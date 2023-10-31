@@ -593,7 +593,7 @@ class StaffAppsUser(commands.Cog):
 
         # check app status
         status = any(
-            x in (1, 3, 4, 5, 6, 7, 8) for x in applicant.status
+            x in {1, 3, 4, 5, 6, 7, 8} for x in applicant.status
         )  # 2 and 8 are closed applications, others are open
         if status:
             await ctx.respond(embed=embeds().ongoing(), ephemeral=True)

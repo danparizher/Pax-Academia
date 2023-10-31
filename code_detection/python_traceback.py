@@ -57,7 +57,7 @@ LINE_PATTERNS = [
     ),
     re.compile(rf"^({'|'.join(COMMON_ERROR_CLASSES)})(:|$)"),
     re.compile(
-        r"^During handling of the above exception, another exception occurred:?$"
+        r"^During handling of the above exception, another exception occurred:?$",
     ),
     re.compile(
         r"^The above exception was the direct cause of the following exception:?$",
@@ -74,7 +74,7 @@ class PythonTracebackDetector(PythonDetector):
         # https://highlightjs.org/demo
         return "1c"
 
-    def line_is_probably_code(self, line: str) -> bool:  # noqa
+    def line_is_probably_code(self, line: str) -> bool:
         if super().line_is_probably_code(line):
             return True
 
