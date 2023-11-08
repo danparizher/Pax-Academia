@@ -1,4 +1,6 @@
 # imports
+from __future__ import annotations
+
 from datetime import datetime
 from os import getenv
 from time import time
