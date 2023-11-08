@@ -3,7 +3,6 @@ Builds the database from scratch if it doesn't exist.
 Author: !SKA#0001
 """
 
-
 import sqlite3
 from pathlib import Path
 

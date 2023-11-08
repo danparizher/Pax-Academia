@@ -7,6 +7,7 @@ async def my_command(ctx: discord.ApplicationContext, arg1, arg2) -> None:
     # Do stuff
     await ctx.respond("Done!", view=feedback(ctx.author, "my_command" | ctx.command.name))
 """
+
 # Imports
 import sqlite3
 from time import time
