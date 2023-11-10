@@ -129,6 +129,9 @@ class DetectorBase(ABC):
         Simply classifies each line of the text without applying any section-size limits.
         """
         lines = self.text.splitlines()
+        if not lines:
+            return []
+
         sections: list[DetectedSection] = []
 
         # special case for first line
