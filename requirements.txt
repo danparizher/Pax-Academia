@@ -4,9 +4,9 @@
 #
 #    pip-compile '.\requirements.in'
 #
-aiohttp==3.8.5
+aiohttp==3.8.6
     # via
-    #   -r .\requirements.in
+    #   -r requirements.in
     #   py-cord
 aiosignal==1.3.1
     # via aiohttp
@@ -19,18 +19,16 @@ attrs==23.1.0
     #   trio
 beautifulsoup4==4.12.2
     # via
-    #   -r .\requirements.in
+    #   -r requirements.in
     #   wikipedia
 black==23.7.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 build==1.0.3
     # via pip-tools
 certifi==2023.7.22
     # via
     #   requests
     #   selenium
-cffi==1.16.0
-    # via trio
 charset-normalizer==3.3.2
     # via
     #   aiohttp
@@ -39,14 +37,10 @@ click==8.1.7
     # via
     #   black
     #   pip-tools
-colorama==0.4.6
-    # via
-    #   build
-    #   click
 deepl==1.15.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 file-read-backwards==3.0.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 frozenlist==1.4.0
     # via
     #   aiohttp
@@ -54,14 +48,14 @@ frozenlist==1.4.0
 h11==0.14.0
     # via wsproto
 humanize==4.8.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 idna==3.4
     # via
     #   requests
     #   trio
     #   yarl
 isort==5.12.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 levenshtein==0.21.1
     # via python-levenshtein
 multidict==6.0.4
@@ -79,23 +73,21 @@ packaging==23.2
 pathspec==0.11.2
     # via black
 pip-tools==7.3.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 platformdirs==4.0.0
     # via black
 pubchempy==1.0.4
-    # via -r .\requirements.in
+    # via -r requirements.in
 py-cord==2.4.1
-    # via -r .\requirements.in
-pycparser==2.21
-    # via cffi
+    # via -r requirements.in
 pyproject-hooks==1.0.0
     # via build
 pysocks==1.7.1
     # via urllib3
 python-dotenv==1.0.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 python-levenshtein==0.21.1
-    # via -r .\requirements.in
+    # via -r requirements.in
 rapidfuzz==3.5.2
     # via
     #   levenshtein
@@ -107,7 +99,7 @@ requests==2.31.0
     #   wikipedia
 selenium==4.12.0
     # via
-    #   -r .\requirements.in
+    #   -r requirements.in
     #   undetected-chromedriver
 sniffio==1.3.0
     # via trio
@@ -116,7 +108,7 @@ sortedcontainers==2.4.0
 soupsieve==2.5
     # via beautifulsoup4
 thefuzz==0.20.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 trio==0.23.1
     # via
     #   selenium
@@ -124,7 +116,7 @@ trio==0.23.1
 trio-websocket==0.11.1
     # via selenium
 undetected-chromedriver==3.5.3
-    # via -r .\requirements.in
+    # via -r requirements.in
 urllib3[socks]==2.0.7
     # via
     #   requests
@@ -135,7 +127,7 @@ websockets==12.0
 wheel==0.41.3
     # via pip-tools
 wikipedia==1.4.0
-    # via -r .\requirements.in
+    # via -r requirements.in
 wsproto==1.2.0
     # via trio-websocket
 yarl==1.9.2
