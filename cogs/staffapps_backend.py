@@ -1,4 +1,6 @@
 # imports
+from __future__ import annotations
+
 from datetime import datetime
 from os import getenv
 from time import time
@@ -287,7 +289,7 @@ class staffAppsSeeSpam(discord.ui.View):
             view=None,
         )
         log(
-            f"$ unbanned user {self.data[self.cur_page-1][0]} from applying for staff.",
+            f"$ unbanned user {self.data[self.cur_page - 1][0]} from applying for staff.",
             self.author,
         )
 
@@ -410,7 +412,7 @@ class staffAppsMain(discord.ui.View):
             self.dislike_button_child.disabled = False
         self.db.close()
         title = f"Staff applications page {self.cur_page}/{len(self.data)}"
-        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant Name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n"
+        description = f"Application ID: **{self.data[self.cur_page - 1][0]}**\nApplicant Name: **{self.data[self.cur_page - 1][3]}**\nApplicant ID: **{self.data[self.cur_page - 1][1]}**\n"
         fields = [
             ("Status", statusname, False),
             ("First Name", self.data[self.cur_page - 1][4], False),
@@ -514,7 +516,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        log(f"User {self.data[self.cur_page-1][1]} marked as spam by $", self.author)
+        log(f"User {self.data[self.cur_page - 1][1]} marked as spam by $", self.author)
         embed = EmbedBuilder(
             title="User marked as spam.",
             description="This user can no longer apply for staff.",
@@ -556,7 +558,7 @@ class staffAppsMain(discord.ui.View):
         )
         self.db.commit()
         self.db.close()
-        log(f"Application {self.data[self.cur_page-1][0]} denied by $", self.author)
+        log(f"Application {self.data[self.cur_page - 1][0]} denied by $", self.author)
         embed = EmbedBuilder(
             title="Application denied.",
             description="This application has been denied and a cooldown has been applied.",
@@ -613,12 +615,12 @@ class staffAppsMain(discord.ui.View):
                 (current_status + 1, self.data[self.cur_page - 1][0]),
             )
         title = "Application status updated."
-        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n \
+        description = f"Application ID: **{self.data[self.cur_page - 1][0]}**\nApplicant name: **{self.data[self.cur_page - 1][3]}**\nApplicant ID: **{self.data[self.cur_page - 1][1]}**\n \
             Status changed from **{status_name[0]}** -> **{status_name[1]}**."
         self.db.commit()
         self.db.close()
         log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from {status_name[0]} -> {status_name[1]} by $",
+            f"Application {self.data[self.cur_page - 1][0]} status changed from {status_name[0]} -> {status_name[1]} by $",
             self.author,
         )
         embed = EmbedBuilder(
@@ -656,12 +658,12 @@ class staffAppsMain(discord.ui.View):
             (self.data[self.cur_page - 1][0],),
         )
         title = "Application status updated."
-        description = f"Application ID: **{self.data[self.cur_page-1][0]}**\nApplicant name: **{self.data[self.cur_page-1][3]}**\nApplicant ID: **{self.data[self.cur_page-1][1]}**\n \
+        description = f"Application ID: **{self.data[self.cur_page - 1][0]}**\nApplicant name: **{self.data[self.cur_page - 1][3]}**\nApplicant ID: **{self.data[self.cur_page - 1][1]}**\n \
             Status changed from **Application submitted** -> **Second Opinion required**."
         self.db.commit()
         self.db.close()
         log(
-            f"Application {self.data[self.cur_page-1][0]} status changed from Application submitted -> Second Opinion required by $",
+            f"Application {self.data[self.cur_page - 1][0]} status changed from Application submitted -> Second Opinion required by $",
             self.author,
         )
         embed = EmbedBuilder(
@@ -712,7 +714,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         log(
-            f"Application {self.data[self.cur_page-1][0]} liked by $ ({interaction.user.id})",
+            f"Application {self.data[self.cur_page - 1][0]} liked by $ ({interaction.user.id})",
             interaction.user,
         )
         embed = EmbedBuilder(
@@ -763,7 +765,7 @@ class staffAppsMain(discord.ui.View):
         self.db.commit()
         self.db.close()
         log(
-            f"Application {self.data[self.cur_page-1][0]} disliked by $ ({interaction.user.id})",
+            f"Application {self.data[self.cur_page - 1][0]} disliked by $ ({interaction.user.id})",
             interaction.user,
         )
         embed = EmbedBuilder(
@@ -931,7 +933,7 @@ class StaffAppsBackoffice(commands.Cog):
             data = self.cursor.execute(
                 "select appId, discordName, description, submissionTime from application a join status s on a.status = s.statusId order by appId ASC",
             ).fetchall()
-            title = f"Applications page 1/{len(data)//10+1}"
+            title = f"Applications page 1/{len(data) // 10 + 1}"
             field_title = "Application ID, Discord Name, Status, Submission Time"
             field_content = "".join(
                 f"{row[0]}, {row[1]}, {row[2]}, {datetime.fromtimestamp(int(row[3]))}\n"
@@ -958,7 +960,7 @@ class StaffAppsBackoffice(commands.Cog):
             data = self.cursor.execute(
                 "select appId, discordName, submissionTime from application where status = 2",
             ).fetchall()
-            title = f"Denied Applications page 1/{len(data)//10+1}"
+            title = f"Denied Applications page 1/{len(data) // 10 + 1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
             field_content = "".join(
                 f"{row[0]}, {row[1]}, {datetime.fromtimestamp(int(row[2]))}\n"
@@ -985,7 +987,7 @@ class StaffAppsBackoffice(commands.Cog):
             data = self.cursor.execute(
                 "select appId, discordName, submissionTime from application where status = 9",
             ).fetchall()
-            title = f"Accepted Applications page 1/{len(data)//10+1}"
+            title = f"Accepted Applications page 1/{len(data) // 10 + 1}"
             field_title = "Application ID, Discord Name, Original Submission Time"
             field_content = ""
             for row in data[:10]:
