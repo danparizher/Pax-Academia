@@ -31,10 +31,19 @@ jobs:
 
       - name: Commit changes
         run: |
+          git checkout -b update-requirements
           git add requirements.txt
           if git diff --staged --quiet; then
             echo "No changes in requirements.txt"
           else
             git commit -m "Update requirements.txt"
-            git push
+            git push --set-upstream origin update-requirements
           fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Update requirements.txt"
+          body: "This PR updates the requirements.txt file."
+          branch: "update-requirements"
