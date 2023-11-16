@@ -2,7 +2,7 @@ name: Update requirements
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 9 * * *"
 
 jobs:
   build:
