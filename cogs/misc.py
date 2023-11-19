@@ -58,6 +58,7 @@ def get_git_revision_short_hash() -> str:
 
 
 def get_origin_revision_short_hash() -> str:
+    subprocess.check_call(["git", "fetch", "origin"])
     return (
         subprocess.check_output(["git", "rev-parse", "--short", "origin/main"])
         .decode("ascii")
