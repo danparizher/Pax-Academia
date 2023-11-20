@@ -47,3 +47,4 @@ jobs:
           title: "Update requirements.txt"
           body: "This PR updates the requirements.txt file."
           branch: "update-requirements"
+          base: "main"
