@@ -17,6 +17,7 @@ def load() -> None:
         "deepl",
         "detect_ai",
         "detect_code",
+        "detect_media_spam",
         "dictionary",
         "message_counter",
         "misc",
