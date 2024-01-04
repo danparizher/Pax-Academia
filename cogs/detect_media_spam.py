@@ -12,13 +12,12 @@ from message_formatting.embeds import EmbedBuilder
 from util.logger import log
 
 if TYPE_CHECKING:
-    from typing import AsyncGenerator
-
     import discord
+    from discord.commands.context import ApplicationContext
 
 # How much of a channel can be media before the bot takes action.
 # _Approximately_ equal to the % of vertical space on clients' screens which is occupied by media.
-MAXIMUM_MEDIA_PERCENT = 1 / 3
+MAXIMUM_MEDIA_PERCENT = 2 / 3
 
 # Up to how many messages should be considered in the media monitoring?
 MEDIA_MESSAGE_LOOKBACK = 10
@@ -94,7 +93,7 @@ class MonitoredMessage:
         If an image/gif was embedded by URL, the URL text is not included in the calculation.
         """
 
-        line_count = 1 + message.content.count("\n")
+        line_count = 1 + message.content.count("\n") if message.content.strip() else 0
 
         # check if the message content is just a link, and there is an embed from it
         # for example, when you send a tenor gif
@@ -126,29 +125,35 @@ class MonitoredMessage:
 
 @dataclass
 class ChannelMonitor:
+    lookback: int = MEDIA_MESSAGE_LOOKBACK
+    maximum_media_percent: float = MAXIMUM_MEDIA_PERCENT
     history: list[MonitoredMessage] = field(default_factory=list)
 
     def monitor(self, message: discord.Message) -> None:
         self.history.append(MonitoredMessage(message))
 
-        while len(self.history) > MEDIA_MESSAGE_LOOKBACK:
+        while len(self.history) > self.lookback:
             del self.history[0]
 
     @property
-    def media_percent(self) -> float:
-        media_pixels = sum(m.media_vertical_pixels for m in self.history)
-        textual_pixels = sum(m.textual_vertical_pixels for m in self.history)
+    def textual_pixels(self) -> int:
+        return sum(m.textual_vertical_pixels for m in self.history)
 
-        total_pixels = textual_pixels + media_pixels
-        return media_pixels / total_pixels
+    @property
+    def media_pixels(self) -> int:
+        return sum(m.media_vertical_pixels for m in self.history)
+
+    @property
+    def media_percent(self) -> float:
+        return self.media_pixels / (self.media_pixels + self.textual_pixels)
 
     @property
     def spam_detected(self) -> bool:
         # make sure that we're making a well-informed decision
-        if len(self.history) < MEDIA_MESSAGE_LOOKBACK:
+        if len(self.history) < self.lookback:
             return False
 
-        return self.media_percent > MAXIMUM_MEDIA_PERCENT
+        return self.media_percent > self.maximum_media_percent
 
     def pop_media_messages(self) -> list[discord.Message]:
         media_messages = []
@@ -165,51 +170,107 @@ class DetectMediaSpam(commands.Cog):
 
         env_var = getenv("DETECT_MEDIA_SPAM_CHANNEL_IDS")
         self.channel_monitors_by_id = (
-            {int(channel_id): ChannelMonitor() for channel_id in env_var.split(",")}
+            {
+                int(channel_id): {
+                    lookback: ChannelMonitor(lookback=lookback)
+                    for lookback in range(5, 26, 5)
+                }
+                for channel_id in env_var.split(",")
+            }
             if env_var
             else {}
         )
 
+    @staticmethod
+    async def delete_media_spam(
+        channel: discord.abc.MessageableChannel,
+        channel_monitor: ChannelMonitor,
+    ) -> None:
+        media_percent = channel_monitor.media_percent
+
+        media_messages = channel_monitor.pop_media_messages()
+
+        offender_ids: set[int] = set()
+        offender_mentions: list[str] = []
+
+        for message in media_messages:
+            offender_id = message.author.id
+            if offender_id not in offender_ids:
+                offender_ids.add(offender_id)
+                offender_mentions.append(message.author.mention)
+
+        deletions = asyncio.gather(*(m.delete() for m in media_messages))
+        await channel.send(
+            " ".join(offender_mentions),
+            embed=EmbedBuilder(
+                title="Media Spam Detected",
+                description="Please don't send so much media in this channel.",
+                fields=[("Media Ratio", f"{media_percent:.2%}", True)],
+            ).build(),
+            delete_after=10,
+        )
+        await deletions
+
+        log(
+            f"DetectMediaSpam deleted {len(media_messages)} messages from {len(offender_ids)} authors in <#{channel.id}> "
+            f"with a media ratio of {media_percent:.2%}: "
+            f"{[m.id for m in media_messages]!r}, {offender_ids!r}",
+        )
+
     @commands.Cog.listener()
     async def on_message(self: DetectMediaSpam, message: discord.Message) -> None:
-        channel_monitor = self.channel_monitors_by_id.get(message.channel.id)
+        channel_monitors = self.channel_monitors_by_id.get(message.channel.id)
 
-        if not channel_monitor:
+        if not channel_monitors:
             return
 
-        channel_monitor.monitor(message)
+        for channel_monitor in channel_monitors.values():
+            channel_monitor.monitor(message)
 
-        if channel_monitor.spam_detected:
-            media_percent = channel_monitor.media_percent
+        # TODO: enable this once we're happy with the thresholds
+        # if channel_monitor.spam_detected:
+        #     self.delete_media_spam(message.channel, channel_monitor)
 
-            media_messages = channel_monitor.pop_media_messages()
+    @commands.slash_command(name="dev-media-statistics")
+    async def dev_media_statistics(
+        self: DetectMediaSpam,
+        ctx: ApplicationContext,
+    ) -> None:
+        channel_monitors = (
+            self.channel_monitors_by_id.get(ctx.channel.id) if ctx.channel else None
+        )
 
-            offender_ids: set[int] = set()
-            offender_mentions: list[str] = []
+        if not channel_monitors:
+            await ctx.respond("This channel is not being monitored.", ephemeral=True)
+            return
 
-            for message in media_messages:
-                offender_id = message.author.id
-                if offender_id not in offender_ids:
-                    offender_ids.add(offender_id)
-                    offender_mentions.append(message.author.mention)
-
-            deletions = asyncio.gather(*(m.delete() for m in media_messages))
-            await message.channel.send(
-                " ".join(offender_mentions),
-                embed=EmbedBuilder(
-                    title="Media Spam Detected",
-                    description="Please don't send so much media in this channel.",
-                    fields=[("Media Ratio", f"{media_percent:.2%}", True)],
-                ).build(),
-                delete_after=10,
-            )
-            await deletions
-
-            log(
-                f"DetectMediaSpam deleted {len(media_messages)} messages from {len(offender_ids)} authors in <#{message.channel.id}> "
-                f"with a media ratio of {media_percent:.2%}: "
-                f"{[m.id for m in media_messages]!r}, {offender_ids!r}",
-            )
+        await ctx.respond(
+            embed=EmbedBuilder(
+                title="Media Statistics",
+                fields=[
+                    field
+                    for lookback, channel_monitor in channel_monitors.items()
+                    for field in (
+                        (
+                            f"{lookback} - Media Px",
+                            f"{channel_monitor.media_pixels}",
+                            True,
+                        ),
+                        (
+                            f"{lookback} - Text Px",
+                            f"{channel_monitor.textual_pixels}",
+                            True,
+                        ),
+                        (
+                            f"{lookback} - Media %",
+                            f"{channel_monitor.media_percent:.2%}",
+                            True,
+                        ),
+                    )
+                ],
+            ).build(),
+            ephemeral=True,
+        )
 
 
 def setup(bot: commands.Bot) -> None:
