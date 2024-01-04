@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass, field
 from os import getenv
 from typing import TYPE_CHECKING
@@ -149,15 +150,13 @@ class ChannelMonitor:
 
         return self.media_percent > MAXIMUM_MEDIA_PERCENT
 
-    async def delete_media_messages(self) -> AsyncGenerator[discord.Message, None]:
-        to_delete = []
+    def pop_media_messages(self) -> list[discord.Message]:
+        media_messages = []
         for i in range(len(self.history) - 1, -1, -1):
             if self.history[i].mostly_media:
-                to_delete.append(self.history.pop(i))
+                media_messages.append(self.history.pop(i).message)
 
-        for m in to_delete:
-            await m.message.delete()
-            yield m.message
+        return media_messages
 
 
 class DetectMediaSpam(commands.Cog):
@@ -183,18 +182,18 @@ class DetectMediaSpam(commands.Cog):
         if channel_monitor.spam_detected:
             media_percent = channel_monitor.media_percent
 
+            media_messages = channel_monitor.pop_media_messages()
+
             offender_ids: set[int] = set()
             offender_mentions: list[str] = []
-            deleted_message_ids: list[int] = []
 
-            async for message in channel_monitor.delete_media_messages():
-                deleted_message_ids.append(message.id)
-
+            for message in media_messages:
                 offender_id = message.author.id
                 if offender_id not in offender_ids:
                     offender_ids.add(offender_id)
                     offender_mentions.append(message.author.mention)
 
+            deletions = asyncio.gather(*(m.delete() for m in media_messages))
             await message.channel.send(
                 " ".join(offender_mentions),
                 embed=EmbedBuilder(
@@ -204,11 +203,12 @@ class DetectMediaSpam(commands.Cog):
                 ).build(),
                 delete_after=10,
             )
+            await deletions
 
             log(
-                f"DetectMediaSpam deleted {len(deleted_message_ids)} messages from {len(offender_ids)} authors in <#{message.channel.id}> "
+                f"DetectMediaSpam deleted {len(media_messages)} messages from {len(offender_ids)} authors in <#{message.channel.id}> "
                 f"with a media ratio of {media_percent:.2%}: "
-                f"{deleted_message_ids!r}, {offender_ids!r}",
+                f"{[m.id for m in media_messages]!r}, {offender_ids!r}",
             )
 
 
