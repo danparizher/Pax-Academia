@@ -156,12 +156,11 @@ class ChannelMonitor:
         return self.media_percent > self.maximum_media_percent
 
     def pop_media_messages(self) -> list[discord.Message]:
-        media_messages = []
-        for i in range(len(self.history) - 1, -1, -1):
-            if self.history[i].mostly_media:
-                media_messages.append(self.history.pop(i).message)
-
-        return media_messages
+        return [
+            self.history.pop(i).message
+            for i in range(len(self.history) - 1, -1, -1)
+            if self.history[i].mostly_media
+        ]
 
 
 class DetectMediaSpam(commands.Cog):
@@ -253,12 +252,12 @@ class DetectMediaSpam(commands.Cog):
                     for field in (
                         (
                             f"{lookback} - Media Px",
-                            f"{channel_monitor.media_pixels}",
+                            str(channel_monitor.media_pixels),
                             True,
                         ),
                         (
                             f"{lookback} - Text Px",
-                            f"{channel_monitor.textual_pixels}",
+                            str(channel_monitor.textual_pixels),
                             True,
                         ),
                         (
