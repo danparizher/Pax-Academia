@@ -180,42 +180,6 @@ class DetectMediaSpam(commands.Cog):
             else {}
         )
 
-    @staticmethod
-    async def delete_media_spam(
-        channel: discord.abc.MessageableChannel,
-        channel_monitor: ChannelMonitor,
-    ) -> None:
-        media_percent = channel_monitor.media_percent
-
-        media_messages = channel_monitor.pop_media_messages()
-
-        offender_ids: set[int] = set()
-        offender_mentions: list[str] = []
-
-        for message in media_messages:
-            offender_id = message.author.id
-            if offender_id not in offender_ids:
-                offender_ids.add(offender_id)
-                offender_mentions.append(message.author.mention)
-
-        deletions = asyncio.gather(*(m.delete() for m in media_messages))
-        await channel.send(
-            " ".join(offender_mentions),
-            embed=EmbedBuilder(
-                title="Media Spam Detected",
-                description="Please don't send so much media in this channel.",
-                fields=[("Media Ratio", f"{media_percent:.2%}", True)],
-            ).build(),
-            delete_after=10,
-        )
-        await deletions
-
-        log(
-            f"DetectMediaSpam deleted {len(media_messages)} messages from {len(offender_ids)} authors in <#{channel.id}> "
-            f"with a media ratio of {media_percent:.2%}: "
-            f"{[m.id for m in media_messages]!r}, {offender_ids!r}",
-        )
-
     @commands.Cog.listener()
     async def on_message(self: DetectMediaSpam, message: discord.Message) -> None:
         channel_monitors = self.channel_monitors_by_id.get(message.channel.id)
@@ -226,9 +190,8 @@ class DetectMediaSpam(commands.Cog):
         for channel_monitor in channel_monitors.values():
             channel_monitor.monitor(message)
 
-        # TODO: enable this once we're happy with the thresholds
-        # if channel_monitor.spam_detected:
-        #     self.delete_media_spam(message.channel, channel_monitor)
+        # TODO: delete spam if it's detected;
+        #       which will be done at a later date in another PR
 
     @commands.slash_command(name="dev-media-statistics")
     async def dev_media_statistics(
