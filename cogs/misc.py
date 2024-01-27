@@ -21,8 +21,8 @@ if TYPE_CHECKING:
 
     from discord.commands.context import ApplicationContext
 
-LOADING_EMOJI = "\N{Clockwise Downwards and Upwards Open Circle Arrows}"
-COMPLETED_EMOJI = "\N{White Heavy Check Mark}"
+LOADING_EMOJI = "\N{CLOCKWISE DOWNWARDS AND UPWARDS OPEN CIRCLE ARROWS}"
+COMPLETED_EMOJI = "\N{WHITE HEAVY CHECK MARK}"
 VIEW_DB_GUILD = os.getenv("GUILD_ID")
 VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
