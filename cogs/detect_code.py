@@ -69,30 +69,31 @@ class DetectCode(commands.Cog):
 
         lines = text.splitlines()
 
-        # Most people don't paste one line of code, so this avoids false positives
-        if len(lines) == 1:
+        # Most people don't have less than around 5 lines of code, so we can ignore them
+        if len(lines) < 5:
             return False
 
         non_blank_lines = [line for line in lines if line.strip()]
 
         patterns = [
-            r"\b\w+\s*\(\s*.*?\s*\)\s*",
-            r"(#.*$)",
+            r"\w+\s*\(.*\)",
+            r"#",
             r"'''",
             r'"""',
             r";(?=\s*(//|#).+|$)",
-            r"^[\w]+\.[\w]+(\.[\w]+)*$",
-            r"\b\w+(?:_\w+)*\b(?:->\b\w+(?:_\w+)*\b)+",
+            r"^\w+(\.\w+)+$",
+            r"\w+(->\w+)+",
             r"^\/\*",
-            r".*\*/$",
-            r"[A-Za-z]+(?:[a-z][A-Z]|[A-Z][a-z])[A-Za-z]*",
+            r"\*/$",
+            r"[a-z][A-Z]",
             r"^\w+(?:_\w+)+$",
             r"\b[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)+\b",
         ]
-        combined_pattern = "|".join(patterns)
 
         code_like_lines = [
-            line for line in non_blank_lines if re.search(combined_pattern, line)
+            line
+            for line in non_blank_lines
+            if any(re.search(line, pattern) for pattern in patterns)
         ]
 
         # Calculate the percentage of code-like lines
