@@ -93,7 +93,7 @@ class DetectCode(commands.Cog):
         code_like_lines = [
             line
             for line in non_blank_lines
-            if any(re.search(line, pattern) for pattern in patterns)
+            if any(re.search(pattern, line) for pattern in patterns)
         ]
 
         # Calculate the percentage of code-like lines
