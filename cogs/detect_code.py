@@ -76,7 +76,7 @@ class DetectCode(commands.Cog):
         non_blank_lines = [line for line in lines if line.strip()]
 
         patterns = [
-            r"\w+\s*\(.*\)",
+            r"\w\(.*\)",
             r"#",
             r"'''",
             r'"""',
