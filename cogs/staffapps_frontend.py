@@ -41,14 +41,14 @@ class embeds:
         fields = [
             (
                 "Created",
-                f"""{created_at.strftime('%B %d, %Y')}
-                {precisedelta(time_since_creation, minimum_unit='days', format="%.0F")} ago""",
+                f"""{created_at.strftime("%B %d, %Y")}
+                {precisedelta(time_since_creation, minimum_unit="days", format="%.0F")} ago""",
                 True,
             ),
             (
                 "Joined",
-                f"""{join_time.strftime('%B %d, %Y')}
-                {precisedelta(time_since_join, minimum_unit='days', format="%.0F")} ago""",
+                f"""{join_time.strftime("%B %d, %Y")}
+                {precisedelta(time_since_join, minimum_unit="days", format="%.0F")} ago""",
                 True,
             ),
             ("Messages", f"{msg_count} messages", True),
@@ -61,7 +61,7 @@ class embeds:
         desc = """Unfortunately, you do not meet the basic requirements in order to apply for staff.
             Your account must be at least 1 year old, you must have been a member of the server for at least 30 days and you need to have at least 500 messages sent total in any channel. (sent after November 20th 2022)"""
         if wait_time > timedelta(0):
-            desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit='days', format="%.0F")}**."""
+            desc += f"""\n\nYou will be eligible to apply for staff in **{precisedelta(wait_time, minimum_unit="days", format="%.0F")}**."""
         if msg_count < 500:
             desc += f"""\n\nYou need to send **{(left := 500 - msg_count)}** more message{"" if left == 1 else "s"}."""
         return EmbedBuilder(
