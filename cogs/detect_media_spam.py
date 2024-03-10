@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass, field
 from os import getenv
 from typing import TYPE_CHECKING
@@ -9,7 +8,6 @@ from urllib.parse import urlparse
 from discord.ext import commands
 
 from message_formatting.embeds import EmbedBuilder
-from util.logger import log
 
 if TYPE_CHECKING:
     import discord

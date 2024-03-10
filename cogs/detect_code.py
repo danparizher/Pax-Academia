@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import asyncio
 from contextlib import suppress
 from itertools import islice
@@ -62,24 +64,36 @@ class DetectCode(commands.Cog):
         """
         A simple algorithm to generically detect code-like features of a message.
         """
+
         minimum_code_probability = 0.5
 
         lines = text.splitlines()
 
-        # Most people don't paste one line of code, so this avoids false positives
-        if len(lines) == 1:
+        # Most people don't have less than around 5 lines of code, so we can ignore them
+        if len(lines) < 5:
             return False
 
         non_blank_lines = [line for line in lines if line.strip()]
+
+        patterns = [
+            r"\w\(.*\)",
+            r"#",
+            r"'''",
+            r'"""',
+            r";(?=\s*(//|#).+|$)",
+            r"^\w+(\.\w+)+$",
+            r"\w+(->\w+)+",
+            r"^\/\*",
+            r"\*/$",
+            r"[a-z][A-Z]",
+            r"^\w+(?:_\w+)+$",
+            r"\b[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)+\b",
+        ]
+
         code_like_lines = [
             line
             for line in non_blank_lines
-            if any(
-                [
-                    line.startswith("  "),
-                    line.endswith((";", "{", "}", "]", "[", ")", "(", ":", ",")),
-                ],
-            )
+            if any(re.search(pattern, line) for pattern in patterns)
         ]
 
         # Calculate the percentage of code-like lines
