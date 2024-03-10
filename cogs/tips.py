@@ -110,7 +110,7 @@ class Tips(commands.Cog):
     )
     @limit(3)
     async def tip(
-        self: Tips,  # noqa
+        self: Tips,
         ctx: ApplicationContext,
         tip: str,
         ping: Member | None = None,

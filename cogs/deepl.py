@@ -174,14 +174,14 @@ class Translation(commands.Cog):
 
         embed = EmbedBuilder(
             title=f"Original Text - {source_language or 'Auto Detect'}",
-            description=f"{text}",
+            description=text,
         ).build()
 
         await ctx.respond(embed=embed)
 
         embed = EmbedBuilder(
             title=f"Translated Text - {target_language}",
-            description=f"{translated_text}",
+            description=translated_text,
         ).build()
 
         await ctx.send(embed=embed)
