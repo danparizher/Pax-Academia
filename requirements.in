@@ -1,6 +1,6 @@
 aiohttp==3.8.6
 beautifulsoup4==4.12.2
-black==23.7.0
+black==24.3.0
 deepl==1.15.0
 file-read-backwards==3.0.0
 humanize==4.8.0
