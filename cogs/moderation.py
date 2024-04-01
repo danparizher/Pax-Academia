@@ -29,20 +29,18 @@ class MessageFingerprint:
     guild_id: int | None  # will be None for DMs
     channel_id: int
     message_id: int
-    jump_url: (
-        str
-    )  # just so that we can easily refer to this message when surfacing it to humans
+    jump_url: str  # just so that we can easily refer to this message when surfacing it to humans
 
     attachment_urls: list[
         str
     ]  # the discord content URLs for each of the message's uploaded attachments
-    cached_attachment_hashes: (
-        set[Hash] | None
-    ) = None  # populated on the first call to `get_attachment_hashes`
+    cached_attachment_hashes: set[Hash] | None = (
+        None  # populated on the first call to `get_attachment_hashes`
+    )
 
-    content_hash: (
-        Hash | None
-    ) = None  # hash of the message body, after being passed through `filter_content`
+    content_hash: Hash | None = (
+        None  # hash of the message body, after being passed through `filter_content`
+    )
 
     # shortcut to build a fingerprint given a message
     @classmethod
@@ -84,12 +82,10 @@ class MessageFingerprint:
         # remove all punctuation and spacing
         content = content.translate(
             str.maketrans(
-                {
-                    unwanted_character: ""
-                    for unwanted_character in (
-                        string.whitespace + string.punctuation + string.digits
-                    )
-                },
+                dict.fromkeys(
+                    string.whitespace + string.punctuation + string.digits,
+                    "",
+                ),
             ),
         )
 
