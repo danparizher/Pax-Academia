@@ -49,7 +49,7 @@ h11==0.14.0
     # via wsproto
 humanize==4.8.0
     # via -r requirements.in
-idna==3.4
+idna==3.7
     # via
     #   requests
     #   trio
@@ -121,7 +121,6 @@ urllib3[socks]==2.0.7
     # via
     #   requests
     #   selenium
-    #   urllib3
 websockets==12.0
     # via undetected-chromedriver
 wheel==0.41.3
