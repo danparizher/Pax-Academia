@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+# TODO: add support for more languages!
 from .python import PythonDetector
 from .python_traceback import PythonTracebackDetector
 

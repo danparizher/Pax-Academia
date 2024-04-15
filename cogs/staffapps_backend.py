@@ -1006,7 +1006,7 @@ class StaffAppsBackoffice(commands.Cog):
                     embed=embed.build(),
                     view=staffAppsSeeDeniedAccepted(ctx.author, data, "a"),
                     ephemeral=True,
-                )  #
+                )
             else:
                 await ctx.respond(embed=embed.build(), ephemeral=True)
             log(f"{username} viewed accepted applications")
