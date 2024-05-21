@@ -92,7 +92,7 @@ rapidfuzz==3.5.2
     # via
     #   levenshtein
     #   thefuzz
-requests==2.31.0
+requests==2.32.0
     # via
     #   deepl
     #   undetected-chromedriver
@@ -121,7 +121,6 @@ urllib3[socks]==2.0.7
     # via
     #   requests
     #   selenium
-    #   urllib3
 websockets==12.0
     # via undetected-chromedriver
 wheel==0.41.3
