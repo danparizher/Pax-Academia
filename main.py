@@ -14,7 +14,7 @@ bot = commands.Bot(command_prefix="g.", intents=discord_intents)
 def load() -> None:
     cogs = [
         "alerts",
-        # "deepl",
+        "deepl",
         "detect_ai",
         "detect_code",
         "detect_media_spam",
