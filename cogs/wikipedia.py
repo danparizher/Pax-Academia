@@ -24,7 +24,7 @@ def get_wiki_without_logging(query: str) -> dict[str, str]:
         "title": page.title,
         "summary": page.summary.split("\n")[0],
         "url": page.url,
-        "image": page.images[0],
+        "image": page.images[0] if page.images else "",
     }
 
 
