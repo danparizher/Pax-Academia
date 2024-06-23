@@ -29,15 +29,14 @@ class MessageCounter(commands.Cog):
             return
 
         messages_sent = (
-            None
+            sent
             if (
                 sent := self.cursor.execute(
                     "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
                     (message.author.id,),
                 ).fetchall()
             )
-            == []
-            else sent
+            else None
         )
 
         # If a user is not in db, add them
