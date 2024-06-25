@@ -130,15 +130,14 @@ class Applicant:
         # get user data from database
         # check if user exists, else add
         messages_sent = (
-            None
+            sent
             if (
                 sent := cursor.execute(
                     "SELECT messagesSent, helpMessagesSent FROM user WHERE uid = ?",
                     (user.id,),
                 ).fetchall()
             )
-            == []
-            else sent
+            else None
         )
         # If a user is not in db, add them
         if messages_sent is None:

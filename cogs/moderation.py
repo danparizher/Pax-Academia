@@ -186,13 +186,14 @@ class Moderation(commands.Cog):
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
-        multipost_of: list[MessageFingerprint] = []
-        for other_fingerprint in self.fingerprints:
+        multipost_of = [
+            other_fingerprint
+            for other_fingerprint in self.fingerprints
             if (
                 fingerprint is not other_fingerprint
                 and await fingerprint.is_multipost_of(other_fingerprint)
-            ):
-                multipost_of.append(other_fingerprint)
+            )
+        ]
 
         return fingerprint, multipost_of
 
