@@ -188,7 +188,7 @@ class Moderation(commands.Cog):
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
-        multipost_of = [
+        return [
             other_fingerprint
             for other_fingerprint in self.fingerprints
             if (
@@ -196,8 +196,6 @@ class Moderation(commands.Cog):
                 and await fingerprint.is_multipost_of(other_fingerprint)
             )
         ]
-
-        return multipost_of
 
     # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
