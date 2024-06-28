@@ -184,7 +184,7 @@ class Moderation(commands.Cog):
     async def record_fingerprint(
         self: Moderation,
         message: discord.Message,
-    ) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
+    ) -> list[MessageFingerprint]:
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
@@ -197,7 +197,7 @@ class Moderation(commands.Cog):
             )
         ]
 
-        return fingerprint, multipost_of
+        return multipost_of
 
     # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
@@ -279,17 +279,13 @@ class Moderation(commands.Cog):
         ):
             return
 
-        fingerprint, previous_messages = await self.record_fingerprint(message)
-        n_previous_messages = len(previous_messages)
+        previous_messages = await self.record_fingerprint(message)
 
-        # Original Message - No action taken
-        if n_previous_messages == 0:
+        if not previous_messages:
+            # This is a new, unique message. Not a multipost.
             return
 
-        # We used to have different behavior depending on `n_previous_messages`
-        # but now we just delete all multiposts. I'm keeping the variable around
-        # just because it would require a lot of code changes to remove it.
-        first_message, *_other_messages = previous_messages
+        first_post = previous_messages[0]
 
         embed = EmbedBuilder(
             title="Multi-Post Deleted",
@@ -297,7 +293,7 @@ class Moderation(commands.Cog):
             fields=[
                 (
                     "Original Message",
-                    f"[link]({first_message.jump_url})",
+                    f"[link]({first_post.jump_url})",
                     True,
                 ),
             ],
