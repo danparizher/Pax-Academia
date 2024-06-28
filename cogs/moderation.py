@@ -279,13 +279,13 @@ class Moderation(commands.Cog):
         ):
             return
 
-        previous_messages = await self.record_fingerprint(message)
+        previous_postings = await self.record_fingerprint(message)
 
-        if not previous_messages:
+        if not previous_postings:
             # This is a new, unique message. Not a multipost.
             return
 
-        first_post = previous_messages[0]
+        first_post = previous_postings[0]
 
         embed = EmbedBuilder(
             title="Multi-Post Deleted",
