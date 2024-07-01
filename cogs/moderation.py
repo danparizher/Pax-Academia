@@ -58,9 +58,11 @@ class MessageFingerprint:
             message_id=message.id,
             jump_url=message.jump_url,
             attachment_urls=[attachment.url for attachment in message.attachments],
-            content_hash=cls.sha256_hash(filtered_content)
-            if filtered_content is not None
-            else None,
+            content_hash=(
+                cls.sha256_hash(filtered_content)
+                if filtered_content is not None
+                else None
+            ),
         )
 
     # performs a SHA256 hash
@@ -182,11 +184,11 @@ class Moderation(commands.Cog):
     async def record_fingerprint(
         self: Moderation,
         message: discord.Message,
-    ) -> tuple[MessageFingerprint, list[MessageFingerprint]]:
+    ) -> list[MessageFingerprint]:
         fingerprint = MessageFingerprint.build(message)
         self.fingerprints.append(fingerprint)
 
-        multipost_of = [
+        return [
             other_fingerprint
             for other_fingerprint in self.fingerprints
             if (
@@ -194,8 +196,6 @@ class Moderation(commands.Cog):
                 and await fingerprint.is_multipost_of(other_fingerprint)
             )
         ]
-
-        return fingerprint, multipost_of
 
     # deletes recorded fingerprints after 2 minutes,
     # and clears out logged `multipost_warnings` after 10 minutes
@@ -248,8 +248,7 @@ class Moderation(commands.Cog):
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
     #   - Original Message - No action taken
-    #   - Second Message - React to both the original and second message with a custom emoji, and warn the author under the second message
-    #   - Third and Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
+    #   - Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
     #   - Author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
@@ -278,89 +277,43 @@ class Moderation(commands.Cog):
         ):
             return
 
-        fingerprint, previous_messages = await self.record_fingerprint(message)
-        n_previous_messages = len(previous_messages)
+        previous_postings = await self.record_fingerprint(message)
 
-        # Original Message - No action taken
-        if n_previous_messages == 0:
+        if not previous_postings:
+            # This is a new, unique message. Not a multipost.
             return
 
-        # First Multipost - React to the original message with a custom multipost emoji, and reply with a warning to the multipost
-        if n_previous_messages == 1:
-            original_message = previous_messages[0]
+        first_post = previous_postings[0]
 
-            embed = EmbedBuilder(
-                title="Multi-Post Warning",
-                description="Please don't send the same message in multiple channels.",
-                fields=[
-                    (
-                        "Original Message",
-                        f"[link]({original_message.jump_url})",
-                        True,
-                    ),
-                ],
-            ).build()
+        embed = EmbedBuilder(
+            title="Multi-Post Deleted",
+            description="Please don't send the same message in multiple channels. Your message has been deleted.\n\nThis warning will be deleted in 15 seconds.",
+            fields=[
+                (
+                    "Original Message",
+                    f"[link]({first_post.jump_url})",
+                    True,
+                ),
+            ],
+        ).build()
 
-            try:
-                await self.bot.http.add_reaction(
-                    original_message.channel_id,
-                    original_message.message_id,
-                    MULTIPOST_EMOJI,
-                )
-                await message.add_reaction(MULTIPOST_EMOJI)
-
-                warning = await message.reply(embed=embed)
-                await self.delete_previous_multipost_warnings(
-                    fingerprint.channel_id,
-                    fingerprint.author_id,
-                )
-                self.multipost_warnings[message.id] = (warning, fingerprint)
-                log(f"First mp warning for $ in {message.channel.name}", message.author)
-            except discord.errors.HTTPException as e:
-                if "unknown message".casefold() in repr(e).casefold():
-                    # The multipost has already been deleted, take no action
-                    return
-                # unknown error, just raise it
-                raise
-
-        # Subsequent Multiposts - Reply with a warning (and ping the offender), delete the multipost, then delete the warning after 15 seconds
-        else:
-            first_message, second_message, *_other_messages = previous_messages
-
-            embed = EmbedBuilder(
-                title="Multi-Post Deleted",
-                description="Please don't send the same message in multiple channels. Your message has been deleted.",
-                fields=[
-                    (
-                        "First Message",
-                        f"[link]({first_message.jump_url})",
-                        True,
-                    ),
-                    (
-                        "Second Message",
-                        f"[link]({second_message.jump_url})",
-                        True,
-                    ),
-                ],
-            ).build()
-
-            try:
-                await message.reply(
-                    message.author.mention,
-                    embed=embed,
-                    delete_after=15,
-                )
-                await message.delete()
-                log(
-                    f"Subsequent mp warning for $ in {message.channel.name}",
-                    message.author,
-                )
-            except discord.errors.HTTPException as e:
-                if "unknown message".casefold() in repr(e).casefold():
-                    # The multiposted message has already been deleted, take no action
-                    return
-                # unknown error, just raise it
-                raise
+        try:
+            await message.reply(
+                message.author.mention,
+                embed=embed,
+                delete_after=15,
+            )
+            await message.delete()
+            log(
+                f"Subsequent mp warning for $ in {message.channel.name}",
+                message.author,
+            )
+        except discord.errors.HTTPException as e:
+            if "unknown message".casefold() in repr(e).casefold():
+                # The multiposted message has already been deleted, take no action
+                return
+            # unknown error, just raise it
+            raise
 
     @commands.Cog.listener()
     async def on_message(self: Moderation, message: discord.Message) -> None:
