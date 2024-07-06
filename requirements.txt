@@ -23,22 +23,16 @@ black==24.4.2
     # via -r requirements.in
 build==1.2.1
     # via pip-tools
-certifi==2024.6.2
+certifi==2024.7.4
     # via
     #   requests
     #   selenium
-cffi==1.16.0
-    # via trio
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via
     #   black
     #   pip-tools
-colorama==0.4.6
-    # via
-    #   build
-    #   click
 deepl==1.18.0
     # via -r requirements.in
 file-read-backwards==3.1.0
@@ -82,8 +76,6 @@ pubchempy==1.0.4
     # via -r requirements.in
 py-cord==2.5.0
     # via -r requirements.in
-pycparser==2.22
-    # via cffi
 pyproject-hooks==1.1.0
     # via
     #   build
