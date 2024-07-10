@@ -250,7 +250,12 @@ class Moderation(commands.Cog):
 
         embed = EmbedBuilder(
             title="Multi-Post Deleted",
-            description="Please don't send the same message in multiple channels. Your message has been deleted.\n\nThis warning will be deleted in 15 seconds.",
+            description=(
+                "Please don't send the same message in multiple channels."
+                " Your message has been deleted."
+                " You may delete your original message to re-post it elsewhere."
+                " \n\nThis warning will be deleted in 15 seconds."
+            ),
             fields=[
                 (
                     "Original Message",
@@ -287,6 +292,7 @@ class Moderation(commands.Cog):
         self: Moderation,
         payload: discord.RawMessageDeleteEvent,
     ) -> None:
+        # You're allowed to re-post messages that have been deleted.
         for i, fingerprint in enumerate(self.fingerprints):
             if payload.message_id == fingerprint.message_id:
                 del self.fingerprints[i]
