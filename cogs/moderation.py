@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import bisect
 import os
 import re
 import string
@@ -20,6 +21,9 @@ Hash: TypeAlias = bytes
 
 MULTIPOST_EMOJI = os.getenv("MULTIPOST_EMOJI", ":regional_indicator_m:")
 ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
+
+# how long must you wait before being allowed to multipost
+ACCEPTABLE_MULTIPOST_DELAY = 15
 
 
 @dataclass
@@ -169,7 +173,8 @@ class MessageFingerprint:
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        # stores all user messages sent in the last minute (recent messages near the end)
+        # stores the fingerprints of every eligible (multipost-able)
+        # message sent in the last {ACCEPTABLE_MULTIPOST_DELAY} seconds
         self.fingerprints: list[MessageFingerprint] = []
         self.multipost_warnings: dict[
             Annotated[int, "Multiposted Message ID"],
@@ -186,7 +191,7 @@ class Moderation(commands.Cog):
         message: discord.Message,
     ) -> list[MessageFingerprint]:
         fingerprint = MessageFingerprint.build(message)
-        self.fingerprints.append(fingerprint)
+        bisect.insort(self.fingerprints, fingerprint, key=lambda fp: fp.created_at)
 
         return [
             other_fingerprint
@@ -197,20 +202,13 @@ class Moderation(commands.Cog):
             )
         ]
 
-    # deletes recorded fingerprints after 2 minutes,
-    # and clears out logged `multipost_warnings` after 10 minutes
+    # deletes recorded fingerprints after {ACCEPTABLE_MULTIPOST_DELAY} seconds
     @tasks.loop(seconds=3)
     async def clear_old_cached_data(self) -> None:
-        # new messages are always appended to the end of the list
-        # so we will only be deleting messages from the front of the list
-        # this algorithm finds the number of messages the delete, then deletes them in bulk
-        n_fingerprints_to_delete = 0
-        for fingerprint in self.fingerprints:
-            if time.time() - fingerprint.created_at > 120:
-                n_fingerprints_to_delete += 1
-            else:
-                break
-
+        n_fingerprints_to_delete = bisect.bisect_right(
+            [fp.created_at for fp in self.fingerprints],
+            time.time() - ACCEPTABLE_MULTIPOST_DELAY,
+        )
         del self.fingerprints[:n_fingerprints_to_delete]
 
         # delete multipost warnings that are more than 10 minutes old
@@ -248,12 +246,16 @@ class Moderation(commands.Cog):
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
     #   - Original Message - No action taken
-    #   - Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
+    #   - Subsequent Messages - Delete the message and warn the
+    #     author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
     #   - Author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
-    #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
-    #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
+    #   - Message was sent in a TextChannel (not a DMChannel) that
+    #     is in a CategoryChannel whose name ends with "HELP"
+    #   - The same author sent another message in the last
+    #     {ACCEPTABLE_MULTIPOST_DELAY} seconds with a matching
+    #     fingerprint (see MessageFingerprint.matches)
     async def check_multipost(self: Moderation, message: discord.Message) -> None:
         # author not a bot
         if message.author.bot:
