@@ -196,7 +196,7 @@ class Moderation(commands.Cog):
         ]
 
     # deletes recorded fingerprints after {ACCEPTABLE_MULTIPOST_DELAY} seconds
-    @tasks.loop(seconds=3)
+    @tasks.loop(seconds=15)
     async def clear_old_cached_data(self) -> None:
         n_fingerprints_to_delete = bisect.bisect_right(
             [fp.created_at for fp in self.fingerprints],
