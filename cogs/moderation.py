@@ -7,7 +7,7 @@ import string
 import time
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import Annotated, TypeAlias
+from typing import TypeAlias
 
 import aiohttp
 import discord
@@ -176,16 +176,9 @@ class Moderation(commands.Cog):
         # stores the fingerprints of every eligible (multipost-able)
         # message sent in the last {ACCEPTABLE_MULTIPOST_DELAY} seconds
         self.fingerprints: list[MessageFingerprint] = []
-        self.multipost_warnings: dict[
-            Annotated[int, "Multiposted Message ID"],
-            tuple[
-                Annotated[discord.Message, "Bot's Warning Message"],
-                Annotated[MessageFingerprint, "Offending Message's Fingerprint"],
-            ],
-        ] = {}
         self.clear_old_cached_data.start()
 
-    # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
+    # Records and returns a list of fingerprints that this message is a multipost of
     async def record_fingerprint(
         self: Moderation,
         message: discord.Message,
@@ -210,38 +203,6 @@ class Moderation(commands.Cog):
             time.time() - ACCEPTABLE_MULTIPOST_DELAY,
         )
         del self.fingerprints[:n_fingerprints_to_delete]
-
-        # delete multipost warnings that are more than 10 minutes old
-        multipost_warnings_to_delete = [
-            original_message_id
-            for original_message_id, (
-                warning_message,
-                _fingerprint,
-            ) in self.multipost_warnings.items()
-            if time.time() - warning_message.created_at.timestamp() > 600
-        ]
-        for message_id in multipost_warnings_to_delete:
-            del self.multipost_warnings[message_id]
-
-    async def delete_previous_multipost_warnings(
-        self: Moderation,
-        channel_id: int,
-        author_id: int,
-    ) -> None:
-        to_delete = [
-            warning_message_id
-            for warning_message_id, (
-                multipost_warning,
-                offenders_fingerprint,
-            ) in self.multipost_warnings.items()
-            if offenders_fingerprint.channel_id == channel_id
-            and offenders_fingerprint.author_id == author_id
-        ]
-        for warning_message_id in to_delete:
-            multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(
-                warning_message_id,
-            )
-            await multipost_warning.delete()
 
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
@@ -307,7 +268,7 @@ class Moderation(commands.Cog):
             )
             await message.delete()
             log(
-                f"Subsequent mp warning for $ in {message.channel.name}",
+                f"Deleted multi-posted message (id: {message.id}) from $ in #{message.channel.name}",
                 message.author,
             )
         except discord.errors.HTTPException as e:
@@ -326,22 +287,6 @@ class Moderation(commands.Cog):
         self: Moderation,
         payload: discord.RawMessageDeleteEvent,
     ) -> None:
-        if payload.message_id in self.multipost_warnings:
-            # The person deleted their message after seeing out multipost warning
-            # so we can delete the warning message
-            warning_message, _fingerprint = self.multipost_warnings.pop(
-                payload.message_id,
-            )
-            try:
-                await warning_message.delete()
-            except discord.errors.HTTPException as e:
-                if "unknown message".casefold() in repr(e).casefold():
-                    # a mod probably already deleted the warning message
-                    return
-                raise
-
-        # If you delete your message then re-send it in another channel, that's fine
-        # so we can remove the original message fingerprint
         for i, fingerprint in enumerate(self.fingerprints):
             if payload.message_id == fingerprint.message_id:
                 del self.fingerprints[i]
