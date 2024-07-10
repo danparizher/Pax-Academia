@@ -23,7 +23,7 @@ MULTIPOST_EMOJI = os.getenv("MULTIPOST_EMOJI", ":regional_indicator_m:")
 ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
 
 # how long must you wait before being allowed to multipost
-ACCEPTABLE_MULTIPOST_DELAY = 15
+ACCEPTABLE_MULTIPOST_DELAY = 600
 
 
 @dataclass
