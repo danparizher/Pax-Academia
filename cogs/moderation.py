@@ -88,10 +88,9 @@ class MessageFingerprint:
         # remove all punctuation and spacing
         content = content.translate(
             str.maketrans(
-                dict.fromkeys(
-                    string.whitespace + string.punctuation + string.digits,
-                    "",
-                ),
+                "",
+                "",
+                string.whitespace + string.punctuation + string.digits,
             ),
         )
 
