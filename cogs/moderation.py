@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import bisect
 import os
 import re
 import string
 import time
 from dataclasses import dataclass
 from hashlib import sha256
-from typing import Annotated, TypeAlias
+from typing import TypeAlias
 
 import aiohttp
 import discord
@@ -20,6 +21,9 @@ Hash: TypeAlias = bytes
 
 MULTIPOST_EMOJI = os.getenv("MULTIPOST_EMOJI", ":regional_indicator_m:")
 ALLOW_MULTIPOST_FOR_ROLE = os.getenv("ALLOW_MULTIPOST_FOR_ROLE")
+
+# how long must you wait before being allowed to multipost
+ACCEPTABLE_MULTIPOST_DELAY = 600
 
 
 @dataclass
@@ -84,10 +88,9 @@ class MessageFingerprint:
         # remove all punctuation and spacing
         content = content.translate(
             str.maketrans(
-                dict.fromkeys(
-                    string.whitespace + string.punctuation + string.digits,
-                    "",
-                ),
+                "",
+                "",
+                string.whitespace + string.punctuation + string.digits,
             ),
         )
 
@@ -169,24 +172,18 @@ class MessageFingerprint:
 class Moderation(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
         self.bot = bot
-        # stores all user messages sent in the last minute (recent messages near the end)
+        # stores the fingerprints of every eligible (multipost-able)
+        # message sent in the last {ACCEPTABLE_MULTIPOST_DELAY} seconds
         self.fingerprints: list[MessageFingerprint] = []
-        self.multipost_warnings: dict[
-            Annotated[int, "Multiposted Message ID"],
-            tuple[
-                Annotated[discord.Message, "Bot's Warning Message"],
-                Annotated[MessageFingerprint, "Offending Message's Fingerprint"],
-            ],
-        ] = {}
         self.clear_old_cached_data.start()
 
-    # Records and returns a MessageFingerprint and a list of fingerprints that this message is a multipost of
+    # Records and returns a list of fingerprints that this message is a multipost of
     async def record_fingerprint(
         self: Moderation,
         message: discord.Message,
     ) -> list[MessageFingerprint]:
         fingerprint = MessageFingerprint.build(message)
-        self.fingerprints.append(fingerprint)
+        bisect.insort(self.fingerprints, fingerprint, key=lambda fp: fp.created_at)
 
         return [
             other_fingerprint
@@ -197,63 +194,28 @@ class Moderation(commands.Cog):
             )
         ]
 
-    # deletes recorded fingerprints after 2 minutes,
-    # and clears out logged `multipost_warnings` after 10 minutes
-    @tasks.loop(seconds=3)
+    # deletes recorded fingerprints after {ACCEPTABLE_MULTIPOST_DELAY} seconds
+    @tasks.loop(seconds=15)
     async def clear_old_cached_data(self) -> None:
-        # new messages are always appended to the end of the list
-        # so we will only be deleting messages from the front of the list
-        # this algorithm finds the number of messages the delete, then deletes them in bulk
-        n_fingerprints_to_delete = 0
-        for fingerprint in self.fingerprints:
-            if time.time() - fingerprint.created_at > 120:
-                n_fingerprints_to_delete += 1
-            else:
-                break
-
+        n_fingerprints_to_delete = bisect.bisect_right(
+            [fp.created_at for fp in self.fingerprints],
+            time.time() - ACCEPTABLE_MULTIPOST_DELAY,
+        )
         del self.fingerprints[:n_fingerprints_to_delete]
-
-        # delete multipost warnings that are more than 10 minutes old
-        multipost_warnings_to_delete = [
-            original_message_id
-            for original_message_id, (
-                warning_message,
-                _fingerprint,
-            ) in self.multipost_warnings.items()
-            if time.time() - warning_message.created_at.timestamp() > 600
-        ]
-        for message_id in multipost_warnings_to_delete:
-            del self.multipost_warnings[message_id]
-
-    async def delete_previous_multipost_warnings(
-        self: Moderation,
-        channel_id: int,
-        author_id: int,
-    ) -> None:
-        to_delete = [
-            warning_message_id
-            for warning_message_id, (
-                multipost_warning,
-                offenders_fingerprint,
-            ) in self.multipost_warnings.items()
-            if offenders_fingerprint.channel_id == channel_id
-            and offenders_fingerprint.author_id == author_id
-        ]
-        for warning_message_id in to_delete:
-            multipost_warning, _offenders_fingerprint = self.multipost_warnings.pop(
-                warning_message_id,
-            )
-            await multipost_warning.delete()
 
     # this function should be called after every on_message
     # it will detect multiposts and will apply the following moderation:
     #   - Original Message - No action taken
-    #   - Subsequent Messages - Delete the message and warn the author, then delete the warning after 15 seconds
+    #   - Subsequent Messages - Delete the message and warn the
+    #     author, then delete the warning after 15 seconds
     # A message is a "multipost" if it meets these criteria:
     #   - Author is not a bot
     #   - Author doesn't have the ALLOW_MULTIPOST_FOR_ROLE role
-    #   - Message was sent in a TextChannel (not a DMChannel) that is in a CategoryChannel whose name ends with "HELP"
-    #   - The same author sent another message in the last 60 seconds with a matching fingerprint (see MessageFingerprint.matches)
+    #   - Message was sent in a TextChannel (not a DMChannel) that
+    #     is in a CategoryChannel whose name ends with "HELP"
+    #   - The same author sent another message in the last
+    #     {ACCEPTABLE_MULTIPOST_DELAY} seconds with a matching
+    #     fingerprint (see MessageFingerprint.matches)
     async def check_multipost(self: Moderation, message: discord.Message) -> None:
         # author not a bot
         if message.author.bot:
@@ -287,7 +249,12 @@ class Moderation(commands.Cog):
 
         embed = EmbedBuilder(
             title="Multi-Post Deleted",
-            description="Please don't send the same message in multiple channels. Your message has been deleted.\n\nThis warning will be deleted in 15 seconds.",
+            description=(
+                "Please don't send the same message in multiple channels."
+                " Your message has been deleted."
+                " You may delete your original message to re-post it elsewhere."
+                " \n\nThis warning will be deleted in 15 seconds."
+            ),
             fields=[
                 (
                     "Original Message",
@@ -305,7 +272,7 @@ class Moderation(commands.Cog):
             )
             await message.delete()
             log(
-                f"Subsequent mp warning for $ in {message.channel.name}",
+                f"Deleted multi-posted message (id: {message.id}) from $ in #{message.channel.name}",
                 message.author,
             )
         except discord.errors.HTTPException as e:
@@ -324,22 +291,7 @@ class Moderation(commands.Cog):
         self: Moderation,
         payload: discord.RawMessageDeleteEvent,
     ) -> None:
-        if payload.message_id in self.multipost_warnings:
-            # The person deleted their message after seeing out multipost warning
-            # so we can delete the warning message
-            warning_message, _fingerprint = self.multipost_warnings.pop(
-                payload.message_id,
-            )
-            try:
-                await warning_message.delete()
-            except discord.errors.HTTPException as e:
-                if "unknown message".casefold() in repr(e).casefold():
-                    # a mod probably already deleted the warning message
-                    return
-                raise
-
-        # If you delete your message then re-send it in another channel, that's fine
-        # so we can remove the original message fingerprint
+        # You're allowed to re-post messages that have been deleted.
         for i, fingerprint in enumerate(self.fingerprints):
             if payload.message_id == fingerprint.message_id:
                 del self.fingerprints[i]
