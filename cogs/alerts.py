@@ -341,6 +341,26 @@ class Alerts(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self: Alerts, message: discord.Message) -> None:
+        await self.maybe_send_alerts(message)
+
+    @commands.Cog.listener()
+    async def on_raw_message_edit(
+        self: Alerts,
+        payload: discord.RawMessageUpdateEvent,
+    ) -> None:
+        channel = self.bot.get_channel(
+            payload.channel_id,
+        ) or await self.bot.fetch_channel(
+            payload.channel_id,
+        )
+
+        assert isinstance(
+            channel,
+            discord.abc.Messageable,
+        ), "Presumably a channel that has messages in it should be 'messageable'."
+
+        message = await channel.fetch_message(payload.message_id)
+        await self.maybe_send_alerts(message)
 
 
 def setup(bot: commands.Bot) -> None:
