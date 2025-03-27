@@ -390,7 +390,8 @@ class Alerts(commands.Cog):
                 title="Alert",
                 description=(
                     f"Your {'keyword' if len(keywords) == 1 else 'keywords'} "
-                    f"{', '.join([f'`{keyword}`' for keyword in keywords])} was mentioned "
+                    f"{', '.join([f'`{keyword}`' for keyword in keywords])} "
+                    f"{'was' if len(keywords) == 1 else 'were'} mentioned "
                     f"in {message.channel.mention} by {message.author.mention}."
                 ),
                 fields=[
