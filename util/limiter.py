@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import functools
 from os import getenv
-from typing import Awaitable, Callable, ParamSpec, TypeVar
+from typing import TYPE_CHECKING, Callable, ParamSpec, TypeVar
 
 from discord import ApplicationContext
 
 import database
 from message_formatting.embeds import EmbedBuilder
 from util.logger import log
+
+if TYPE_CHECKING:
+    from collections.abc import Awaitable
 
 LimitedCommandParams = ParamSpec("LimitedCommandParams")
 LimitedCommandReturnValue = TypeVar("LimitedCommandReturnValue")
