@@ -67,7 +67,10 @@ class AlertRecord:
     def __hash__(self) -> int:
         return hash((self.message_id, self.alerted_user_id))
 
-    def __eq__(self, other: AlertRecord) -> bool:
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AlertRecord):
+            raise NotImplementedError
+
         return (
             self.message_id == other.message_id
             and self.alerted_user_id == other.alerted_user_id
