@@ -694,9 +694,9 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        assert (
-            interaction.user is not None
-        ), "Our Discord server must be haunted! Every interaction must be paired with a user."
+        assert interaction.user is not None, (
+            "Our Discord server must be haunted! Every interaction must be paired with a user."
+        )
 
         self.db = database.connect()
         self.cursor = self.db.cursor()
@@ -745,9 +745,9 @@ class staffAppsMain(discord.ui.View):
         button: discord.ui.Button,
         interaction: discord.Interaction,
     ) -> None:
-        assert (
-            interaction.user is not None
-        ), "Our Discord server must be haunted! Every interaction must be paired with a user."
+        assert interaction.user is not None, (
+            "Our Discord server must be haunted! Every interaction must be paired with a user."
+        )
 
         self.db = database.connect()
         self.cursor = self.db.cursor()
