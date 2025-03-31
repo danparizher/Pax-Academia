@@ -1,51 +1,32 @@
-name: Update requirements
+name: Update Requirements
 
 on:
   schedule:
-    - cron: "0 9 * * *"
+    - cron: "0 0 * * *"
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  update-requirements:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
 
       - name: Install pip-tools
         run: pip install pip-tools
 
       - name: Compile requirements
-        run: pip-compile requirements.in -U
-
-      - name: Configure Git user
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-      - name: Commit changes
-        run: |
-          git checkout -b update-requirements
-          git add requirements.txt
-          if git diff --staged --quiet; then
-            echo "No changes in requirements.txt"
-          else
-            git commit -m "Update requirements.txt"
-            git pull --rebase origin update-requirements
-            git push --set-upstream origin update-requirements
-          fi
+        run: pip-compile --upgrade
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           title: "Update requirements.txt"
           body: "This PR updates the requirements.txt file."
-          branch: "update-requirements"
-          base: "main"
+          base: main
+          branch: update-requirements
+          paths: requirements.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
