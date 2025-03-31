@@ -7,7 +7,7 @@ humanize
 isort
 pip-tools
 pubchempy
-py-cord
+py-cord<=2.5
 python-dotenv
 python-Levenshtein
 selenium
