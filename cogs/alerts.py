@@ -77,20 +77,78 @@ class AlertRecord:
         )
 
 
-class Alerts(commands.Cog):
-    ALERT_MEMORY_DURATION = 60 * 60 * 6  # 6 hours
+@dataclass(frozen=True)
+class AlertIdentifier:
+    alerted_user_id: int
+    about_message_id: int
 
+
+@dataclass(frozen=True)
+class AlertInformation:
+    keywords: frozenset[str]
+    memory_expires_at: float
+
+    @staticmethod
+    def expire_in(seconds: float) -> float:
+        return perf_counter() + seconds
+
+    @property
+    def expired(self) -> bool:
+        return perf_counter() > self.memory_expires_at
+
+
+class AlertMemory:
+    DURATION = 60 * 60 * 6  # 6 hours
+
+    def __init__(self) -> None:
+        self.alerts: dict[AlertIdentifier, AlertInformation] = {}
+
+    def delete_expired_records(self) -> None:
+        for identifier in list(self.alerts):
+            if self.alerts[identifier].expired:
+                del self.alerts[identifier]
+
+    def upsert(self, *, message_id: int, user_id: int, keywords: frozenset) -> bool:
+        """
+        Updates the memory to include this alert.
+        Returns true if there are new keywords which the user has not yet been alerted about.
+        """
+        identifier = AlertIdentifier(
+            alerted_user_id=user_id,
+            about_message_id=message_id,
+        )
+
+        if identifier not in self.alerts:
+            # Never previously alerted for this message
+            self.alerts[identifier] = AlertInformation(
+                keywords=keywords,
+                memory_expires_at=AlertInformation.expire_in(AlertMemory.DURATION),
+            )
+            return True
+
+        info = self.alerts[identifier]
+        if keywords.issubset(info.keywords):
+            # No new keywords = no new alert
+            return False
+
+        # There are some new keywords
+        self.alerts[identifier] = AlertInformation(
+            keywords=info.keywords | keywords,
+            memory_expires_at=AlertInformation.expire_in(AlertMemory.DURATION),
+        )
+        return True
+
+
+class Alerts(commands.Cog):
     def __init__(self: Alerts, bot: commands.Bot) -> None:
         self.bot = bot
         self.db = database.connect()
-        self.alert_memory: set[AlertRecord] = set()
+        self.alert_memory = AlertMemory()
 
     # periodically clear expired alert records
     @tasks.loop(seconds=15)
     async def clean_alert_memory(self) -> None:
-        for record in self.alert_memory.copy():
-            if record.expired:
-                self.alert_memory.remove(record)
+        self.alert_memory.delete_expired_records()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -322,23 +380,17 @@ class Alerts(commands.Cog):
         embed: discord.Embed,
         send_to: discord.Member,
         message_id: int,
+        keywords: frozenset[str],
     ) -> None:
-        alert_record = AlertRecord(message_id, send_to.id).expire_in(
-            self.ALERT_MEMORY_DURATION,
+        should_send = self.alert_memory.upsert(
+            message_id=message_id,
+            user_id=send_to.id,
+            keywords=keywords,
         )
-        if alert_record in self.alert_memory:
-            # we already alerted this user, don't send it again
-            return
 
-        # immediately record the alert, to act as a debounce
-        # then, if failure ensues, remove it afterwards
-        self.alert_memory.add(alert_record)
-        with suppress(discord.Forbidden):
-            try:
+        if should_send:
+            with suppress(discord.Forbidden):
                 await send_to.send(embed=embed)
-            except:
-                self.alert_memory.remove(alert_record)
-                raise
 
     async def maybe_send_alerts(self: Alerts, message: discord.Message) -> None:
         """
@@ -407,7 +459,14 @@ class Alerts(commands.Cog):
                 ],
             ).build()
 
-            sending_alerts.append(self.send_and_record_alert(embed, member, message.id))
+            sending_alerts.append(
+                self.send_and_record_alert(
+                    embed,
+                    member,
+                    message.id,
+                    frozenset(keywords),
+                )
+            )
 
         await asyncio.gather(*sending_alerts)
 
