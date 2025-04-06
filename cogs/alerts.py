@@ -395,7 +395,7 @@ class Alerts(commands.Cog):
     async def maybe_send_alerts(self: Alerts, message: discord.Message) -> None:
         """
         If the message is valid and contains keyword(s),
-        send DM(s) to the user(s) who added the keyword(s)
+        send a DM to the user(s) who added the keyword(s)
         """
 
         # never alert on bot messages
@@ -421,7 +421,6 @@ class Alerts(commands.Cog):
         )
 
         # group together alerts by the person who is to be alerted
-        # (so that we don't alert someone multiple times for the same message)
         alerts: dict[int, list[str]] = {}
         for keyword, uid in c.fetchall():
             if not re.search(keyword, message.content, re.IGNORECASE):
@@ -465,7 +464,7 @@ class Alerts(commands.Cog):
                     member,
                     message.id,
                     frozenset(keywords),
-                )
+                ),
             )
 
         await asyncio.gather(*sending_alerts)
