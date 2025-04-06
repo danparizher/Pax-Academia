@@ -113,9 +113,9 @@ class SimilarWord:
         :return: a WordInformation
         """
         status_code, soup = await fetch_page_cached(self.url)
-        assert (
-            status_code == 200
-        ), "Got a non-200 response while fetching a URL that was provided directly from Oxford."
+        assert status_code == 200, (
+            "Got a non-200 response while fetching a URL that was provided directly from Oxford."
+        )
         return parse_oxford_definition_page(self.url, soup)
 
 
@@ -187,9 +187,9 @@ class WordInformation:
                 footer=footer,
             ).build()
 
-        assert (
-            len(self.senses) > 1
-        ), "It shouldn't be possible for a WordInformation to be created without a sense."
+        assert len(self.senses) > 1, (
+            "It shouldn't be possible for a WordInformation to be created without a sense."
+        )
 
         sense_parts = []
         for index, sense in enumerate(self.senses[:5]):

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
+import asyncio
 import re
 from contextlib import suppress
+from dataclasses import dataclass
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 import discord
 from discord.commands import option
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 import database
 from message_formatting.embeds import EmbedBuilder
@@ -41,10 +44,111 @@ def get_keywords(ctx: discord.AutocompleteContext) -> list[str]:
     return data
 
 
+@dataclass
+class AlertRecord:
+    """
+    Represents an alert that was sent to a user.
+    We keep track of these to avoid duplicate alerts.
+    They have an expiry time to avoid unnecessary memory usage.
+    """
+
+    message_id: int
+    alerted_user_id: int
+    expires_at: float = 0
+
+    def expire_in(self, seconds: float) -> AlertRecord:
+        self.expires_at = perf_counter() + seconds
+        return self
+
+    @property
+    def expired(self) -> bool:
+        return perf_counter() > self.expires_at
+
+    def __hash__(self) -> int:
+        return hash((self.message_id, self.alerted_user_id))
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, AlertRecord):
+            raise NotImplementedError
+
+        return (
+            self.message_id == other.message_id
+            and self.alerted_user_id == other.alerted_user_id
+        )
+
+
+@dataclass(frozen=True)
+class AlertIdentifier:
+    alerted_user_id: int
+    about_message_id: int
+
+
+@dataclass(frozen=True)
+class AlertInformation:
+    keywords: frozenset[str]
+    memory_expires_at: float
+
+    @staticmethod
+    def expire_in(seconds: float) -> float:
+        return perf_counter() + seconds
+
+    @property
+    def expired(self) -> bool:
+        return perf_counter() > self.memory_expires_at
+
+
+class AlertMemory:
+    DURATION = 60 * 60 * 6  # 6 hours
+
+    def __init__(self) -> None:
+        self.alerts: dict[AlertIdentifier, AlertInformation] = {}
+
+    def delete_expired_records(self) -> None:
+        for identifier in list(self.alerts):
+            if self.alerts[identifier].expired:
+                del self.alerts[identifier]
+
+    def upsert(self, *, message_id: int, user_id: int, keywords: frozenset) -> bool:
+        """
+        Updates the memory to include this alert.
+        Returns true if there are new keywords which the user has not yet been alerted about.
+        """
+        identifier = AlertIdentifier(
+            alerted_user_id=user_id,
+            about_message_id=message_id,
+        )
+
+        if identifier not in self.alerts:
+            # Never previously alerted for this message
+            self.alerts[identifier] = AlertInformation(
+                keywords=keywords,
+                memory_expires_at=AlertInformation.expire_in(AlertMemory.DURATION),
+            )
+            return True
+
+        info = self.alerts[identifier]
+        if keywords.issubset(info.keywords):
+            # No new keywords = no new alert
+            return False
+
+        # There are some new keywords
+        self.alerts[identifier] = AlertInformation(
+            keywords=info.keywords | keywords,
+            memory_expires_at=AlertInformation.expire_in(AlertMemory.DURATION),
+        )
+        return True
+
+
 class Alerts(commands.Cog):
     def __init__(self: Alerts, bot: commands.Bot) -> None:
         self.bot = bot
         self.db = database.connect()
+        self.alert_memory = AlertMemory()
+
+    # periodically clear expired alert records
+    @tasks.loop(seconds=15)
+    async def clean_alert_memory(self) -> None:
+        self.alert_memory.delete_expired_records()
 
     # Allows the user to enter a keyword to be alerted when it is mentioned in the guild. When the keyword is used, the bot will send a DM to the user.
     @commands.slash_command(
@@ -261,77 +365,132 @@ class Alerts(commands.Cog):
 
         log(f"Alerts resumed by $ in {ctx.guild}.", ctx.author)
 
-    @commands.Cog.listener()
-    async def on_message(self: Alerts, message: discord.Message) -> None:
-        async def user_alerts() -> None:
-            """
-            If a message contains a keyword, send a DM to the user who added the keyword
-            :return: The message.content is being returned.
-            """
-            assert (
-                self.bot.user is not None
-            ), "on_message only fires when the bot is already logged in"
+    @staticmethod
+    async def get_or_fetch_member(
+        guild: discord.Guild,
+        member_id: int,
+    ) -> discord.Member | None:
+        try:
+            return guild.get_member(member_id) or await guild.fetch_member(member_id)
+        except discord.NotFound:
+            return None
 
-            # do not process alerts for bot messages or in DMs
-            if message.author.bot or isinstance(message.author, discord.User):
-                return
+    async def send_and_record_alert(
+        self: Alerts,
+        embed: discord.Embed,
+        send_to: discord.Member,
+        message_id: int,
+        keywords: frozenset[str],
+    ) -> None:
+        should_send = self.alert_memory.upsert(
+            message_id=message_id,
+            user_id=send_to.id,
+            keywords=keywords,
+        )
 
-            # Should be impossible (since we already checked if this is a DM)
-            # this is just to satisfy type-checkers
-            if message.channel not in message.author.guild.channels:
-                return
+        if should_send:
+            with suppress(discord.Forbidden):
+                await send_to.send(embed=embed)
 
-            c = self.db.cursor()
-            c.execute(
-                "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)",
+    async def maybe_send_alerts(self: Alerts, message: discord.Message) -> None:
+        """
+        If the message is valid and contains keyword(s),
+        send a DM to the user(s) who added the keyword(s)
+        """
+
+        # never alert on bot messages
+        if message.author.bot:
+            return
+
+        # filter out bad channel types
+        if isinstance(
+            message.channel,
+            (
+                # we need the channel to be loaded correctly
+                discord.PartialMessageable,
+                # do not alert from DM's
+                discord.DMChannel,
+                discord.GroupChannel,
+            ),
+        ):
+            return
+
+        c = self.db.cursor()
+        c.execute(
+            "SELECT message, uid FROM alert WHERE (paused = FALSE OR paused IS NULL)",
+        )
+
+        # group together alerts by the person who is to be alerted
+        alerts: dict[int, list[str]] = {}
+        for keyword, uid in c.fetchall():
+            if not re.search(keyword, message.content, re.IGNORECASE):
+                continue
+
+            member = await self.get_or_fetch_member(message.channel.guild, uid)
+            if not member or not message.channel.permissions_for(member).view_channel:
+                continue
+
+            alerts.setdefault(uid, [])
+            alerts[uid].append(keyword)
+
+        # send the alerts
+        sending_alerts = []
+        for uid, keywords in alerts.items():
+            member = await self.get_or_fetch_member(message.channel.guild, uid)
+            if member is None:
+                continue
+
+            embed = EmbedBuilder(
+                title="Alert",
+                description=(
+                    f"Your {'keyword' if len(keywords) == 1 else 'keywords'} "
+                    f"{', '.join([f'`{keyword}`' for keyword in keywords])} "
+                    f"{'was' if len(keywords) == 1 else 'were'} mentioned "
+                    f"in {message.channel.mention} by {message.author.mention}."
+                ),
+                fields=[
+                    ("Message", message.content, False),
+                    (
+                        "Message Link",
+                        f"[Click to see message]({message.jump_url})",
+                        False,
+                    ),
+                ],
+            ).build()
+
+            sending_alerts.append(
+                self.send_and_record_alert(
+                    embed,
+                    member,
+                    message.id,
+                    frozenset(keywords),
+                ),
             )
 
-            alerts = {}
-            for keyword, uid in c.fetchall():
-                if not re.search(keyword, message.content, re.IGNORECASE):
-                    continue
+        await asyncio.gather(*sending_alerts)
 
-                # try to pull from cache, otherwise re-fetch
-                member = message.channel.guild.get_member(uid)
-                if not member:
-                    try:
-                        member = await message.channel.guild.fetch_member(uid)
-                    except discord.NotFound:
-                        continue
+    @commands.Cog.listener()
+    async def on_message(self: Alerts, message: discord.Message) -> None:
+        await self.maybe_send_alerts(message)
 
-                if not message.channel.permissions_for(member).view_channel:
-                    continue
+    @commands.Cog.listener()
+    async def on_raw_message_edit(
+        self: Alerts,
+        payload: discord.RawMessageUpdateEvent,
+    ) -> None:
+        channel = self.bot.get_channel(
+            payload.channel_id,
+        ) or await self.bot.fetch_channel(
+            payload.channel_id,
+        )
 
-                alerts.setdefault(uid, [])
+        assert isinstance(
+            channel,
+            discord.abc.Messageable,
+        ), "Presumably a channel that has messages in it should be 'messageable'."
 
-                alerts[uid].append(keyword)
-
-            for uid, keywords in alerts.items():
-                member = message.channel.guild.get_member(uid)
-                if member is None:
-                    try:
-                        member = await message.channel.guild.fetch_member(uid)
-                    except discord.NotFound:
-                        # If the member is not found, skip to the next iteration
-                        continue
-
-                # At this point, member should not be None
-                embed = EmbedBuilder(
-                    title="Alert",
-                    description=f"Your {'keyword' if len(keywords) == 1 else 'keywords'} {', '.join([f'`{keyword}`' for keyword in keywords])} was mentioned in {message.channel.mention} by {message.author.mention}.",
-                    fields=[
-                        ("Message", message.content, False),
-                        (
-                            "Message Link",
-                            f"[Click to see message]({message.jump_url})",
-                            False,
-                        ),
-                    ],
-                ).build()
-                with suppress(discord.Forbidden):
-                    await member.send(embed=embed)
-
-        await user_alerts()
+        message = await channel.fetch_message(payload.message_id)
+        await self.maybe_send_alerts(message)
 
 
 def setup(bot: commands.Bot) -> None:
