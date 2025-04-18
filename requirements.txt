@@ -17,7 +17,7 @@ attrs==25.3.0
     #   aiohttp
     #   outcome
     #   trio
-beautifulsoup4==4.13.3
+beautifulsoup4==4.13.4
     # via
     #   -r requirements.in
     #   wikipedia
@@ -39,7 +39,7 @@ deepl==1.21.1
     # via -r requirements.in
 file-read-backwards==3.1.0
     # via -r requirements.in
-frozenlist==1.5.0
+frozenlist==1.6.0
     # via
     #   aiohttp
     #   aiosignal
@@ -141,7 +141,7 @@ wikipedia==1.4.0
     # via -r requirements.in
 wsproto==1.2.0
     # via trio-websocket
-yarl==1.19.0
+yarl==1.20.0
     # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
