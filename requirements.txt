@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.11.17
+aiohttp==3.11.18
     # via
     #   -r requirements.in
     #   py-cord
@@ -37,7 +37,7 @@ click==8.1.8
     #   pip-tools
 deepl==1.21.1
     # via -r requirements.in
-file-read-backwards==3.1.0
+file-read-backwards==3.2.0
     # via -r requirements.in
 frozenlist==1.6.0
     # via
