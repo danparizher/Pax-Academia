@@ -43,7 +43,7 @@ frozenlist==1.6.0
     # via
     #   aiohttp
     #   aiosignal
-h11==0.14.0
+h11==0.16.0
     # via wsproto
 humanize==4.12.2
     # via -r requirements.in
