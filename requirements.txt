@@ -35,7 +35,7 @@ click==8.1.8
     # via
     #   black
     #   pip-tools
-deepl==1.21.1
+deepl==1.22.0
     # via -r requirements.in
 file-read-backwards==3.2.0
     # via -r requirements.in
@@ -45,7 +45,7 @@ frozenlist==1.6.0
     #   aiosignal
 h11==0.16.0
     # via wsproto
-humanize==4.12.2
+humanize==4.12.3
     # via -r requirements.in
 idna==3.10
     # via
