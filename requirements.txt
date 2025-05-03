@@ -29,7 +29,7 @@ certifi==2025.4.26
     # via
     #   requests
     #   selenium
-charset-normalizer==3.4.1
+charset-normalizer==3.4.2
     # via requests
 click==8.1.8
     # via
@@ -103,7 +103,7 @@ requests==2.32.3
     #   deepl
     #   undetected-chromedriver
     #   wikipedia
-selenium==4.31.0
+selenium==4.32.0
     # via
     #   -r requirements.in
     #   undetected-chromedriver
