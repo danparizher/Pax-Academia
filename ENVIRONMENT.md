@@ -39,6 +39,8 @@
    ALLOW_VIEW_LOGS_ROLE_NAME = <a role name whose members can use the /view-logs command>
    STDOUT_LOG_FILE = <optionally, the file path where stdout is being redirected>
    STDERR_LOG_FILE = <optionally, the file path where stderr is being redirected>
+   INTRODUCTIONS_CHANNEL = <the channel ID where new members are introduced>
+   SWAGHI_EMOJI_ID = <the emoji ID for the :swaghi: emoji>
    ```
 
 5. Configure bot permissions.
