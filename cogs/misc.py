@@ -28,8 +28,8 @@ VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
 STDOUT_LOG_FILE = os.getenv("STDOUT_LOG_FILE", "log.txt")
 STDERR_LOG_FILE = os.getenv("STDERR_LOG_FILE", "log.txt")
-INTRODUCTIONS_CHANNEL_ID: int = int(os.getenv("INTRODUCTIONS_CHANNEL_ID"))
-SWAGHI_EMOJI_ID: int = int(os.getenv("SWAGHI_EMOJI_ID"))
+INTRODUCTIONS_CHANNEL_ID = os.getenv("INTRODUCTIONS_CHANNEL_ID")
+SWAGHI_EMOJI_ID = os.getenv("SWAGHI_EMOJI_ID")
 
 
 VIEW_DB_PERMISSIONS = (
@@ -189,9 +189,13 @@ class Misc(commands.Cog):
         :param message: The message that was sent.
         :type message: discord.Message
         """
-        if message.channel.id == INTRODUCTIONS_CHANNEL_ID:
-            swaghiEmoji: discord.Emoji = discord.utils.get(message.guild.emojis, id=SWAGHI_EMOJI_ID)
-            if swaghiEmoji != None:
+        if (
+            message.channel.id == INTRODUCTIONS_CHANNEL_ID
+            and SWAGHI_EMOJI_ID is not None
+        ):
+            swaghi_emoji_id_int = int(SWAGHI_EMOJI_ID)
+            swaghiEmoji = self.bot.get_emoji(swaghi_emoji_id_int)
+            if swaghiEmoji is not None:
                 await message.add_reaction(emoji=swaghiEmoji)
 
     @VIEW_LOGS_PERMISSIONS
