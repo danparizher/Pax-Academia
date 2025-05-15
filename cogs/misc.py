@@ -189,7 +189,7 @@ class Misc(commands.Cog):
         """
         introductionsChannelID: int = 769639145764159488
         if message.channel.id == introductionsChannelID:
-            await message.add_reaction(emoji = "<:swaghi:721519806930485288>")
+            await message.add_reaction(emoji="<:swaghi:721519806930485288>")
 
     @VIEW_LOGS_PERMISSIONS
     @commands.slash_command(
