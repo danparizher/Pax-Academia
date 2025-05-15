@@ -179,6 +179,18 @@ class Misc(commands.Cog):
 
         await edit(f"{COMPLETED_EMOJI} Presented {len(tables)} table(s).")
 
+    @commands.Cog.listener()
+    async def on_message(self: Misc, message: discord.Message) -> None:
+        """
+        It adds the :swaghi: reaction to a message if it's in the #introductions channel.
+
+        :param message: The message that was sent.
+        :type message: discord.Message
+        """
+        introductionsChannelID: int = 769639145764159488
+        if message.channel.id == introductionsChannelID:
+            await message.add_reaction(emoji = "<:swaghi:721519806930485288>")
+
     @VIEW_LOGS_PERMISSIONS
     @commands.slash_command(
         name="view-logs",
