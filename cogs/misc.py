@@ -28,6 +28,8 @@ VIEW_DB_ROLE = os.getenv("ALLOW_VIEW_DATABASE_ROLE_NAME")
 VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
 STDOUT_LOG_FILE = os.getenv("STDOUT_LOG_FILE", "log.txt")
 STDERR_LOG_FILE = os.getenv("STDERR_LOG_FILE", "log.txt")
+INTRODUCTIONS_CHANNEL_ID = os.getenv("INTRODUCTIONS_CHANNEL_ID")
+AUTO_REACT_WITH_EMOJI_ID = os.getenv("SWAGHI_EMOJI_ID")
 
 
 VIEW_DB_PERMISSIONS = (
@@ -178,6 +180,23 @@ class Misc(commands.Cog):
             await edit(f"{LOADING_EMOJI} Presented {i + 1}/{len(tables)} table(s).")
 
         await edit(f"{COMPLETED_EMOJI} Presented {len(tables)} table(s).")
+
+    @commands.Cog.listener()
+    async def on_message(self: Misc, message: discord.Message) -> None:
+        """
+        It automatically adds a reaction to a message if it's in the #introductions channel.
+
+        :param message: The message that was sent.
+        :type message: discord.Message
+        """
+        if (
+            message.channel.id == INTRODUCTIONS_CHANNEL_ID
+            and AUTO_REACT_WITH_EMOJI_ID is not None
+        ):
+            emoji_id: int = int(AUTO_REACT_WITH_EMOJI_ID)
+            emoji: discord.Emoji | None = self.bot.get_emoji(emoji_id)
+            if emoji is not None:
+                await message.add_reaction(emoji=emoji)
 
     @VIEW_LOGS_PERMISSIONS
     @commands.slash_command(
