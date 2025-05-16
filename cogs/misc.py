@@ -29,7 +29,7 @@ VIEW_LOGS_ROLE = os.getenv("ALLOW_VIEW_LOGS_ROLE_NAME")
 STDOUT_LOG_FILE = os.getenv("STDOUT_LOG_FILE", "log.txt")
 STDERR_LOG_FILE = os.getenv("STDERR_LOG_FILE", "log.txt")
 INTRODUCTIONS_CHANNEL_ID = os.getenv("INTRODUCTIONS_CHANNEL_ID")
-SWAGHI_EMOJI_ID = os.getenv("SWAGHI_EMOJI_ID")
+AUTO_REACT_WITH_EMOJI_ID = os.getenv("SWAGHI_EMOJI_ID")
 
 
 VIEW_DB_PERMISSIONS = (
@@ -191,12 +191,12 @@ class Misc(commands.Cog):
         """
         if (
             message.channel.id == INTRODUCTIONS_CHANNEL_ID
-            and SWAGHI_EMOJI_ID is not None
+            and AUTO_REACT_WITH_EMOJI_ID is not None
         ):
-            emoji_id = int(AUTO_REACT_WITH_EMOJI_ID)
-            emoji = self.bot.get_emoji(emoji_id)
-            if swaghiEmoji is not None:
-                await message.add_reaction(emoji=swaghiEmoji)
+            emoji_id: int = int(AUTO_REACT_WITH_EMOJI_ID)
+            emoji: discord.Emoji | None = self.bot.get_emoji(emoji_id)
+            if emoji is not None:
+                await message.add_reaction(emoji=emoji)
 
     @VIEW_LOGS_PERMISSIONS
     @commands.slash_command(
