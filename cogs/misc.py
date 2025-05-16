@@ -193,8 +193,8 @@ class Misc(commands.Cog):
             message.channel.id == INTRODUCTIONS_CHANNEL_ID
             and SWAGHI_EMOJI_ID is not None
         ):
-            swaghi_emoji_id_int = int(SWAGHI_EMOJI_ID)
-            swaghiEmoji = self.bot.get_emoji(swaghi_emoji_id_int)
+            emoji_id = int(AUTO_REACT_WITH_EMOJI_ID)
+            emoji = self.bot.get_emoji(emoji_id)
             if swaghiEmoji is not None:
                 await message.add_reaction(emoji=swaghiEmoji)
 
