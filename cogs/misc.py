@@ -184,7 +184,7 @@ class Misc(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self: Misc, message: discord.Message) -> None:
         """
-        It adds the :swaghi: reaction to a message if it's in the #introductions channel.
+        It automatically adds a reaction to a message if it's in the #introductions channel.
 
         :param message: The message that was sent.
         :type message: discord.Message
