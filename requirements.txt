@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.11.18
+aiohttp==3.12.0
     # via
     #   -r requirements.in
     #   py-cord
@@ -31,7 +31,7 @@ certifi==2025.4.26
     #   selenium
 charset-normalizer==3.4.2
     # via requests
-click==8.2.0
+click==8.2.1
     # via
     #   black
     #   pip-tools
@@ -56,7 +56,7 @@ isort==6.0.1
     # via -r requirements.in
 levenshtein==0.27.1
     # via python-levenshtein
-multidict==6.4.3
+multidict==6.4.4
     # via
     #   aiohttp
     #   yarl
@@ -103,7 +103,7 @@ requests==2.32.3
     #   deepl
     #   undetected-chromedriver
     #   wikipedia
-selenium==4.32.0
+selenium==4.33.0
     # via
     #   -r requirements.in
     #   undetected-chromedriver
