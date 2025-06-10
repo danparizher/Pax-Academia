@@ -98,7 +98,7 @@ rapidfuzz==3.13.0
     # via
     #   levenshtein
     #   thefuzz
-requests==2.32.3
+requests==2.32.4
     # via
     #   deepl
     #   undetected-chromedriver
