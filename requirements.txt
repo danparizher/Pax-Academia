@@ -6,7 +6,7 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.11.18
+aiohttp==3.12.13
     # via
     #   -r requirements.in
     #   py-cord
@@ -25,13 +25,13 @@ black==25.1.0
     # via -r requirements.in
 build==1.2.2.post1
     # via pip-tools
-certifi==2025.4.26
+certifi==2025.6.15
     # via
     #   requests
     #   selenium
 charset-normalizer==3.4.2
     # via requests
-click==8.2.0
+click==8.2.1
     # via
     #   black
     #   pip-tools
@@ -39,7 +39,7 @@ deepl==1.22.0
     # via -r requirements.in
 file-read-backwards==3.2.0
     # via -r requirements.in
-frozenlist==1.6.0
+frozenlist==1.7.0
     # via
     #   aiohttp
     #   aiosignal
@@ -56,7 +56,7 @@ isort==6.0.1
     # via -r requirements.in
 levenshtein==0.27.1
     # via python-levenshtein
-multidict==6.4.3
+multidict==6.4.4
     # via
     #   aiohttp
     #   yarl
@@ -76,7 +76,7 @@ pip-tools==7.4.1
     # via -r requirements.in
 platformdirs==4.3.8
     # via black
-propcache==0.3.1
+propcache==0.3.2
     # via
     #   aiohttp
     #   yarl
@@ -98,12 +98,12 @@ rapidfuzz==3.13.0
     # via
     #   levenshtein
     #   thefuzz
-requests==2.32.3
+requests==2.32.4
     # via
     #   deepl
     #   undetected-chromedriver
     #   wikipedia
-selenium==4.32.0
+selenium==4.33.0
     # via
     #   -r requirements.in
     #   undetected-chromedriver
@@ -141,7 +141,7 @@ wikipedia==1.4.0
     # via -r requirements.in
 wsproto==1.2.0
     # via trio-websocket
-yarl==1.20.0
+yarl==1.20.1
     # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:
