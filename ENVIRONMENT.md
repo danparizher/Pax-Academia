@@ -39,6 +39,8 @@
    ALLOW_VIEW_LOGS_ROLE_NAME = <a role name whose members can use the /view-logs command>
    STDOUT_LOG_FILE = <optionally, the file path where stdout is being redirected>
    STDERR_LOG_FILE = <optionally, the file path where stderr is being redirected>
+   AUTO_REACT_IN_CHANNEL_ID = <the channel ID where a reaction is added to every message>
+   AUTO_REACT_WITH_EMOJI_ID = <the emoji ID to be used in the above channel>
    ```
 
 5. Configure bot permissions.
