@@ -6,11 +6,11 @@
 #
 aiohappyeyeballs==2.6.1
     # via aiohttp
-aiohttp==3.12.13
+aiohttp==3.12.14
     # via
     #   -r requirements.in
     #   py-cord
-aiosignal==1.3.2
+aiosignal==1.4.0
     # via aiohttp
 attrs==25.3.0
     # via
@@ -123,6 +123,7 @@ trio-websocket==0.12.2
     # via selenium
 typing-extensions==4.13.2
     # via
+    #   aiosignal
     #   beautifulsoup4
     #   selenium
 undetected-chromedriver==3.5.5
