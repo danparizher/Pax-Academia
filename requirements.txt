@@ -70,6 +70,7 @@ packaging==25.0
     # via
     #   black
     #   build
+    #   wheel
 pathspec==0.12.1
     # via black
 pip-tools==7.4.1
@@ -135,7 +136,7 @@ websocket-client==1.8.0
     # via selenium
 websockets==15.0.1
     # via undetected-chromedriver
-wheel==0.45.1
+wheel==0.46.2
     # via pip-tools
 wikipedia==1.4.0
     # via -r requirements.in
